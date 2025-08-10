@@ -9,11 +9,36 @@ public class MenuPage implements MenuOption {
     private final String name;
     private final String prompt;
 
+    private static class BackOption implements MenuOption {
+
+        @Override
+        public void select() {}
+
+        @Override
+        public String getName() {
+            return "Back";
+        }
+
+        @Override
+        public MenuOption getNextOption() {
+            return null;
+        }
+
+        @Override
+        public boolean closesMenu() {
+            return false;
+        }
+    }
+
+    // back option. will always be last in the options list
+    public static final MenuOption BACK_OPTION = new BackOption();
+
     // public:
     public MenuPage(String name, String prompt) {
         this.name = name;
         this.prompt = prompt;
-        this.options = new ArrayList<>();
+        this.options = new ArrayList<>(1);
+        options.add(BACK_OPTION);
     }
 
     @Override
@@ -51,7 +76,8 @@ public class MenuPage implements MenuOption {
 
     public void addOption(MenuOption option)
     {
-        options.add(option);
+        // add the new option as last before the back option
+        options.add(options.size()-1,option);
     }
 
     private int askForId(){
