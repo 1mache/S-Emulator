@@ -6,7 +6,6 @@ public class Menu {
     private final MenuPage startPage;
     private final LinkedList<MenuOption> choiceStack;
 
-
     public Menu(MenuPage startPage) {
         this.startPage = startPage;
         choiceStack = new LinkedList<>();
@@ -22,8 +21,8 @@ public class Menu {
         while(option != null && !option.closesMenu()) {
             if(option == MenuPage.BACK_OPTION){
                 if(choiceStack.size() <= 1) return; // exit
-                choiceStack.pop(); // go back 1 option
-                option = choiceStack.pop();
+                choiceStack.pop(); // pop the one that we saw just now
+                option = choiceStack.pop(); // get the previous
                 continue;
             }
 
