@@ -1,4 +1,4 @@
-package sEmulator.console;
+package console;
 
 public interface MenuOption {
     /**

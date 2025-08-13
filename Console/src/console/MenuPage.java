@@ -1,4 +1,4 @@
-package sEmulator.console;
+package console;
 
 import java.util.ArrayList;
 import java.util.Scanner;
