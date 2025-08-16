@@ -2,10 +2,11 @@ package engine.instruction.concrete;
 
 import engine.instruction.AbstractInstruction;
 import engine.instruction.InstructionData;
+import engine.label.Label;
 
-public class Neutralnstruction extends AbstractInstruction {
-    public Neutralnstruction() {
-        super(InstructionData.NEUTRAL);
+public class NeutralInstruction extends AbstractInstruction {
+    public NeutralInstruction(Label label) {
+        super(InstructionData.NEUTRAL, label);
     }
 
     @Override

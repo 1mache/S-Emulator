@@ -2,11 +2,12 @@ package engine.instruction.concrete;
 
 import engine.instruction.AbstractInstruction;
 import engine.instruction.InstructionData;
+import engine.label.Label;
 
 public class IncreaseInstruction extends AbstractInstruction {
 
-    public IncreaseInstruction(/*variable*/) {
-        super(InstructionData.INCREASE);
+    public IncreaseInstruction(Label label/*variable*/) {
+        super(InstructionData.INCREASE, label);
     }
 
     @Override
