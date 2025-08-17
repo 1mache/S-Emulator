@@ -1,5 +1,7 @@
 package engine.label;
 
+import java.util.Objects;
+
 public class NumericLabel implements Label {
     private final int number;
 
@@ -10,5 +12,17 @@ public class NumericLabel implements Label {
     @Override
     public String stringRepresentation() {
         return "L" + number;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        NumericLabel that = (NumericLabel) o;
+        return number == that.number;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(number);
     }
 }
