@@ -1,5 +1,7 @@
 package engine.variable;
 
+import java.util.Objects;
+
 public class Variable {
     private final VariableType type;
     private final int number;
@@ -26,5 +28,17 @@ public class Variable {
 
     public VariableType getType() {
         return type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Variable variable = (Variable) o;
+        return number == variable.number && type == variable.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, number);
     }
 }
