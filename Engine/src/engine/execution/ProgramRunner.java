@@ -39,8 +39,17 @@ public class ProgramRunner implements Runner {
                         .ifPresent(jumpLabel::set);
                 pc++;
             }
-            else // jump needs to happen
+            else{
+                // jump needs to happen
                 currInstruction = program.getInstruction(jumpLabel.get());
+                program.getLabelLine(jumpLabel.get())
+                        .ifPresent(integer -> {pc = integer+1;});
+
+                currInstruction
+                        .map(instruction -> instruction.execute(variableContext))
+                        .ifPresent(jumpLabel::set);
+
+            }
         }while(currInstruction.isPresent());
     }
 

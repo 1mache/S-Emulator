@@ -26,6 +26,8 @@ public interface Program {
      * @return instruction by Label, empty if label doesn't exist
      */
     Optional<Instruction> getInstruction(Label label);
+
+    Optional<Integer> getLabelLine(Label label);
     /**
      * @return next instruction by index (line number) in the Program.
      *         empty if index out of bounds

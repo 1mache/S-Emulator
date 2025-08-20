@@ -1,34 +1,38 @@
 package engine.instruction;
 
-import engine.execution.context.VariableContext;
-import engine.instruction.concrete.*;
+import engine.argument.Argument;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.variable.Variable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class AbstractInstruction implements Instruction {
     private final InstructionData data;
-    private final Label label;
     private final Variable variable;
+    private final Label label;
+
+    protected final List<Argument> arguments;
 
 
     protected AbstractInstruction(InstructionData data, Variable variable) {
         this(data, variable, FixedLabel.EMPTY);
     }
-    protected AbstractInstruction(InstructionData data, Variable variable, Label label) {
-        this.data = data;
-        this.variable = variable;
-        this.label = label;
+
+    public AbstractInstruction(InstructionData data, Variable variable, List<Argument> arguments) {
+        this(data, variable, FixedLabel.EMPTY, arguments);
     }
 
-    // factory method based on InstructionData
-    public static Instruction createInstruction(InstructionData data, Variable variable, Label label) {
-        return switch (data) {
-            case INCREASE -> new IncreaseInstruction(variable,label);
-            case DECREASE -> new DecreaseInstruction(variable,label);
-            case JUMP_NOT_ZERO -> new JumpNotZeroInstruction(variable,label);
-            case NEUTRAL -> new NeutralInstruction(variable,label);
-        };
+    protected AbstractInstruction(InstructionData data, Variable variable, Label label) {
+        this(data, variable, label, new ArrayList<Argument>());
+    }
+
+    public AbstractInstruction(InstructionData data, Variable variable, Label label, List<Argument> arguments) {
+        this.data = data;
+        this.label = label;
+        this.variable = variable;
+        this.arguments = arguments;
     }
 
     @Override
@@ -50,4 +54,8 @@ public abstract class AbstractInstruction implements Instruction {
     public Label getLabel() {
         return label;
     }
+
+    public boolean processArguments(){
+        return arguments.size() == data.getNumOfArguments(); // default implementation
+    };
 }

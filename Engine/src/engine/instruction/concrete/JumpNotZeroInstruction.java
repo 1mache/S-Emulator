@@ -1,5 +1,6 @@
 package engine.instruction.concrete;
 
+import engine.argument.Argument;
 import engine.execution.context.VariableContext;
 import engine.instruction.AbstractInstruction;
 import engine.instruction.InstructionData;
@@ -7,16 +8,20 @@ import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.variable.Variable;
 
-public class JumpNotZeroInstruction extends AbstractInstruction {
-    private final Label targetLabel;
+import java.util.List;
 
-    public JumpNotZeroInstruction(Variable variable, Label targetLabel) {
-        super(InstructionData.JUMP_NOT_ZERO, variable);
-        this.targetLabel = targetLabel;
+public class JumpNotZeroInstruction extends AbstractInstruction {
+    private final List<Argument> arguments;
+    private Label targetLabel;
+    private static final int ARG_AMOUNT = 1;
+
+    public JumpNotZeroInstruction(Variable variable, List<Argument> arguments) {
+        super(InstructionData.JUMP_NOT_ZERO, variable, arguments);
+        this.arguments = arguments;
     }
-    public JumpNotZeroInstruction(Variable variable, Label label, Label targetLabel) {
-        super(InstructionData.JUMP_NOT_ZERO, variable, label);
-        this.targetLabel = targetLabel;
+    public JumpNotZeroInstruction(Variable variable, Label label, List<Argument> arguments) {
+        super(InstructionData.JUMP_NOT_ZERO, variable, arguments);
+        this.arguments = arguments;
     }
 
     @Override
@@ -25,5 +30,17 @@ public class JumpNotZeroInstruction extends AbstractInstruction {
             return targetLabel;
 
         return FixedLabel.EMPTY;
+    }
+
+    @Override
+    public boolean processArguments() {
+        if(arguments.size() != ARG_AMOUNT)
+            return false;
+
+        if(!(arguments.getFirst() instanceof Label))
+            return false; // needs to be a label
+
+        targetLabel = (Label) arguments.getFirst();
+        return true;
     }
 }

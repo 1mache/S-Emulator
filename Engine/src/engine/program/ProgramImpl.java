@@ -61,6 +61,13 @@ public class ProgramImpl implements Program {
     }
 
     @Override
+    public Optional<Integer> getLabelLine(Label label) {
+        if(label == FixedLabel.EMPTY)
+            return Optional.empty();
+        return Optional.of(labeledInstructions.get(label).pcId());
+    }
+
+    @Override
     public Optional<Instruction> getInstructionByIndex(int index) {
         if(index >= instructions.size())
             return Optional.empty();

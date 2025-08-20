@@ -1,8 +1,10 @@
 package engine.variable;
 
+import engine.argument.Argument;
+
 import java.util.Objects;
 
-public class Variable {
+public class Variable implements Argument {
     private final VariableType type;
     private final long number;
 

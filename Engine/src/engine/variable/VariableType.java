@@ -17,7 +17,7 @@ public enum VariableType {
 
     public abstract String stringRepresentation();
 
-    public static final Character INPUT_VARIABLE_CHAR = 'x';
-    public static final Character WORK_VARIABLE_CHAR = 'z';
-    public static final Character RESULT_VARIABLE_CHAR = 'y';
+    public static final char INPUT_VARIABLE_CHAR = 'x';
+    public static final char WORK_VARIABLE_CHAR = 'z';
+    public static final char RESULT_VARIABLE_CHAR = 'y';
 }
