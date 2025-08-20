@@ -4,6 +4,7 @@ import engine.instruction.Instruction;
 import engine.label.Label;
 import engine.variable.Variable;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface Program {
@@ -11,6 +12,10 @@ public interface Program {
      * @return program name
      */
     String getName();
+    /**
+     * @return list of all the input variables used by the Program
+     */
+    List<Variable> getInputVariables();
     /**
      * @param label the instruction label
      * @return boolean whether the label is in use
@@ -22,18 +27,8 @@ public interface Program {
      */
     Optional<Instruction> getInstruction(Label label);
     /**
-     * @return next instruction by pc (instruction pointer).
-     *         empty if pc reached the end of the program
+     * @return next instruction by index (line number) in the Program.
+     *         empty if index out of bounds
      */
-    Optional<Instruction> getNextInstruction();
-    /**
-     * @return 0 if the variable wasn't used yet, and its value right now otherwise
-     */
-    int getVariableState(Variable variable);
-
-    /**
-     * @param variable the variable we want to change
-     * @param value the value we want to give it
-     */
-    void setVariableState(Variable variable, int value);
+    Optional<Instruction> getInstructionByIndex(int index);
 }

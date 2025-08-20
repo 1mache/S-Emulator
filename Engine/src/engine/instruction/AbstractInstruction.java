@@ -1,5 +1,6 @@
 package engine.instruction;
 
+import engine.execution.context.VariableContext;
 import engine.instruction.concrete.*;
 import engine.label.FixedLabel;
 import engine.label.Label;
@@ -9,6 +10,7 @@ public abstract class AbstractInstruction implements Instruction {
     private final InstructionData data;
     private final Label label;
     private final Variable variable;
+
 
     protected AbstractInstruction(InstructionData data, Variable variable) {
         this(data, variable, FixedLabel.EMPTY);

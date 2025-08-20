@@ -1,10 +1,13 @@
 package engine.instruction;
 
+import engine.execution.context.VariableContext;
 import engine.label.Label;
 import engine.variable.Variable;
 
+import java.util.Map;
+
 public interface Instruction {
-    void execute();
+    Label execute(VariableContext context);
     String getName();
     int cycles();
     Variable getVariable();

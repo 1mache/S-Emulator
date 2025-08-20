@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class Variable {
     private final VariableType type;
-    private final int number;
+    private final long number;
 
     private Variable(VariableType type, int number) {
         this.type = type;
@@ -26,9 +26,9 @@ public class Variable {
         return type.stringRepresentation() + number;
     }
 
-    public VariableType getType() {
-        return type;
-    }
+    public VariableType getType() {return type;}
+
+    public long getNumber() {return number;}
 
     @Override
     public boolean equals(Object o) {
