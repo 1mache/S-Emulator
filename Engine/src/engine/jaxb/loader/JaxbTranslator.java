@@ -1,19 +1,13 @@
 package engine.jaxb.loader;
 
 import engine.argument.Argument;
-import engine.instruction.AbstractInstruction;
-import engine.instruction.Instruction;
-import engine.instruction.InstructionBuilder;
-import engine.instruction.InstructionData;
-import engine.jaxb.generated.SInstruction;
-import engine.jaxb.generated.SInstructionArgument;
-import engine.jaxb.generated.SProgram;
-import engine.label.FixedLabel;
-import engine.label.Label;
-import engine.label.NumericLabel;
+import engine.instruction.*;
+import engine.jaxb.generated.*;
+import engine.jaxb.loader.exception.SProgramXMLException;
+import engine.label.*;
 import engine.program.Program;
-
 import engine.program.ProgramImpl;
+
 import engine.variable.Variable;
 import engine.variable.VariableType;
 
@@ -28,28 +22,27 @@ public class JaxbTranslator {
         List<Instruction> instructions = new ArrayList<>();
         List<SInstruction> sInstructions = sProgram.getSInstructions().getSInstruction();
         for (SInstruction sInstruction : sInstructions) {
-            try{
-                InstructionData instructionData = InstructionData.valueOf(sInstruction.getName());
-                Variable variable = str2Variable(sInstruction.getSVariable());
-                Label label = str2Label(sInstruction.getSLabel());
-                List<Argument>  arguments = getArguments(sInstruction);
+            InstructionData instructionData = InstructionData.valueOf(sInstruction.getName());
+            Variable variable = str2Variable(sInstruction.getSVariable());
 
-                InstructionBuilder builder = new InstructionBuilder(instructionData, variable);
-                builder.setArguments(arguments);
-                builder.setLabel(label);
-                Instruction instruction = builder.build();
+            String sLabel = sInstruction.getSLabel();
 
-                instructions.add(instruction);
-
-            }catch(IllegalArgumentException e){
-                System.out.println("Unknown instruction: " + sInstruction.getName());
+            InstructionBuilder builder = new InstructionBuilder(instructionData, variable);
+            if(sInstruction.getSInstructionArguments() != null) {
+                builder.setArguments(getArguments(sInstruction));
             }
+            if(sLabel != null) {
+                builder.setLabel(str2Label(sLabel));
+            }
+
+            instructions.add(builder.build());
         }
 
         return new ProgramImpl(sProgram.getName(), instructions);
     }
 
     private static Variable str2Variable(String str) {
+        str = str.toLowerCase();
         if(str.length() == 2) {
             return switch (str.charAt(0)) {
                 case VariableType.INPUT_VARIABLE_CHAR -> Variable.createInputVariable(
@@ -58,7 +51,7 @@ public class JaxbTranslator {
                 case VariableType.WORK_VARIABLE_CHAR -> Variable.createWorkVariable(
                         Character.getNumericValue(str.charAt(1))
                 );
-                default -> throw new IllegalArgumentException("Unknown instruction variable: " + str);
+                default -> throw new SProgramXMLException("Unknown variable format: " + str);
             };
         }
 
@@ -67,12 +60,11 @@ public class JaxbTranslator {
             return Variable.RESULT;
         }
 
-        throw new IllegalArgumentException("Unknown instruction variable: " + str);
+        throw new SProgramXMLException("Unknown variable format: " + str);
     }
 
     private static Label str2Label(String str) {
-        if(str == null || str.isEmpty())
-           return FixedLabel.EMPTY; // empty label
+        str = str.toLowerCase();
         if(str.equals(FixedLabel.EXIT.stringRepresentation()))
             return FixedLabel.EXIT; // exit label
 
@@ -83,7 +75,6 @@ public class JaxbTranslator {
         List<Argument> res = new ArrayList<>();
 
         var sArgsList = sInstruction.getSInstructionArguments();
-        if(sArgsList == null) {return res;} // empty list
 
         for(SInstructionArgument argument: sArgsList.getSInstructionArgument()){
             switch (argument.getName()) {
@@ -94,7 +85,7 @@ public class JaxbTranslator {
                     res.add(str2Variable(argument.getValue()));
                     break;
                 default:
-                    throw new IllegalArgumentException("Unknown instruction argument: " + argument.getName());
+                    throw new SProgramXMLException("Unknown instruction argument: " + argument.getName());
             }
         }
 

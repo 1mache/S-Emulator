@@ -12,14 +12,13 @@ import java.util.List;
 
 public class JumpNotZeroInstruction extends AbstractInstruction {
     private final Label targetLabel;
-    private static final int ARG_AMOUNT = 1;
 
     public JumpNotZeroInstruction(Variable variable, List<Argument> arguments) {
         super(InstructionData.JUMP_NOT_ZERO, variable, arguments);
         targetLabel = (Label) arguments.getFirst();
     }
     public JumpNotZeroInstruction(Variable variable, Label label, List<Argument> arguments) {
-        super(InstructionData.JUMP_NOT_ZERO, variable, arguments);
+        super(InstructionData.JUMP_NOT_ZERO, variable, label, arguments);
         targetLabel = (Label) arguments.getFirst();
     }
 

@@ -20,15 +20,15 @@ public abstract class AbstractInstruction implements Instruction {
         this(data, variable, FixedLabel.EMPTY);
     }
 
-    public AbstractInstruction(InstructionData data, Variable variable, List<Argument> arguments) {
+    protected AbstractInstruction(InstructionData data, Variable variable, List<Argument> arguments) {
         this(data, variable, FixedLabel.EMPTY, arguments);
     }
 
     protected AbstractInstruction(InstructionData data, Variable variable, Label label) {
-        this(data, variable, label, new ArrayList<Argument>());
+        this(data, variable, label, new ArrayList<>());
     }
 
-    public AbstractInstruction(InstructionData data, Variable variable, Label label, List<Argument> arguments) {
+    protected AbstractInstruction(InstructionData data, Variable variable, Label label, List<Argument> arguments) {
         this.data = data;
         this.label = label;
         this.variable = variable;

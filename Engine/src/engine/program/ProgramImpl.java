@@ -41,7 +41,7 @@ public class ProgramImpl implements Program {
         });
         // sort input
         inputVariables.sort(Comparator.comparingLong(Variable::getNumber));
-    };
+    }
 
     @Override
     public String getName() {
