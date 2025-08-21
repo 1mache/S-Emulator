@@ -54,6 +54,11 @@ public class ProgramImpl implements Program {
     }
 
     @Override
+    public boolean hasLabel(Label label) {
+        return label == FixedLabel.EMPTY || labeledInstructions.containsKey(label);
+    }
+
+    @Override
     public Optional<Instruction> getInstruction(Label label) {
         if(label == FixedLabel.EMPTY)
             return Optional.empty();

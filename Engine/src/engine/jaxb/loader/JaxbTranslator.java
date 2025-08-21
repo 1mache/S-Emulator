@@ -18,7 +18,9 @@ public class JaxbTranslator {
     private static final String JNZ_ARG_NAME = "JNZLabel";
     private static final String VARIABLE_ARG_NAME = "assignedVariable";
 
-    public static Program getProgram(SProgram sProgram) {
+    private static final List<Label> argumentLabels = new ArrayList<>();
+
+    public Program getProgram(SProgram sProgram) {
         List<Instruction> instructions = new ArrayList<>();
         List<SInstruction> sInstructions = sProgram.getSInstructions().getSInstruction();
         for (SInstruction sInstruction : sInstructions) {
@@ -41,7 +43,11 @@ public class JaxbTranslator {
         return new ProgramImpl(sProgram.getName(), instructions);
     }
 
-    private static Variable str2Variable(String str) {
+    List<Label> getArgumentLabels() {
+        return argumentLabels;
+    }
+
+    private Variable str2Variable(String str) {
         str = str.toLowerCase();
         if(str.length() == 2) {
             return switch (str.charAt(0)) {
@@ -63,7 +69,7 @@ public class JaxbTranslator {
         throw new SProgramXMLException("Unknown variable format: " + str);
     }
 
-    private static Label str2Label(String str) {
+    private Label str2Label(String str) {
         str = str.toLowerCase();
         if(str.equals(FixedLabel.EXIT.stringRepresentation()))
             return FixedLabel.EXIT; // exit label
@@ -71,7 +77,7 @@ public class JaxbTranslator {
         return new NumericLabel(Character.getNumericValue(str.charAt(1)));
     }
 
-    private static List<Argument> getArguments(SInstruction sInstruction) {
+    private List<Argument> getArguments(SInstruction sInstruction) {
         List<Argument> res = new ArrayList<>();
 
         var sArgsList = sInstruction.getSInstructionArguments();
@@ -79,7 +85,9 @@ public class JaxbTranslator {
         for(SInstructionArgument argument: sArgsList.getSInstructionArgument()){
             switch (argument.getName()) {
                 case JNZ_ARG_NAME:
-                    res.add(str2Label(argument.getValue()).toArgument());
+                    var label = str2Label(argument.getValue());
+                    res.add(label.toArgument());
+                    argumentLabels.add(label);
                     break;
                 case VARIABLE_ARG_NAME:
                     res.add(str2Variable(argument.getValue()));

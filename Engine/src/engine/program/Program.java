@@ -16,6 +16,12 @@ public interface Program {
      * @return list of all the input variables used by the Program
      */
     List<Variable> getInputVariables();
+
+    /**
+     * Checks if label is present in the program
+     * @param label (if EMPTY returns true, but has no meaning)
+     */
+    boolean hasLabel(Label label);
     /**
      * @param label the instruction label
      * @return lineId of that label, empty if label is EMPTY
