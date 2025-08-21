@@ -3,7 +3,7 @@ package engine.jaxb.loader;
 import engine.argument.Argument;
 import engine.instruction.AbstractInstruction;
 import engine.instruction.Instruction;
-import engine.instruction.AbstractInstructionBuilder;
+import engine.instruction.InstructionBuilder;
 import engine.instruction.InstructionData;
 import engine.jaxb.generated.SInstruction;
 import engine.jaxb.generated.SInstructionArgument;
@@ -34,13 +34,11 @@ public class JaxbTranslator {
                 Label label = str2Label(sInstruction.getSLabel());
                 List<Argument>  arguments = getArguments(sInstruction);
 
-                AbstractInstructionBuilder builder = new AbstractInstructionBuilder(instructionData, variable);
+                InstructionBuilder builder = new InstructionBuilder(instructionData, variable);
                 builder.setArguments(arguments);
                 builder.setLabel(label);
-                AbstractInstruction instruction = builder.build();
-                if(!instruction.processArguments()){
-                    throw new IllegalStateException("Argument processing failed");
-                }
+                Instruction instruction = builder.build();
+
                 instructions.add(instruction);
 
             }catch(IllegalArgumentException e){

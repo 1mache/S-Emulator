@@ -9,7 +9,6 @@ import engine.program.Program;
 import engine.variable.Variable;
 
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class ProgramRunner implements Runner {
     private final Program program;
@@ -27,31 +26,26 @@ public class ProgramRunner implements Runner {
     public void run(Long... initInput) {
         initInputVariables(initInput);
 
-        Optional<Instruction> currInstruction = Optional.empty();
-        AtomicReference<Label> jumpLabel = new AtomicReference<>(FixedLabel.EMPTY);
+        Optional<Instruction> currInstruction;
+        Label jumpLabel = FixedLabel.EMPTY;
 
         do {
-            if(jumpLabel.get() == FixedLabel.EMPTY) {
+            if (jumpLabel == FixedLabel.EMPTY) {
                 currInstruction = program.getInstructionByIndex(pc);
-
-                currInstruction
-                        .map(instruction -> instruction.execute(variableContext))
-                        .ifPresent(jumpLabel::set);
-                pc++;
             }
-            else{
+            else {
                 // jump needs to happen
-                currInstruction = program.getInstruction(jumpLabel.get());
-                program.getLabelLine(jumpLabel.get())
-                        .ifPresent(integer -> {pc = integer+1;});
-
-                currInstruction
-                        .map(instruction -> instruction.execute(variableContext))
-                        .ifPresent(jumpLabel::set);
+                currInstruction = program.getInstruction(jumpLabel);
+                // set the pc to the relevant line
+                program.getLabelLineId(jumpLabel)
+                        .ifPresent(lineId -> pc = lineId);
 
             }
-        }while(currInstruction.isPresent());
+            jumpLabel = executeInstruction(currInstruction.orElse(null));
+        }
+        while (currInstruction.isPresent());
     }
+
 
     @Override
     public Long getResult() {
@@ -64,5 +58,13 @@ public class ProgramRunner implements Runner {
         // initialize what we can with the values we got (rest is 0)
         for(int i = 0; i < minLength; i++)
             variableContext.setVariableValue(variableList.get(i), initInput[i]);
+    }
+
+    private Label executeInstruction(Instruction instruction) {
+        pc++;
+        Optional<Instruction> optionalInstruction = Optional.ofNullable(instruction);
+        return optionalInstruction
+                .map(ins -> ins.execute(variableContext))
+                .orElse(FixedLabel.EMPTY);
     }
 }

@@ -54,8 +54,4 @@ public abstract class AbstractInstruction implements Instruction {
     public Label getLabel() {
         return label;
     }
-
-    public boolean processArguments(){
-        return arguments.size() == data.getNumOfArguments(); // default implementation
-    };
 }

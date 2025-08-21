@@ -1,7 +1,5 @@
 package engine.execution;
 
-import engine.instruction.InstructionIdentifier;
-
 public interface Runner {
     /**
      * executes the program given initial values of input variables

@@ -18,16 +18,14 @@ public interface Program {
     List<Variable> getInputVariables();
     /**
      * @param label the instruction label
-     * @return boolean whether the label is in use
+     * @return lineId of that label, empty if label is EMPTY
      */
-    boolean hasLabel(Label label);
+    Optional<Integer> getLabelLineId(Label label);
     /**
      * @param label the instruction label
-     * @return instruction by Label, empty if label doesn't exist
+     * @return instruction by Label, empty if label is EMPTY
      */
     Optional<Instruction> getInstruction(Label label);
-
-    Optional<Integer> getLabelLine(Label label);
     /**
      * @return next instruction by index (line number) in the Program.
      *         empty if index out of bounds

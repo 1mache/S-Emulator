@@ -5,20 +5,28 @@ import engine.instruction.concrete.DecreaseInstruction;
 import engine.instruction.concrete.IncreaseInstruction;
 import engine.instruction.concrete.JumpNotZeroInstruction;
 import engine.instruction.concrete.NeutralInstruction;
+import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.variable.Variable;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class AbstractInstructionBuilder {
-    InstructionData instructionData;
-    Variable variable;
-    Label label;
-    List<Argument> arguments;
+public class InstructionBuilder {
+    private final InstructionData instructionData;
+    private final Variable variable;
+    private Label label;
+    private List<Argument> arguments;
 
-    public AbstractInstructionBuilder(InstructionData data, Variable variable) {
+    public InstructionBuilder(InstructionData data, Variable variable) {
         this.instructionData = data;
         this.variable = variable;
+        reset();
+    }
+
+    public void reset(){
+        label = FixedLabel.EMPTY;
+        arguments = new ArrayList<>();
     }
 
     public void setLabel(Label label) {
@@ -29,7 +37,7 @@ public class AbstractInstructionBuilder {
         this.arguments = arguments;
     }
 
-    public AbstractInstruction build() {
+    public Instruction build() {
         return switch (instructionData) {
             case INCREASE -> new IncreaseInstruction(variable,label);
             case DECREASE -> new DecreaseInstruction(variable,label);

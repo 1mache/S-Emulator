@@ -25,7 +25,9 @@ public class Variable implements Argument {
     }
 
     public String stringRepresentation() {
-        return type.stringRepresentation() + number;
+        String representation = type.stringRepresentation();
+        if (type != VariableType.RESULT) representation = representation + number;
+        return representation;
     }
 
     public VariableType getType() {return type;}

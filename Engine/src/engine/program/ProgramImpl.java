@@ -1,7 +1,6 @@
 package engine.program;
 
 import engine.instruction.Instruction;
-import engine.instruction.InstructionIdentifier;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.variable.Variable;
@@ -10,7 +9,11 @@ import engine.variable.VariableType;
 import java.util.*;
 
 public class ProgramImpl implements Program {
-    private final Map<Label, InstructionIdentifier> labeledInstructions = new HashMap<>();
+
+    // record that represents instruction and its ordinal id in the program
+    private record InstructionLocator(Instruction instruction, int lineId) { }
+
+    private final Map<Label, InstructionLocator> labeledInstructions = new HashMap<>();
     private final List<Instruction> instructions;
 
     private final List<Variable> inputVariables = new ArrayList<>();
@@ -27,7 +30,7 @@ public class ProgramImpl implements Program {
             Instruction instruction = instructions.get(i);
             if(!instruction.getLabel().equals(FixedLabel.EMPTY))
                 labeledInstructions.put(
-                        instruction.getLabel(), new InstructionIdentifier(instruction, i)
+                        instruction.getLabel(), new InstructionLocator(instruction, i)
                 );
         }
         /* populate the inputVariables list with input variables used in the
@@ -51,20 +54,17 @@ public class ProgramImpl implements Program {
     }
 
     @Override
-    public boolean hasLabel(Label label) {
-        return labeledInstructions.containsKey(label);
-    }
-
-    @Override
     public Optional<Instruction> getInstruction(Label label) {
-        return Optional.ofNullable(labeledInstructions.get(label).instruction());
-    }
-
-    @Override
-    public Optional<Integer> getLabelLine(Label label) {
         if(label == FixedLabel.EMPTY)
             return Optional.empty();
-        return Optional.of(labeledInstructions.get(label).pcId());
+        return Optional.of(labeledInstructions.get(label).instruction());
+    }
+
+    @Override
+    public Optional<Integer> getLabelLineId(Label label) {
+        if(label == FixedLabel.EMPTY)
+            return Optional.empty();
+        return Optional.of(labeledInstructions.get(label).lineId());
     }
 
     @Override

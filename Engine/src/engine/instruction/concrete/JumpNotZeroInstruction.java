@@ -11,17 +11,16 @@ import engine.variable.Variable;
 import java.util.List;
 
 public class JumpNotZeroInstruction extends AbstractInstruction {
-    private final List<Argument> arguments;
-    private Label targetLabel;
+    private final Label targetLabel;
     private static final int ARG_AMOUNT = 1;
 
     public JumpNotZeroInstruction(Variable variable, List<Argument> arguments) {
         super(InstructionData.JUMP_NOT_ZERO, variable, arguments);
-        this.arguments = arguments;
+        targetLabel = (Label) arguments.getFirst();
     }
     public JumpNotZeroInstruction(Variable variable, Label label, List<Argument> arguments) {
         super(InstructionData.JUMP_NOT_ZERO, variable, arguments);
-        this.arguments = arguments;
+        targetLabel = (Label) arguments.getFirst();
     }
 
     @Override
@@ -30,17 +29,5 @@ public class JumpNotZeroInstruction extends AbstractInstruction {
             return targetLabel;
 
         return FixedLabel.EMPTY;
-    }
-
-    @Override
-    public boolean processArguments() {
-        if(arguments.size() != ARG_AMOUNT)
-            return false;
-
-        if(!(arguments.getFirst() instanceof Label))
-            return false; // needs to be a label
-
-        targetLabel = (Label) arguments.getFirst();
-        return true;
     }
 }
