@@ -1,26 +1,25 @@
+import console.LoadFileOption;
 import console.Menu;
 import console.MenuPage;
+import engine.SLanguageEngine;
 
 public class Main {
     public static void main(String[] args) {
+        SLanguageEngine engine = new SLanguageEngine();
+
         MenuPage startPage = new MenuPage(
                 "Start menu",
                 "Hi, twin, welcome to my awesome Jaba program! \n" +
-                        "How are you twin <3");
+                        "Please select an option: <3");
 
-        MenuPage page1 = new MenuPage(
-                "Im good thanks...",
-                "Glad to hear that. Now tickle me <3");
+        MenuPage option1 = new LoadFileOption(
+                "Load Program", "Please enter the full path to file: "
+        );
 
-        MenuPage page2 = new MenuPage(
-                "Who are you?",
-                "Last name Smart, first name Menu, middle name..." +
-                        "Danger ...");
+        startPage.addOption(option1);
+        option1.addOption(option1);
 
-        startPage.addOption(page1);
-        startPage.addOption(page2);
-
-        Menu menu = new Menu(startPage);
+        Menu menu = new Menu(engine,startPage);
         menu.start();
     }
 }

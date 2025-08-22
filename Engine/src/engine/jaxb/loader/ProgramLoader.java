@@ -18,7 +18,7 @@ public class ProgramLoader implements XMLLoader{
     @Override
     public void loadXML(String path) throws FileNotFoundException, NotXMLException{
         if(!path.endsWith(".xml"))
-            throw new NotXMLException("Path "+ path + " does not lead to an xml file");
+            throw new NotXMLException(path + " is not an xml file");
         try {
             SProgram sProgram = JaxbLoader.loadProgramFromXML(path);
             JaxbTranslator translator = new JaxbTranslator();
