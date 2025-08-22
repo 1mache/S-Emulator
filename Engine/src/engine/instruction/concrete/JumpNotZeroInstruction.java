@@ -29,4 +29,10 @@ public class JumpNotZeroInstruction extends AbstractInstruction {
 
         return FixedLabel.EMPTY;
     }
+
+    @Override
+    public String stringRepresentation() {
+        String varStr = getVariable().stringRepresentation();
+        return "IF "+ varStr + "!=0 GOTO " + targetLabel.stringRepresentation();
+    }
 }

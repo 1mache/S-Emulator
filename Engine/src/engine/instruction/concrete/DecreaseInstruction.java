@@ -23,4 +23,10 @@ public class DecreaseInstruction extends AbstractInstruction {
             context.setVariableValue(getVariable(), curValue-1);
         return FixedLabel.EMPTY;
     }
+
+    @Override
+    public String stringRepresentation() {
+        String varStr = getVariable().stringRepresentation();
+        return varStr + " <- " + varStr + " - 1";
+    }
 }

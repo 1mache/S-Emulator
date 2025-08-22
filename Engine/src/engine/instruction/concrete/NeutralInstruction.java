@@ -21,4 +21,10 @@ public class NeutralInstruction extends AbstractInstruction {
     {
         return FixedLabel.EMPTY;
     }
+
+    @Override
+    public String stringRepresentation() {
+        String varStr = getVariable().stringRepresentation();
+        return varStr + " <- " + varStr;
+    }
 }

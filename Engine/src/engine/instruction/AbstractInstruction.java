@@ -12,9 +12,7 @@ public abstract class AbstractInstruction implements Instruction {
     private final InstructionData data;
     private final Variable variable;
     private final Label label;
-
     protected final List<Argument> arguments;
-
 
     protected AbstractInstruction(InstructionData data, Variable variable) {
         this(data, variable, FixedLabel.EMPTY);
