@@ -1,6 +1,7 @@
 package engine.variable;
 
 import engine.argument.Argument;
+import engine.argument.ArgumentType;
 
 import java.util.Objects;
 
@@ -45,5 +46,10 @@ public class Variable implements Argument {
     @Override
     public int hashCode() {
         return Objects.hash(type, number);
+    }
+
+    @Override
+    public ArgumentType getArgumentType() {
+        return ArgumentType.VARIABLE;
     }
 }

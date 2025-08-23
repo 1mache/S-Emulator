@@ -1,6 +1,5 @@
 package engine.label;
 
-import engine.argument.Argument;
 
 public enum FixedLabel implements Label {
     EMPTY{

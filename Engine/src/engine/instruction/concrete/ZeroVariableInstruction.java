@@ -3,25 +3,24 @@ package engine.instruction.concrete;
 import engine.execution.context.VariableContext;
 import engine.instruction.AbstractInstruction;
 import engine.instruction.InstructionData;
+import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.variable.Variable;
 
+public class ZeroVariableInstruction extends AbstractInstruction {
 
-public class GotoLabel extends AbstractInstruction {
-    private final Label targetLabel;
-
-    public GotoLabel(Label label, Label targetLabel) {
-        super(InstructionData.GOTO_LABEL, Variable.NONE, label);
-        this.targetLabel = targetLabel;
+    public ZeroVariableInstruction(Variable variable, Label label) {
+        super(InstructionData.ZERO_VARIABLE, variable, label);
     }
 
     @Override
     public Label execute(VariableContext context) {
-        return targetLabel;
+        context.setVariableValue(getVariable(), 0);
+        return FixedLabel.EMPTY;
     }
 
     @Override
     public String stringRepresentation() {
-        return "GOTO " + getLabel().stringRepresentation();
+        return getVariable().stringRepresentation() + " <- 0";
     }
 }

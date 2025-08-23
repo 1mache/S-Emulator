@@ -1,8 +1,11 @@
 package engine.instruction;
 
+import engine.argument.ArgumentType;
 import engine.execution.context.VariableContext;
 import engine.label.Label;
 import engine.variable.Variable;
+
+import java.util.List;
 
 public interface Instruction {
     // TODO: Javadoc
@@ -13,4 +16,5 @@ public interface Instruction {
     int cycles();
     Variable getVariable();
     Label getLabel();
+    List<ArgumentType> getArgumentTypes();
 }

@@ -1,6 +1,5 @@
 package engine.label;
 
-import engine.argument.Argument;
 
 public class NumericLabel implements Label {
     private final int number;

@@ -1,11 +1,9 @@
 package engine.instruction;
 
-import engine.argument.Argument;
-import engine.label.FixedLabel;
+import engine.argument.ArgumentType;
 import engine.label.Label;
 import engine.variable.Variable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractInstruction implements Instruction {
@@ -42,5 +40,10 @@ public abstract class AbstractInstruction implements Instruction {
     @Override
     public Label getLabel() {
         return label;
+    }
+
+    @Override
+    public List<ArgumentType> getArgumentTypes() {
+        return data.getArgumentTypes();
     }
 }
