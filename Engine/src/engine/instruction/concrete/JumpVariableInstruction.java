@@ -21,7 +21,7 @@ public class JumpVariableInstruction extends AbstractJumpInstruction {
 
     @Override
     public String stringRepresentation() {
-        return "IF " + getTargetLabel().stringRepresentation() +
+        return "IF " + getVariable().stringRepresentation() +
                 " = " + otherVariable.stringRepresentation() +
                 " GOTO " + getTargetLabel().stringRepresentation();
     }

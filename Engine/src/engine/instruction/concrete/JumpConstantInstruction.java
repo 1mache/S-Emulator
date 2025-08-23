@@ -22,7 +22,7 @@ public class JumpConstantInstruction extends AbstractJumpInstruction {
 
     @Override
     public String stringRepresentation() {
-        return "IF " + getVariable() + " = " + constant.value()
+        return "IF " + getVariable().stringRepresentation() + " = " + constant.value()
                 + " GOTO " + getTargetLabel().stringRepresentation();
     }
 }

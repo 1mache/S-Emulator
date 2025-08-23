@@ -18,6 +18,7 @@ public class JumpZeroInstruction extends AbstractJumpInstruction {
 
     @Override
     public String stringRepresentation() {
-        return "";
+        return "IF " + getVariable().stringRepresentation() + " = 0 GOTO "
+                + getTargetLabel().stringRepresentation();
     }
 }
