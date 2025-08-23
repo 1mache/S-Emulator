@@ -2,7 +2,7 @@ package engine.label;
 
 import engine.argument.Argument;
 
-public enum FixedLabel implements Label, Argument {
+public enum FixedLabel implements Label {
     EMPTY{
         @Override
         public String stringRepresentation() {return "";}
@@ -15,11 +15,4 @@ public enum FixedLabel implements Label, Argument {
 
     @Override
     public abstract String stringRepresentation();
-
-    @Override
-    public Argument toArgument() {
-        return this;
-    }
-
-
 }

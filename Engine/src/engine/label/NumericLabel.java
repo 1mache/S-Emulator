@@ -2,9 +2,7 @@ package engine.label;
 
 import engine.argument.Argument;
 
-import java.util.Objects;
-
-public class NumericLabel implements Label, Argument {
+public class NumericLabel implements Label {
     private final int number;
 
     public NumericLabel(int number) {
@@ -14,11 +12,6 @@ public class NumericLabel implements Label, Argument {
     @Override
     public String stringRepresentation() {
         return "L" + number;
-    }
-
-    @Override
-    public Argument toArgument() {
-        return this;
     }
 
     @Override
