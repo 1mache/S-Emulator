@@ -12,25 +12,11 @@ public abstract class AbstractInstruction implements Instruction {
     private final InstructionData data;
     private final Variable variable;
     private final Label label;
-    protected final List<Argument> arguments;
 
-    protected AbstractInstruction(InstructionData data, Variable variable) {
-        this(data, variable, FixedLabel.EMPTY);
-    }
-
-    protected AbstractInstruction(InstructionData data, Variable variable, List<Argument> arguments) {
-        this(data, variable, FixedLabel.EMPTY, arguments);
-    }
-
-    protected AbstractInstruction(InstructionData data, Variable variable, Label label) {
-        this(data, variable, label, new ArrayList<>());
-    }
-
-    protected AbstractInstruction(InstructionData data, Variable variable, Label label, List<Argument> arguments) {
+    public AbstractInstruction(InstructionData data, Variable variable, Label label) {
         this.data = data;
         this.label = label;
         this.variable = variable;
-        this.arguments = arguments;
     }
 
     @Override
@@ -41,6 +27,11 @@ public abstract class AbstractInstruction implements Instruction {
     @Override
     public int cycles() {
         return data.getCycles();
+    }
+
+    @Override
+    public boolean isSynthetic() {
+        return data.isSynthetic();
     }
 
     @Override

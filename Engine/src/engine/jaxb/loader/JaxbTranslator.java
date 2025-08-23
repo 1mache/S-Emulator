@@ -26,28 +26,25 @@ public class JaxbTranslator {
         for (SInstruction sInstruction : sInstructions) {
             InstructionData instructionData = InstructionData.valueOf(sInstruction.getName());
             Variable variable = str2Variable(sInstruction.getSVariable());
+            Label label = str2Label(sInstruction.getSLabel());
 
-            String sLabel = sInstruction.getSLabel();
+            List<Argument> arguments = getArguments(sInstruction);
 
-            InstructionBuilder builder = new InstructionBuilder(instructionData, variable);
-            if(sInstruction.getSInstructionArguments() != null) {
-                builder.setArguments(getArguments(sInstruction));
-            }
-            if(sLabel != null) {
-                builder.setLabel(str2Label(sLabel));
-            }
+            Instruction instruction = InstructionFactory.
+                    createInstruction(instructionData, variable, label, arguments);
 
-            instructions.add(builder.build());
+            instructions.add(instruction);
         }
 
         return new ProgramImpl(sProgram.getName(), instructions);
     }
 
-    List<Label> getArgumentLabels() {
+    public List<Label> getArgumentLabels() {
         return argumentLabels;
     }
 
     private Variable str2Variable(String str) {
+        if(str == null) return Variable.NONE;
         str = str.toLowerCase();
         if(str.length() == 2) {
             return switch (str.charAt(0)) {
@@ -70,6 +67,7 @@ public class JaxbTranslator {
     }
 
     private Label str2Label(String str) {
+        if(str == null) return FixedLabel.EMPTY;
         str = str.toLowerCase();
         if(str.equals(FixedLabel.EXIT.stringRepresentation()))
             return FixedLabel.EXIT; // exit label
@@ -81,12 +79,13 @@ public class JaxbTranslator {
         List<Argument> res = new ArrayList<>();
 
         var sArgsList = sInstruction.getSInstructionArguments();
+        if (sArgsList == null) return res;
 
         for(SInstructionArgument argument: sArgsList.getSInstructionArgument()){
             switch (argument.getName()) {
                 case JNZ_ARG_NAME:
                     var label = str2Label(argument.getValue());
-                    res.add(label.toArgument());
+                    res.add(label);
                     argumentLabels.add(label);
                     break;
                 case VARIABLE_ARG_NAME:

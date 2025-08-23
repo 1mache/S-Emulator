@@ -7,22 +7,20 @@ import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.variable.Variable;
 
-public class IncreaseInstruction extends AbstractInstruction {
+public class ZeroVariable extends AbstractInstruction {
 
-    public IncreaseInstruction(Variable variable, Label label) {
-        super(InstructionData.INCREASE, variable, label);
+    public ZeroVariable(Variable variable, Label label) {
+        super(InstructionData.ZERO_VARIABLE, variable, label);
     }
 
     @Override
     public Label execute(VariableContext context) {
-        var curValue = context.getVariableValue(getVariable());
-        context.setVariableValue(getVariable(), curValue+1);
+        context.setVariableValue(getVariable(), 0);
         return FixedLabel.EMPTY;
     }
 
     @Override
     public String stringRepresentation() {
-        String varStr = getVariable().stringRepresentation();
-        return varStr + " <- " + varStr + " + 1";
+        return getVariable().stringRepresentation() + " <- 0";
     }
 }
