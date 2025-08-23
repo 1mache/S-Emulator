@@ -14,8 +14,7 @@ public class NeutralInstruction extends AbstractInstruction {
     }
 
     @Override
-    public Label execute(VariableContext context)
-    {
+    public Label execute(VariableContext context){
         return FixedLabel.EMPTY;
     }
 
