@@ -1,6 +1,8 @@
 package engine.jaxb.loader;
 
 import engine.argument.Argument;
+import engine.argument.ArgumentType;
+import engine.argument.ConstantArgument;
 import engine.instruction.*;
 import engine.jaxb.generated.*;
 import engine.jaxb.loader.exception.SProgramXMLException;
@@ -13,12 +15,36 @@ import engine.variable.VariableType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class JaxbTranslator {
-    private static final String JNZ_ARG_NAME = "JNZLabel";
-    private static final String VARIABLE_ARG_NAME = "assignedVariable";
+    public static final Map<String, ArgumentType> argumentTypes = Map.ofEntries(
+            // JUMP_NOT_ZERO
+            Map.entry("JNZLabel", ArgumentType.LABEL),
 
-    private static final List<Label> argumentLabels = new ArrayList<>();
+            // GOTO_LABEL
+            Map.entry("gotoLabel", ArgumentType.LABEL),
+
+            // ASSIGNMENT
+            Map.entry("assignedVariable", ArgumentType.VARIABLE),
+
+            // CONSTANT_ASSIGNMENT
+            Map.entry("constantValue", ArgumentType.CONSTANT),
+
+            // JUMP_ZERO
+            Map.entry("JZLabel", ArgumentType.LABEL),
+
+            // JUMP_EQUAL_CONSTANT
+            Map.entry("JEConstantLabel", ArgumentType.LABEL),
+            // * there is also a constant value here like in const assignment. but it's the same
+
+            // JUMP_EQUAL_VARIABLE
+            Map.entry("JEVariableLabel", ArgumentType.LABEL),
+            Map.entry("variableName", ArgumentType.VARIABLE)
+    );
+
+    private final List<ArgumentLabelInfo> argumentLabels = new ArrayList<>();
+    private boolean programHasExit = false;
 
     public Program getProgram(SProgram sProgram) {
         List<Instruction> instructions = new ArrayList<>();
@@ -36,10 +62,10 @@ public class JaxbTranslator {
             instructions.add(instruction);
         }
 
-        return new ProgramImpl(sProgram.getName(), instructions);
+        return new ProgramImpl(sProgram.getName(), instructions, programHasExit);
     }
 
-    public List<Label> getArgumentLabels() {
+    public List<ArgumentLabelInfo> getArgumentLabels() {
         return argumentLabels;
     }
 
@@ -68,11 +94,12 @@ public class JaxbTranslator {
 
     private Label str2Label(String str) {
         if(str == null) return FixedLabel.EMPTY;
+
         str = str.toLowerCase();
-        if(str.equals(FixedLabel.EXIT.stringRepresentation()))
+        if(str.equals(FixedLabel.EXIT.stringRepresentation().toLowerCase()))
             return FixedLabel.EXIT; // exit label
 
-        return new NumericLabel(Character.getNumericValue(str.charAt(1)));
+        return new NumericLabel(Integer.parseInt(str.replaceAll("\\D", "")));
     }
 
     private List<Argument> getArguments(SInstruction sInstruction) {
@@ -81,18 +108,28 @@ public class JaxbTranslator {
         var sArgsList = sInstruction.getSInstructionArguments();
         if (sArgsList == null) return res;
 
+        // parse arguments based on their name
         for(SInstructionArgument argument: sArgsList.getSInstructionArgument()){
-            switch (argument.getName()) {
-                case JNZ_ARG_NAME:
-                    var label = str2Label(argument.getValue());
+            var argumentType = argumentTypes.get(argument.getName());
+            if(argumentType == null)
+                throw new SProgramXMLException("Unknown instruction argument: " + argument.getName());
+            switch (argumentType){
+                case LABEL:
+                    Label label = str2Label(argument.getValue());
+                    if(label == FixedLabel.EXIT) programHasExit = true;
+                    argumentLabels.add(new ArgumentLabelInfo(sInstruction.getName(), label));
                     res.add(label);
-                    argumentLabels.add(label);
                     break;
-                case VARIABLE_ARG_NAME:
-                    res.add(str2Variable(argument.getValue()));
+                case VARIABLE:
+                    Variable variable = str2Variable(argument.getValue());
+                    res.add(variable);
                     break;
-                default:
-                    throw new SProgramXMLException("Unknown instruction argument: " + argument.getName());
+                case CONSTANT:
+                    ConstantArgument constant = new ConstantArgument(
+                            Long.valueOf(argument.getValue())
+                    );
+                    res.add(constant);
+                    break;
             }
         }
 

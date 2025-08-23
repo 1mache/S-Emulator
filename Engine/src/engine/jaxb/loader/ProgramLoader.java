@@ -4,7 +4,6 @@ import engine.jaxb.generated.SProgram;
 import engine.jaxb.loader.exception.NotXMLException;
 import engine.jaxb.loader.exception.SProgramXMLException;
 import engine.jaxb.loader.exception.UnknownLabelException;
-import engine.label.Label;
 import engine.program.Program;
 import jakarta.xml.bind.JAXBException;
 
@@ -13,7 +12,7 @@ import java.util.List;
 
 public class ProgramLoader implements XMLLoader{
     private Program program;
-    private List<Label> argumentLabels;
+    private List<ArgumentLabelInfo> argumentLabels;
 
     @Override
     public void loadXML(String path) throws FileNotFoundException, NotXMLException{
@@ -31,9 +30,11 @@ public class ProgramLoader implements XMLLoader{
 
     @Override
     public void validateProgram() throws UnknownLabelException {
-        for(Label label : argumentLabels){
-            if(!program.hasLabel(label))
-                throw new UnknownLabelException("Error: Unknown label "+ label.stringRepresentation());
+        for(var info : argumentLabels){
+            if(!program.hasLabel(info.label()))
+                throw new UnknownLabelException("Error: Unknown label "
+                        + info.label().stringRepresentation()
+                        + " in Instruction: " + info.instructionName());
         }
     }
 

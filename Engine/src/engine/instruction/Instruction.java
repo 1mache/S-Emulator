@@ -16,5 +16,4 @@ public interface Instruction {
     int cycles();
     Variable getVariable();
     Label getLabel();
-    List<ArgumentType> getArgumentTypes();
 }

@@ -2,6 +2,7 @@ package engine.instruction;
 
 import engine.argument.Argument;
 import engine.argument.ArgumentType;
+import engine.argument.ConstantArgument;
 import engine.instruction.concrete.*;
 import engine.instruction.exception.InstructionArgumentsException;
 import engine.label.Label;
@@ -31,11 +32,28 @@ public class InstructionFactory {
                 Label target = (Label) arguments.getFirst();
                 yield new GotoLabelInstruction(instructionLabel, target);
             }
-            case ASSIGNMENT -> null;
-            case CONSTANT_ASSIGNMENT -> null;
-            case JUMP_ZERO -> null;
-            case JUMP_EQUAL_CONSTANT -> null;
-            case JUMP_EQUAL_VARIABLE -> null;
+            case ASSIGNMENT -> {
+                Variable assignedVariable = (Variable) arguments.getFirst();
+                yield new AssignmentInstruction(variable, instructionLabel, assignedVariable);
+            }
+            case CONSTANT_ASSIGNMENT -> {
+                ConstantArgument constant = (ConstantArgument) arguments.getFirst();
+                yield new ConstantAssignmentInstruction(variable, instructionLabel, constant);
+            }
+            case JUMP_ZERO -> {
+                Label target = (Label) arguments.getFirst();
+                yield new JumpZeroInstruction(variable, instructionLabel, target);
+            }
+            case JUMP_EQUAL_CONSTANT -> {
+                Label target = (Label) arguments.getFirst();
+                ConstantArgument constant = (ConstantArgument) arguments.get(1);
+                yield new JumpConstantInstruction(variable, instructionLabel, target, constant);
+            }
+            case JUMP_EQUAL_VARIABLE -> {
+                Label target = (Label) arguments.getFirst();
+                Variable comparedVar = (Variable) arguments.get(1);
+                yield new JumpVariableInstruction(variable, instructionLabel, target, comparedVar);
+            }
         };
     }
 

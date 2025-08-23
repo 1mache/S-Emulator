@@ -42,6 +42,7 @@ public class ProgramRunner implements Runner {
 
             }
             jumpLabel = executeInstruction(currInstruction.orElse(null));
+            if(jumpLabel == FixedLabel.EXIT) {break;} // check for exit
         }
         while (currInstruction.isPresent());
     }
@@ -53,11 +54,11 @@ public class ProgramRunner implements Runner {
     }
 
     private void initInputVariables(Long... initInput) {
-        var variableList = program.getInputVariables();
-        int minLength = Math.min(variableList.size(), initInput.length);
-        // initialize what we can with the values we got (rest is 0)
-        for(int i = 0; i < minLength; i++)
-            variableContext.setVariableValue(variableList.get(i), initInput[i]);
+        int counter = 1;
+        for(Long input : initInput) {
+            variableContext.setVariableValue(Variable.createInputVariable(counter), input);
+            counter++;
+        }
     }
 
     private Label executeInstruction(Instruction instruction) {

@@ -11,7 +11,9 @@ import java.util.*;
 public class ProgramImpl implements Program {
 
     // record that represents instruction and its ordinal id in the program
-    private record InstructionLocator(Instruction instruction, int lineId) { }
+    private record InstructionLocator(Instruction instruction, int lineId) {
+        public static InstructionLocator EXIT_LOC = new InstructionLocator(null, 0);
+    }
 
     private final Map<Label, InstructionLocator> labeledInstructions = new HashMap<>();
     private final List<Instruction> instructions;
@@ -20,7 +22,7 @@ public class ProgramImpl implements Program {
 
     private final String name;
 
-    public ProgramImpl(String name, List<Instruction> instructions) {
+    public ProgramImpl(String name, List<Instruction> instructions, boolean usesExit) {
         this.name = name;
         this.instructions = instructions;
 
@@ -41,11 +43,26 @@ public class ProgramImpl implements Program {
         });
         // sort input
         inputVariables.sort(Comparator.comparingLong(Variable::getNumber));
+
+        if(usesExit)
+            labeledInstructions.put(FixedLabel.EXIT, InstructionLocator.EXIT_LOC);
     }
 
     @Override
     public String getName() {
         return name;
+    }
+
+    // TODO: change to format required
+    @Override
+    public String print() {
+        StringBuilder result = new StringBuilder();
+        for(var instruction : instructions) {
+            if(!instruction.getLabel().equals(FixedLabel.EMPTY))
+                result.append("[").append(instruction.getLabel().stringRepresentation()).append("] ");
+            result.append(instruction.stringRepresentation()).append("\n");
+        }
+        return result.toString();
     }
 
     @Override
