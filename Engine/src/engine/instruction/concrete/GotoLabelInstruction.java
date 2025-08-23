@@ -27,6 +27,6 @@ public class GotoLabelInstruction extends AbstractJumpInstruction {
 
     @Override
     public String stringRepresentation() {
-        return "GOTO " + getLabel().stringRepresentation();
+        return "GOTO " + targetLabel.stringRepresentation();
     }
 }
