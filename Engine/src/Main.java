@@ -20,7 +20,6 @@ public class Main {
             loader.validateProgram();
             Program program = loader.getProgram();
             Runner runner = new ProgramRunner(program);
-            System.out.println(program.print());
             runner.run(5L, 3L);
             System.out.println(runner.getResult());
 

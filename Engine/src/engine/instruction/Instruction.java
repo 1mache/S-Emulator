@@ -1,6 +1,6 @@
 package engine.instruction;
 
-import engine.argument.ArgumentType;
+import engine.argument.Argument;
 import engine.execution.context.VariableContext;
 import engine.label.Label;
 import engine.variable.Variable;
@@ -16,4 +16,5 @@ public interface Instruction {
     int cycles();
     Variable getVariable();
     Label getLabel();
+    List<Argument> getArguments();
 }

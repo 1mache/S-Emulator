@@ -43,8 +43,6 @@ public class JaxbTranslator {
             Map.entry("variableName", ArgumentType.VARIABLE)
     );
 
-    private final List<ArgumentLabelInfo> argumentLabels = new ArrayList<>();
-    private boolean programHasExit = false;
 
     public Program getProgram(SProgram sProgram) {
         List<Instruction> instructions = new ArrayList<>();
@@ -62,11 +60,7 @@ public class JaxbTranslator {
             instructions.add(instruction);
         }
 
-        return new ProgramImpl(sProgram.getName(), instructions, programHasExit);
-    }
-
-    public List<ArgumentLabelInfo> getArgumentLabels() {
-        return argumentLabels;
+        return new ProgramImpl(sProgram.getName(), instructions);
     }
 
     private Variable str2Variable(String str) {
@@ -99,6 +93,7 @@ public class JaxbTranslator {
         if(str.equals(FixedLabel.EXIT.stringRepresentation().toLowerCase()))
             return FixedLabel.EXIT; // exit label
 
+        // take only the number part and construct a numeric label
         return new NumericLabel(Integer.parseInt(str.replaceAll("\\D", "")));
     }
 
@@ -116,8 +111,6 @@ public class JaxbTranslator {
             switch (argumentType){
                 case LABEL:
                     Label label = str2Label(argument.getValue());
-                    if(label == FixedLabel.EXIT) programHasExit = true;
-                    argumentLabels.add(new ArgumentLabelInfo(sInstruction.getName(), label));
                     res.add(label);
                     break;
                 case VARIABLE:

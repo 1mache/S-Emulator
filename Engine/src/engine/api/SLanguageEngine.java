@@ -58,7 +58,7 @@ public class SLanguageEngine {
 
             instructionNumber++;
             nextInstruction = program.getInstructionByIndex(instructionNumber);
-        };
+        }
         return instructionPeekList;
     }
 

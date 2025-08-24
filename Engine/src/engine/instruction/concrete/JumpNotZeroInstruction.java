@@ -1,5 +1,6 @@
 package engine.instruction.concrete;
 
+import engine.argument.Argument;
 import engine.execution.context.VariableContext;
 import engine.instruction.InstructionData;
 import engine.instruction.AbstractJumpInstruction;
@@ -7,12 +8,11 @@ import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.variable.Variable;
 
-public class JumpNotZeroInstruction extends AbstractJumpInstruction {
-    private final Label targetLabel;
+import java.util.List;
 
+public class JumpNotZeroInstruction extends AbstractJumpInstruction {
     public JumpNotZeroInstruction(Variable variable, Label label, Label targetLabel) {
         super(InstructionData.JUMP_NOT_ZERO, variable, label, targetLabel);
-        this.targetLabel = targetLabel;
     }
 
     @Override
@@ -23,7 +23,7 @@ public class JumpNotZeroInstruction extends AbstractJumpInstruction {
     @Override
     public Label execute(VariableContext context) {
         if(context.getVariableValue(getVariable()) > 0)
-            return targetLabel;
+            return getTargetLabel();
 
         return FixedLabel.EMPTY;
     }
@@ -31,6 +31,11 @@ public class JumpNotZeroInstruction extends AbstractJumpInstruction {
     @Override
     public String stringRepresentation() {
         String varStr = getVariable().stringRepresentation();
-        return "IF "+ varStr + "!=0 GOTO " + targetLabel.stringRepresentation();
+        return "IF "+ varStr + "!=0 GOTO " + getTargetLabel().stringRepresentation();
+    }
+
+    @Override
+    public List<Argument> getArguments() {
+        return List.of(getTargetLabel());
     }
 }

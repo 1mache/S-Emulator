@@ -5,18 +5,10 @@ import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.program.scanner.InstructionScanner;
 import engine.variable.Variable;
-import engine.variable.VariableType;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ProgramImpl implements Program {
-
-    // record that represents instruction and its ordinal id in the program
-    public record InstructionLocator(Instruction instruction, int lineId) {
-        public static InstructionLocator EXIT_LOC = new InstructionLocator(null, 0);
-    }
 
     private final Map<Label, InstructionLocator> labeledInstructions;
     private final List<Instruction> instructions;
@@ -25,16 +17,17 @@ public class ProgramImpl implements Program {
 
     private final String name;
 
-    public ProgramImpl(String name, List<Instruction> instructions, boolean usesExit) {
+    public ProgramImpl(String name, List<Instruction> instructions) {
         this.name = name;
         this.instructions = instructions;
 
         labeledInstructions = InstructionScanner.extractLabeledInstructions(instructions);
         inputVariables = InstructionScanner.extractInputVariables(instructions);
-        if(usesExit)
-            labeledInstructions.put(FixedLabel.EXIT, InstructionLocator.EXIT_LOC);
 
-        usedLabels = InstructionScanner.extractUsedLabels(labeledInstructions);
+        usedLabels = InstructionScanner.extractUsedLabels(
+                labeledInstructions,
+                InstructionScanner.getArgumentLabels(instructions)
+        );
     }
 
     @Override
@@ -76,5 +69,10 @@ public class ProgramImpl implements Program {
         if(index >= instructions.size())
             return Optional.empty();
         return Optional.of(instructions.get(index));
+    }
+
+    @Override
+    public List<Instruction> getInstructions() {
+        return instructions;
     }
 }

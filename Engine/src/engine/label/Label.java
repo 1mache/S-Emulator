@@ -7,6 +7,7 @@ import java.util.Comparator;
 
 public interface Label extends Argument {
     String stringRepresentation();
+
     static Comparator<Label> comparator() {
         return (a, b) -> {
             if (a.equals(b)) return 0;

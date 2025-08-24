@@ -41,4 +41,8 @@ public interface Program {
      *         empty if index out of bounds
      */
     Optional<Instruction> getInstructionByIndex(int index);
+    /**
+     * @return all the instructions in the program
+     */
+    List<Instruction> getInstructions();
 }

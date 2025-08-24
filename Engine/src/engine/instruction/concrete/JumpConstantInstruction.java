@@ -1,11 +1,14 @@
 package engine.instruction.concrete;
 
+import engine.argument.Argument;
 import engine.argument.ConstantArgument;
 import engine.execution.context.VariableContext;
 import engine.instruction.AbstractJumpInstruction;
 import engine.instruction.InstructionData;
 import engine.label.Label;
 import engine.variable.Variable;
+
+import java.util.List;
 
 public class JumpConstantInstruction extends AbstractJumpInstruction {
     private final ConstantArgument constant;
@@ -24,5 +27,10 @@ public class JumpConstantInstruction extends AbstractJumpInstruction {
     public String stringRepresentation() {
         return "IF " + getVariable().stringRepresentation() + " = " + constant.value()
                 + " GOTO " + getTargetLabel().stringRepresentation();
+    }
+
+    @Override
+    public List<Argument> getArguments() {
+        return List.of(getTargetLabel(),constant);
     }
 }

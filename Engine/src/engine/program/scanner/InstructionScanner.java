@@ -1,31 +1,50 @@
 package engine.program.scanner;
 
+import engine.argument.ArgumentType;
 import engine.instruction.Instruction;
+import engine.jaxb.loader.ArgumentLabelInfo;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.ProgramImpl;
+import engine.program.InstructionLocator;
 import engine.variable.Variable;
 import engine.variable.VariableType;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class InstructionScanner {
 
     public static List<Variable> extractInputVariables(List<Instruction> instructions) {
-        return instructions.stream()
-                .map(Instruction::getVariable)
-                .filter(var -> var.getType() == VariableType.INPUT)
+        // collect variables directly operated by instructions
+        Set<Variable> operatedVars =
+                instructions.stream()
+                        .map(Instruction::getVariable)
+                        .filter(var -> var.getType() == VariableType.INPUT)
+                        .collect(Collectors.toSet());
+
+        // collect all input variables that are arguments in the instructions
+        Set<Variable> argumentVars =
+                instructions.stream()
+                        .flatMap(instr -> instr.getArguments().stream())
+                        .filter(arg -> arg.getArgumentType() == ArgumentType.VARIABLE)
+                        .map(arg -> (Variable) arg)
+                        .filter(var -> var.getType() == VariableType.INPUT)
+                        .collect(Collectors.toSet());
+
+        // unite the two sets
+        Set<Variable> allInputs = new HashSet<>(operatedVars);
+        allInputs.addAll(argumentVars);
+
+        // convert to list and sort by number
+        return allInputs.stream()
                 .sorted(Comparator.comparingLong(Variable::getNumber))
                 .toList();
     }
 
-    public static Map<Label, ProgramImpl.InstructionLocator> extractLabeledInstructions(
+    public static Map<Label, InstructionLocator> extractLabeledInstructions(
             List<Instruction> instructions
     ) {
-        Map<Label, ProgramImpl.InstructionLocator> result = new HashMap<>();
+        Map<Label, InstructionLocator> result = new HashMap<>();
 
         /* populate labeledInstructions with instructionData's of instructions
            with nonempty labels*/
@@ -33,18 +52,42 @@ public class InstructionScanner {
             Instruction instruction = instructions.get(i);
             if(!instruction.getLabel().equals(FixedLabel.EMPTY))
                 result.put(
-                        instruction.getLabel(), new ProgramImpl.InstructionLocator(instruction, i)
+                        instruction.getLabel(), new InstructionLocator(instruction, i)
                 );
         }
 
         return result;
     }
 
-    public static List<Label> extractUsedLabels(
-            Map<Label, ProgramImpl.InstructionLocator> labeledInstructions
-    ) {
-        return labeledInstructions.keySet().stream()
-                .sorted(Label.comparator())
+    public static List<ArgumentLabelInfo> getArgumentLabels(List<Instruction> instructions) {
+        return instructions.stream()
+                .flatMap(instr -> instr.getArguments().stream()
+                        .filter(arg -> arg.getArgumentType() == ArgumentType.LABEL)
+                        .map(arg -> new ArgumentLabelInfo(instr.getName(), (Label) arg)))
+                .distinct()
                 .toList();
+    }
+
+    public static List<Label> extractUsedLabels(
+            Map<Label, InstructionLocator> labeledInstructions,
+            List<ArgumentLabelInfo> argumentLabels
+    ) {
+        List<Label> instructionLabels = new ArrayList<>(
+                labeledInstructions.keySet().stream()
+                .sorted(Label.comparator())
+                .toList()
+        );
+
+        if(exitIsUsed(argumentLabels))
+            instructionLabels.add(FixedLabel.EXIT);
+
+        return instructionLabels;
+    }
+
+    private static boolean exitIsUsed(List<ArgumentLabelInfo> argumentLabels)
+    {
+        return argumentLabels.stream()
+                .map(ArgumentLabelInfo::label)
+                .anyMatch(label -> label.equals(FixedLabel.EXIT));
     }
 }

@@ -1,18 +1,19 @@
 package engine.instruction.concrete;
 
+import engine.argument.Argument;
 import engine.execution.context.VariableContext;
 import engine.instruction.InstructionData;
 import engine.instruction.AbstractJumpInstruction;
 import engine.label.Label;
 import engine.variable.Variable;
 
+import java.util.List;
+
 
 public class GotoLabelInstruction extends AbstractJumpInstruction {
-    private final Label targetLabel;
 
     public GotoLabelInstruction(Label label, Label targetLabel) {
         super(InstructionData.GOTO_LABEL, Variable.NONE, label,  targetLabel);
-        this.targetLabel = targetLabel;
     }
 
     @Override
@@ -22,11 +23,16 @@ public class GotoLabelInstruction extends AbstractJumpInstruction {
 
     @Override
     public Label execute(VariableContext context) {
-        return targetLabel;
+        return getTargetLabel();
     }
 
     @Override
     public String stringRepresentation() {
-        return "GOTO " + targetLabel.stringRepresentation();
+        return "GOTO " + getTargetLabel().stringRepresentation();
+    }
+
+    @Override
+    public List<Argument> getArguments() {
+        return List.of(getTargetLabel());
     }
 }
