@@ -13,6 +13,10 @@ public class NumericLabel implements Label {
         return "L" + number;
     }
 
+    public int getNumber() {
+        return number;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

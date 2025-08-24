@@ -1,6 +1,6 @@
 package console;
 
-import engine.SLanguageEngine;
+import engine.api.SLanguageEngine;
 
 public class Menu {
     private final SLanguageEngine engine;

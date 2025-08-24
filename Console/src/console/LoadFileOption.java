@@ -1,6 +1,6 @@
 package console;
 
-import engine.SLanguageEngine;
+import engine.api.SLanguageEngine;
 import engine.jaxb.loader.exception.NotXMLException;
 import engine.jaxb.loader.exception.UnknownLabelException;
 
@@ -8,13 +8,14 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class LoadFileOption extends MenuPage{
-    public LoadFileOption(String name, String prompt) {
-        super(name, prompt);
+    public LoadFileOption() {
+        super("Load program XML file", "");
     }
 
     @Override
     public void execute(SLanguageEngine engine) {
-        super.execute(engine);
+        System.out.println("Please enter the full path of the XML file to load: ");
+
         String path = getFilePath();
         if(path.isEmpty()) {
             System.out.println("Empty line entered, couldn't load file");

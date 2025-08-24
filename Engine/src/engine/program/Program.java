@@ -17,9 +17,14 @@ public interface Program {
      */
     String print();
     /**
-     * @return list of all the input variables used by the Program
+     * @return sorted list of all the input variables used by the Program
      */
     List<Variable> getInputVariables();
+    /**
+     * @return sorted list of all the labels used by the Program,
+     *         Exit in the end if used
+     */
+    List<Label> getLabels();
     /**
      * Checks if label is present in the program
      * @param label (if EMPTY returns true, but has no meaning)

@@ -7,6 +7,8 @@ import engine.variable.Variable;
 import engine.variable.VariableType;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ProgramImpl implements Program {
 
@@ -15,34 +17,19 @@ public class ProgramImpl implements Program {
         public static InstructionLocator EXIT_LOC = new InstructionLocator(null, 0);
     }
 
-    private final Map<Label, InstructionLocator> labeledInstructions = new HashMap<>();
+    private final Map<Label, InstructionLocator> labeledInstructions;
     private final List<Instruction> instructions;
-
-    private final List<Variable> inputVariables = new ArrayList<>();
+    private final List<Variable> inputVariables;
+    private final List<Label> usedLabels;
 
     private final String name;
 
     public ProgramImpl(String name, List<Instruction> instructions, boolean usesExit) {
         this.name = name;
         this.instructions = instructions;
-
-        /* populate labeledInstructions with instructionData's of instructions
-           with nonempty labels*/
-        for(int i = 0; i < instructions.size(); i++){
-            Instruction instruction = instructions.get(i);
-            if(!instruction.getLabel().equals(FixedLabel.EMPTY))
-                labeledInstructions.put(
-                        instruction.getLabel(), new InstructionLocator(instruction, i)
-                );
-        }
-        /* populate the inputVariables list with input variables used in the
-           instruction */
-        instructions.forEach(instruction -> {
-            if(instruction.getVariable().getType() == VariableType.INPUT)
-                inputVariables.add(instruction.getVariable());
-        });
-        // sort input
-        inputVariables.sort(Comparator.comparingLong(Variable::getNumber));
+        labeledInstructions = extractLabeledInstructions(instructions);
+        inputVariables = extractInputVariables(instructions);
+        usedLabels = extractUsedLabels(usesExit);
 
         if(usesExit)
             labeledInstructions.put(FixedLabel.EXIT, InstructionLocator.EXIT_LOC);
@@ -54,6 +41,7 @@ public class ProgramImpl implements Program {
     }
 
     // TODO: change to format required
+
     @Override
     public String print() {
         StringBuilder result = new StringBuilder();
@@ -64,10 +52,14 @@ public class ProgramImpl implements Program {
         }
         return result.toString();
     }
-
     @Override
     public List<Variable> getInputVariables() {
         return inputVariables;
+    }
+
+    @Override
+    public List<Label> getLabels() {
+        return usedLabels;
     }
 
     @Override
@@ -94,5 +86,39 @@ public class ProgramImpl implements Program {
         if(index >= instructions.size())
             return Optional.empty();
         return Optional.of(instructions.get(index));
+    }
+
+    private static List<Variable> extractInputVariables(List<Instruction> instructions) {
+       return instructions.stream()
+                .map(Instruction::getVariable)
+                .filter(var -> var.getType() == VariableType.INPUT)
+                .sorted(Comparator.comparingLong(Variable::getNumber))
+                .toList();
+    }
+
+    private static Map<Label, InstructionLocator> extractLabeledInstructions(List<Instruction> instructions) {
+        Map<Label, InstructionLocator> result = new HashMap<>();
+
+        /* populate labeledInstructions with instructionData's of instructions
+           with nonempty labels*/
+        for(int i = 0; i < instructions.size(); i++){
+            Instruction instruction = instructions.get(i);
+            if(!instruction.getLabel().equals(FixedLabel.EMPTY))
+                result.put(
+                        instruction.getLabel(), new InstructionLocator(instruction, i)
+                );
+        }
+
+        return result;
+    }
+
+    private List<Label> extractUsedLabels(boolean usesExit) {
+        return Stream.concat(
+                        labeledInstructions.keySet().stream(),
+                        usesExit ? Stream.of(FixedLabel.EXIT) : Stream.empty()
+                )
+                .distinct()
+                .sorted(Label.comparator())
+                .toList();
     }
 }

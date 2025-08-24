@@ -1,16 +1,17 @@
 package console;
 
-import engine.SLanguageEngine;
+import engine.api.SLanguageEngine;
 
 import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 public class MenuPage implements MenuOption {
     private final ArrayList<MenuOption> options;
 
     private final String name;
-    private final String prompt;
+    private final String message;
 
     private static class ExitOption implements MenuOption {
         @Override
@@ -31,16 +32,16 @@ public class MenuPage implements MenuOption {
     public static final MenuOption EXIT_OPTION = new ExitOption();
 
     // public:
-    public MenuPage(String name, String prompt) {
+    public MenuPage(String name, String message) {
         this.name = name;
-        this.prompt = prompt;
+        this.message = message;
         this.options = new ArrayList<>(1);
         options.add(EXIT_OPTION);
     }
 
     @Override
     public void execute(SLanguageEngine engine) {
-        System.out.println(prompt);
+        System.out.println(message);
     }
 
     @Override
@@ -66,6 +67,16 @@ public class MenuPage implements MenuOption {
     {
         // add the new option as last before the back option
         options.add(options.size()-1,option);
+    }
+
+    public void addOptionsOf(MenuPage menuPage){
+        var otherOptions = menuPage.options;
+        if (otherOptions.size() > 1) {
+            // Create a sublist excluding the last element (EXIT)
+            List<MenuOption> toAdd = otherOptions.subList(0, otherOptions.size() - 1);
+            // Add all at the beginning of the 'options' list
+            options.addAll(0, toAdd);
+        }
     }
 
     private int askForOptionId() {

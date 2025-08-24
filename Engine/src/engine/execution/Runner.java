@@ -1,5 +1,7 @@
 package engine.execution;
 
+import engine.execution.context.VariableContext;
+
 public interface Runner {
     /**
      * executes the program given initial values of input variables
@@ -9,4 +11,6 @@ public interface Runner {
      * @return the result variable 'y'
      */
     Long getResult();
+
+    VariableContext getVariableContext();
 }

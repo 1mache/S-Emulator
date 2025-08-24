@@ -53,6 +53,11 @@ public class ProgramRunner implements Runner {
         return variableContext.getVariableValue(Variable.RESULT);
     }
 
+    @Override
+    public VariableContext getVariableContext() {
+        return variableContext;
+    }
+
     private void initInputVariables(Long... initInput) {
         int counter = 1;
         for(Long input : initInput) {
