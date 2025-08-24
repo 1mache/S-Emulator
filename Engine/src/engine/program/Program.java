@@ -13,10 +13,6 @@ public interface Program {
      */
     String getName();
     /**
-     * @return all the instructions printed as a big string
-     */
-    String print();
-    /**
      * @return sorted list of all the input variables used by the Program
      */
     List<Variable> getInputVariables();
