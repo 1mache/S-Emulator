@@ -12,8 +12,6 @@ public class ProgramImpl implements Program {
 
     private final Map<Label, InstructionLocator> labeledInstructions;
     private final List<Instruction> instructions;
-    private final List<Variable> inputVariables;
-    private final List<Label> usedLabels;
 
     private final String name;
 
@@ -22,12 +20,6 @@ public class ProgramImpl implements Program {
         this.instructions = instructions;
 
         labeledInstructions = InstructionScanner.extractLabeledInstructions(instructions);
-        inputVariables = InstructionScanner.extractInputVariables(instructions);
-
-        usedLabels = InstructionScanner.extractUsedLabels(
-                labeledInstructions,
-                InstructionScanner.getArgumentLabels(instructions)
-        );
     }
 
     @Override
@@ -37,12 +29,15 @@ public class ProgramImpl implements Program {
 
     @Override
     public List<Variable> getInputVariables() {
-        return inputVariables;
+        return InstructionScanner.extractInputVariables(instructions);
     }
 
     @Override
     public List<Label> getLabels() {
-        return usedLabels;
+        return InstructionScanner.extractUsedLabels(
+                labeledInstructions,
+                InstructionScanner.getArgumentLabels(instructions)
+        );
     }
 
     @Override

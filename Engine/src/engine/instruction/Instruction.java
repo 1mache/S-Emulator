@@ -17,4 +17,5 @@ public interface Instruction {
     Variable getVariable();
     Label getLabel();
     List<Argument> getArguments();
+    List<Instruction> getExpansion();
 }
