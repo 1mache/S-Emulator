@@ -6,6 +6,7 @@ import engine.instruction.AbstractInstruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
+import engine.program.InstructionLocator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -13,7 +14,15 @@ import java.util.List;
 public class ZeroVariableInstruction extends AbstractInstruction {
 
     public ZeroVariableInstruction(Variable variable, Label label) {
-        super(InstructionData.ZERO_VARIABLE, variable, label);
+        this(variable, label, null);
+    }
+
+    public ZeroVariableInstruction(
+           Variable variable,
+           Label label,
+           InstructionLocator expanding
+    ) {
+        super(InstructionData.ZERO_VARIABLE, variable, label, expanding);
     }
 
     @Override

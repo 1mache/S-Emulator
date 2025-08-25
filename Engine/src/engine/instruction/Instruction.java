@@ -3,9 +3,12 @@ package engine.instruction;
 import engine.argument.Argument;
 import engine.execution.context.VariableContext;
 import engine.label.Label;
+import engine.program.InstructionLocator;
+import engine.program.Program;
 import engine.variable.Variable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface Instruction {
     // TODO: Javadoc
@@ -17,5 +20,6 @@ public interface Instruction {
     Variable getVariable();
     Label getLabel();
     List<Argument> getArguments();
-    List<Instruction> getExpansion();
+    Optional<Program> getExpansion(int lineNumber);
+    Optional<InstructionLocator> getExpanding();
 }
