@@ -6,7 +6,6 @@ import engine.execution.context.VariableContext;
 import engine.instruction.AbstractJumpInstruction;
 import engine.instruction.InstructionData;
 import engine.label.Label;
-import engine.program.InstructionLocator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -15,17 +14,7 @@ public class JumpConstantInstruction extends AbstractJumpInstruction {
     private final ConstantArgument constant;
 
     public JumpConstantInstruction(Variable variable, Label label, Label targetLabel, ConstantArgument constant) {
-        this(variable, label, targetLabel, constant,null);
-    }
-
-    public JumpConstantInstruction(
-           Variable variable,
-           Label label,
-           Label tagetLabel,
-           ConstantArgument constant,
-           InstructionLocator expanding
-    ) {
-        super(InstructionData.JUMP_EQUAL_CONSTANT, variable, label, tagetLabel, expanding);
+        super(InstructionData.JUMP_EQUAL_CONSTANT, variable, label, targetLabel);
         this.constant = constant;
     }
 

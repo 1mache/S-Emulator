@@ -5,7 +5,6 @@ import engine.execution.context.VariableContext;
 import engine.instruction.InstructionData;
 import engine.instruction.AbstractJumpInstruction;
 import engine.label.Label;
-import engine.program.InstructionLocator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -14,15 +13,7 @@ import java.util.List;
 public class GotoLabelInstruction extends AbstractJumpInstruction {
 
     public GotoLabelInstruction(Label label, Label targetLabel) {
-        this(label, targetLabel, null);
-    }
-
-    public GotoLabelInstruction(
-            Label label,
-            Label tagetLabel,
-            InstructionLocator expanding
-    ) {
-        super(InstructionData.GOTO_LABEL, Variable.NONE, label, tagetLabel, expanding);
+        super(InstructionData.GOTO_LABEL, Variable.NONE, label,  targetLabel);
     }
 
     @Override

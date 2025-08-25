@@ -15,11 +15,30 @@ import java.util.stream.Collectors;
 public class InstructionScanner {
 
     public static List<Variable> extractInputVariables(List<Instruction> instructions) {
-        return extractVariables(instructions, VariableType.INPUT);
-    }
+        // collect variables directly operated by instructions
+        Set<Variable> operatedVars =
+                instructions.stream()
+                        .map(Instruction::getVariable)
+                        .filter(var -> var.getType() == VariableType.INPUT)
+                        .collect(Collectors.toSet());
 
-    public static List<Variable> extractWorkVariables(List<Instruction> instructions){
-        return extractVariables(instructions, VariableType.WORK);
+        // collect all input variables that are arguments in the instructions
+        Set<Variable> argumentVars =
+                instructions.stream()
+                        .flatMap(instr -> instr.getArguments().stream())
+                        .filter(arg -> arg.getArgumentType() == ArgumentType.VARIABLE)
+                        .map(arg -> (Variable) arg)
+                        .filter(var -> var.getType() == VariableType.INPUT)
+                        .collect(Collectors.toSet());
+
+        // unite the two sets
+        Set<Variable> allInputs = new HashSet<>(operatedVars);
+        allInputs.addAll(argumentVars);
+
+        // convert to list and sort by number
+        return allInputs.stream()
+                .sorted(Comparator.comparingLong(Variable::getNumber))
+                .toList();
     }
 
     public static Map<Label, InstructionLocator> extractLabeledInstructions(
@@ -63,33 +82,6 @@ public class InstructionScanner {
             instructionLabels.add(FixedLabel.EXIT);
 
         return instructionLabels;
-    }
-
-    private static List<Variable> extractVariables(List<Instruction> instructions, VariableType variableType) {
-        // collect variables directly operated by instructions
-        Set<Variable> operatedVars =
-                instructions.stream()
-                        .map(Instruction::getVariable)
-                        .filter(var -> var.getType() == variableType)
-                        .collect(Collectors.toSet());
-
-        // collect all input variables that are arguments in the instructions
-        Set<Variable> argumentVars =
-                instructions.stream()
-                        .flatMap(instr -> instr.getArguments().stream())
-                        .filter(arg -> arg.getArgumentType() == ArgumentType.VARIABLE)
-                        .map(arg -> (Variable) arg)
-                        .filter(var -> var.getType() == variableType)
-                        .collect(Collectors.toSet());
-
-        // unite the two sets
-        Set<Variable> allInputs = new HashSet<>(operatedVars);
-        allInputs.addAll(argumentVars);
-
-        // convert to list and sort by number
-        return allInputs.stream()
-                .sorted(Comparator.comparingLong(Variable::getNumber))
-                .toList();
     }
 
     private static boolean exitIsUsed(List<ArgumentLabelInfo> argumentLabels)

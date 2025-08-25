@@ -6,7 +6,6 @@ import engine.instruction.AbstractInstruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.InstructionLocator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -15,16 +14,7 @@ public class AssignmentInstruction extends AbstractInstruction {
     private final Variable assignedVariable;
 
     public AssignmentInstruction(Variable variable, Label label, Variable assignedVariable) {
-        this(variable, label, assignedVariable, null);
-    }
-
-    public AssignmentInstruction(
-            Variable variable,
-            Label label,
-            Variable assignedVariable,
-            InstructionLocator expanding
-    ) {
-        super(InstructionData.ASSIGNMENT, variable, label, expanding);
+        super(InstructionData.ASSIGNMENT, variable, label);
         this.assignedVariable = assignedVariable;
     }
 

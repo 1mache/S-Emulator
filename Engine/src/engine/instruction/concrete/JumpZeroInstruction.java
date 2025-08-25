@@ -5,23 +5,13 @@ import engine.execution.context.VariableContext;
 import engine.instruction.InstructionData;
 import engine.instruction.AbstractJumpInstruction;
 import engine.label.Label;
-import engine.program.InstructionLocator;
 import engine.variable.Variable;
 
 import java.util.List;
 
 public class JumpZeroInstruction extends AbstractJumpInstruction {
     public JumpZeroInstruction(Variable variable, Label label, Label targetLabel) {
-        this(variable, label, targetLabel, null);
-    }
-
-    public JumpZeroInstruction(
-           Variable variable,
-           Label label,
-           Label tagetLabel,
-           InstructionLocator expanding
-    ) {
-        super(InstructionData.JUMP_ZERO, variable, label, tagetLabel, expanding);
+        super(InstructionData.JUMP_ZERO, variable, label, targetLabel);
     }
 
     @Override
