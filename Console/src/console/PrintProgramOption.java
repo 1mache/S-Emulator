@@ -28,19 +28,19 @@ public class PrintProgramOption extends MenuPage {
 
     private void printInstructions(List<InstructionPeek> instructions) {
         for (InstructionPeek instr : instructions) {
-            // number
-            String number = "#" + (instr.number() + 1); // +1 so it starts with 1
+            // Number
+            String number = "#" + instr.number();
 
-            // synthetic or base
+            // Synthetic or Base
             String type = instr.isSynthetic() ? "(S)" : "(B)";
 
-            // label formatting: 5 characters wide, label starts at position 2
+            // Label formatting: 5 characters wide, label starts at position 2
             String formattedLabel = String.format("[ %-4s]", instr.label()); // left-padded, width 5;
 
-            // instruction string
+            // Instruction string
             String instrString = instr.stringRepresentation();
 
-            // cycles in parentheses
+            // Cycles in parentheses
             String cycles = "(" + instr.cycles() + ")";
 
             System.out.printf("%s %s %s %s %s%n", number, type, formattedLabel, instrString, cycles);
