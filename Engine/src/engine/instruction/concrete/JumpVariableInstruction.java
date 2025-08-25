@@ -4,8 +4,12 @@ import engine.argument.Argument;
 import engine.execution.context.VariableContext;
 import engine.instruction.AbstractJumpInstruction;
 import engine.instruction.InstructionData;
+import engine.label.FixedLabel;
 import engine.label.Label;
+import engine.label.NumericLabel;
 import engine.program.InstructionLocator;
+import engine.program.Program;
+import engine.program.ProgramImpl;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -44,5 +48,31 @@ public class JumpVariableInstruction extends AbstractJumpInstruction {
     @Override
     public List<Argument> getArguments() {
         return List.of(getTargetLabel(), otherVariable);
+    }
+
+    @Override
+    protected Program getSyntheticExpansion(int lineNumber) {
+        InstructionLocator locator = new InstructionLocator(this, lineNumber);
+        Variable z1 = Variable.createWorkVariable(1);
+        Variable z2 = Variable.createWorkVariable(2);
+        Label l1 = new NumericLabel(1);
+        Label l2 = new NumericLabel(2);
+        Label l3 = new NumericLabel(3);
+        Label empty = FixedLabel.EMPTY;
+
+        return new ProgramImpl(
+                getName() + "Expansion",
+                List.of(
+                        new AssignmentInstruction(z1, empty, getVariable(), locator),
+                        new AssignmentInstruction(z2, empty, otherVariable, locator),
+                        new JumpZeroInstruction(z1, l2, l3, locator),
+                        new JumpZeroInstruction(z2, empty, l1, locator),
+                        new DecreaseInstruction(z1, empty, locator),
+                        new DecreaseInstruction(z2, empty, locator),
+                        new GotoLabelInstruction(empty, l2, locator),
+                        new JumpZeroInstruction(z2, l3, getTargetLabel(), locator),
+                        new NeutralInstruction(Variable.RESULT, l1, locator)
+                )
+        );
     }
 }

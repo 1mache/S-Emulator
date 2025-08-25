@@ -4,8 +4,11 @@ import engine.argument.Argument;
 import engine.execution.context.VariableContext;
 import engine.instruction.InstructionData;
 import engine.instruction.AbstractJumpInstruction;
+import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.program.InstructionLocator;
+import engine.program.Program;
+import engine.program.ProgramImpl;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -43,5 +46,18 @@ public class GotoLabelInstruction extends AbstractJumpInstruction {
     @Override
     public List<Argument> getArguments() {
         return List.of(getTargetLabel());
+    }
+
+    @Override
+    protected Program getSyntheticExpansion(int lineNumber) {
+        InstructionLocator locator = new InstructionLocator(this, lineNumber);
+        Variable z1 = Variable.createWorkVariable(1);
+        return new ProgramImpl(
+                getName() +  "Expansion",
+                List.of(
+                        new IncreaseInstruction(z1, FixedLabel.EMPTY, locator),
+                        new JumpNotZeroInstruction(z1, FixedLabel.EMPTY, getTargetLabel(), locator)
+                )
+        );
     }
 }

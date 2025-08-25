@@ -6,7 +6,10 @@ import engine.instruction.AbstractInstruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
+import engine.label.NumericLabel;
 import engine.program.InstructionLocator;
+import engine.program.Program;
+import engine.program.ProgramImpl;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -39,5 +42,18 @@ public class ZeroVariableInstruction extends AbstractInstruction {
     @Override
     public List<Argument> getArguments() {
         return List.of(); // no arguments
+    }
+
+    @Override
+    protected Program getSyntheticExpansion(int lineNumber) {
+        InstructionLocator locator = new InstructionLocator(this, lineNumber);
+        Label l1 = new NumericLabel(1);
+        return new ProgramImpl(
+                getName() + "Expansion",
+                List.of(
+                        new DecreaseInstruction(getVariable(), l1, locator),
+                        new JumpNotZeroInstruction(getVariable(), FixedLabel.EMPTY, l1, locator)
+                )
+        );
     }
 }
