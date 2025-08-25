@@ -5,6 +5,7 @@ import engine.execution.context.VariableContext;
 import engine.instruction.AbstractJumpInstruction;
 import engine.instruction.InstructionData;
 import engine.label.Label;
+import engine.program.InstructionLocator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -13,7 +14,17 @@ public class JumpVariableInstruction extends AbstractJumpInstruction {
     private final Variable otherVariable;
 
     public JumpVariableInstruction(Variable variable, Label label, Label targetLabel, Variable otherVariable) {
-        super(InstructionData.JUMP_EQUAL_VARIABLE, variable, label, targetLabel);
+        this(variable, label, targetLabel, otherVariable, null);
+    }
+
+    public JumpVariableInstruction(
+           Variable variable,
+           Label label,
+           Label tagetLabel,
+           Variable otherVariable,
+           InstructionLocator expanding
+    ) {
+        super(InstructionData.JUMP_EQUAL_VARIABLE, variable, label, tagetLabel, expanding);
         this.otherVariable = otherVariable;
     }
 

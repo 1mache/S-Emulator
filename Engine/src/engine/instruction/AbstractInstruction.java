@@ -1,17 +1,29 @@
 package engine.instruction;
 
 import engine.label.Label;
+import engine.program.InstructionLocator;
+import engine.program.Program;
 import engine.variable.Variable;
+
+import java.util.Optional;
 
 public abstract class AbstractInstruction implements Instruction {
     private final InstructionData data;
     private final Variable variable;
     private final Label label;
 
+    // which instruction am I expanding
+    private final InstructionLocator expanding; // can be null
+
     public AbstractInstruction(InstructionData data, Variable variable, Label label) {
+        this(data, variable, label, null);
+    }
+    public AbstractInstruction(InstructionData data, Variable variable, Label label,  InstructionLocator expanding)
+    {
         this.data = data;
         this.label = label;
         this.variable = variable;
+        this.expanding = expanding;
     }
 
     @Override
@@ -37,5 +49,24 @@ public abstract class AbstractInstruction implements Instruction {
     @Override
     public Label getLabel() {
         return label;
+    }
+
+    @Override
+    public Optional<InstructionLocator> getExpanding() {
+        return Optional.ofNullable(expanding);
+    }
+
+    @Override
+    public Optional<Program> getExpansion(int lineNumber) {
+        if(!isSynthetic())
+            return Optional.empty();
+        
+        return Optional.of(getSyntheticExpansion(lineNumber));
+    }
+
+    // to be implemented by concrete classes.
+    protected Program getSyntheticExpansion(int lineNumber) {
+        // if all instructions implement it this should never happen
+        throw new UnsupportedOperationException("Instruction " + getName() + " does not support synthetic expansion.");
     }
 }
