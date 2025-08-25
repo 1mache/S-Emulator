@@ -18,6 +18,13 @@ import java.util.Optional;
 
 public class SLanguageEngine {
     private Program program;
+    private static final SLanguageEngine instance = new SLanguageEngine();
+
+    public static SLanguageEngine getInstance(){
+        return instance;
+    }
+
+    private SLanguageEngine(){}
 
     public void loadProgram(String path)
             throws NotXMLException, FileNotFoundException, UnknownLabelException {

@@ -6,7 +6,7 @@ import engine.api.SLanguageEngine;
 
 public class Main {
     public static void main(String[] args) {
-        SLanguageEngine engine = new SLanguageEngine();
+        SLanguageEngine engine = SLanguageEngine.getInstance();
 
         MenuPage startPage = new MenuPage(
                 "Start menu",
@@ -18,6 +18,7 @@ public class Main {
 
         startPage.addOption(option1);
         startPage.addOption(option2);
+        // the same menu is printed after every option
         option1.addOptionsOf(startPage);
         option2.addOptionsOf(startPage);
 
