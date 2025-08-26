@@ -55,6 +55,7 @@ public class JumpVariableInstruction extends AbstractJumpInstruction {
         InstructionLocator locator = new InstructionLocator(this, lineNumber);
         Variable z1 = Variable.createWorkVariable(1);
         Variable z2 = Variable.createWorkVariable(2);
+        Variable z3 = Variable.createWorkVariable(3);
         Label l1 = new NumericLabel(1);
         Label l2 = new NumericLabel(2);
         Label l3 = new NumericLabel(3);
@@ -69,7 +70,7 @@ public class JumpVariableInstruction extends AbstractJumpInstruction {
                         new JumpZeroInstruction(z2, empty, l1, locator),
                         new DecreaseInstruction(z1, empty, locator),
                         new DecreaseInstruction(z2, empty, locator),
-                        new GotoLabelInstruction(empty, l2, locator),
+                        new GotoLabelInstruction(z3,empty, l2, locator),
                         new JumpZeroInstruction(z2, l3, getTargetLabel(), locator),
                         new NeutralInstruction(Variable.RESULT, l1, locator)
                 )

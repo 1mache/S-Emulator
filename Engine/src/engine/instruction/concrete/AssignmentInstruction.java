@@ -55,13 +55,14 @@ public class AssignmentInstruction extends AbstractInstruction {
         Label l3 = new NumericLabel(3);
         Label empty = FixedLabel.EMPTY;
         Variable z1 = Variable.createWorkVariable(1);
+        Variable z2 = Variable.createWorkVariable(2);
 
         return new ProgramImpl(
                 getName() + "Expansion",
                 List.of(
                         new ZeroVariableInstruction(getVariable(), empty, locator),
                         new JumpNotZeroInstruction(assignedVariable, empty, l1, locator),
-                        new GotoLabelInstruction(empty, l3, locator),
+                        new GotoLabelInstruction(z2,empty, l3, locator),
                         new DecreaseInstruction(assignedVariable, l1, locator),
                         new IncreaseInstruction(z1, empty, locator),
                         new JumpNotZeroInstruction(assignedVariable, empty, l1, locator),

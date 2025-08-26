@@ -56,9 +56,8 @@ public class ConstantAssignmentInstruction extends AbstractInstruction {
         Variable thisVariable = getVariable();
 
         instructionList.add(new ZeroVariableInstruction(thisVariable, FixedLabel.EMPTY, locator));
-        Instruction inc = new IncreaseInstruction(thisVariable, FixedLabel.EMPTY, locator);
         for (int i = 0; i < constant.value(); i++)
-            instructionList.add(inc);
+            instructionList.add(new IncreaseInstruction(thisVariable, FixedLabel.EMPTY, locator));
         
         return new ProgramImpl(
                 getName() + "Expansion",

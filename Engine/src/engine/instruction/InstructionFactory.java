@@ -30,7 +30,7 @@ public class InstructionFactory {
             case ZERO_VARIABLE -> new ZeroVariableInstruction(variable, instructionLabel);
             case GOTO_LABEL -> {
                 Label target = (Label) arguments.getFirst();
-                yield new GotoLabelInstruction(instructionLabel, target);
+                yield new GotoLabelInstruction(variable,instructionLabel, target);
             }
             case ASSIGNMENT -> {
                 Variable assignedVariable = (Variable) arguments.getFirst();

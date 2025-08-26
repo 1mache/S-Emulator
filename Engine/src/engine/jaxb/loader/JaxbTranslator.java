@@ -64,7 +64,6 @@ public class JaxbTranslator {
     }
 
     private Variable str2Variable(String str) {
-        if(str == null) return Variable.NONE;
         str = str.toLowerCase();
         if(str.length() == 2) {
             return switch (str.charAt(0)) {

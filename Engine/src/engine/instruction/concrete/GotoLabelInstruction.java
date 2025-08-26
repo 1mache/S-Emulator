@@ -16,16 +16,17 @@ import java.util.List;
 
 public class GotoLabelInstruction extends AbstractJumpInstruction {
 
-    public GotoLabelInstruction(Label label, Label targetLabel) {
-        this(label, targetLabel, null);
+    public GotoLabelInstruction(Variable variable, Label label, Label targetLabel) {
+        this(variable, label, targetLabel, null);
     }
 
     public GotoLabelInstruction(
+            Variable variable,
             Label label,
             Label tagetLabel,
             InstructionLocator expanding
     ) {
-        super(InstructionData.GOTO_LABEL, Variable.NONE, label, tagetLabel, expanding);
+        super(InstructionData.GOTO_LABEL, variable, label, tagetLabel, expanding);
     }
 
     @Override
@@ -51,12 +52,11 @@ public class GotoLabelInstruction extends AbstractJumpInstruction {
     @Override
     protected Program getSyntheticExpansion(int lineNumber) {
         InstructionLocator locator = new InstructionLocator(this, lineNumber);
-        Variable z1 = Variable.createWorkVariable(1);
         return new ProgramImpl(
-                getName() +  "Expansion",
+                getName() + "Expansion",
                 List.of(
-                        new IncreaseInstruction(z1, FixedLabel.EMPTY, locator),
-                        new JumpNotZeroInstruction(z1, FixedLabel.EMPTY, getTargetLabel(), locator)
+                        new IncreaseInstruction(getVariable(), FixedLabel.EMPTY, locator),
+                        new JumpNotZeroInstruction(getVariable(), FixedLabel.EMPTY, getTargetLabel(), locator)
                 )
         );
     }

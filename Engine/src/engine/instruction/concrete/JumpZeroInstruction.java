@@ -47,13 +47,14 @@ public class JumpZeroInstruction extends AbstractJumpInstruction {
     @Override
     protected Program getSyntheticExpansion(int lineNumber) {
         InstructionLocator locator = new InstructionLocator(this, lineNumber);
+        Variable z1 = Variable.createWorkVariable(1);
         Label l1 = new NumericLabel(1);
 
         return new ProgramImpl(
                 getName() + "Expansion",
                 List.of(
                         new JumpNotZeroInstruction(getVariable(), FixedLabel.EMPTY, l1, locator),
-                        new GotoLabelInstruction(FixedLabel.EMPTY, getTargetLabel() , locator),
+                        new GotoLabelInstruction(z1, FixedLabel.EMPTY, getTargetLabel() , locator),
                         new NeutralInstruction(Variable.RESULT, l1, locator)
                 )
         );

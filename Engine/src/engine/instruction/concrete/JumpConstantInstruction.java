@@ -55,22 +55,20 @@ public class JumpConstantInstruction extends AbstractJumpInstruction {
     protected Program getSyntheticExpansion(int lineNumber) {
         InstructionLocator locator = new InstructionLocator(this, lineNumber);
         Variable z1 = Variable.createWorkVariable(1);
+        Variable z2 = Variable.createWorkVariable(2);
         Label l1 = new NumericLabel(1);
         Label empty = FixedLabel.EMPTY;
 
         List<Instruction> instructions = new ArrayList<>();
         instructions.add(new AssignmentInstruction(z1, empty, getVariable(), locator));
 
-        Instruction jz = new JumpZeroInstruction(z1, empty, l1, locator);
-        Instruction dec = new DecreaseInstruction(z1, empty, locator);
-
         for (int i = 0; i < constant.value(); i++) {
-            instructions.add(jz);
-            instructions.add(dec);
+            instructions.add(new JumpZeroInstruction(z1, empty, l1, locator));
+            instructions.add(new DecreaseInstruction(z1, empty, locator));
         }
 
         instructions.add(new JumpNotZeroInstruction(z1, empty, l1, locator));
-        instructions.add(new GotoLabelInstruction(getTargetLabel(), empty, locator));
+        instructions.add(new GotoLabelInstruction(z2, getTargetLabel(), empty, locator));
         instructions.add(new NeutralInstruction(Variable.RESULT, l1, locator));
         return new ProgramImpl(getName() + "Expansion", instructions);
     }
