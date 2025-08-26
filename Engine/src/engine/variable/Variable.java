@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class Variable implements Argument {
     private final VariableType type;
-    private final long number;
+    private final int number;
 
     private Variable(VariableType type, int number) {
         this.type = type;
@@ -33,7 +33,7 @@ public class Variable implements Argument {
 
     public VariableType getType() {return type;}
 
-    public long getNumber() {return number;}
+    public int getNumber() {return number;}
 
     @Override
     public boolean equals(Object o) {

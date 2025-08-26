@@ -5,5 +5,5 @@ public record InstructionPeek(
         String label,
         boolean isSynthetic,
         int cycles,
-        long number
+        int number
 ){}

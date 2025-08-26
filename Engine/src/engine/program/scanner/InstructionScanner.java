@@ -88,7 +88,7 @@ public class InstructionScanner {
 
         // convert to list and sort by number
         return allInputs.stream()
-                .sorted(Comparator.comparingLong(Variable::getNumber))
+                .sorted(Comparator.comparingInt(Variable::getNumber))
                 .toList();
     }
 
