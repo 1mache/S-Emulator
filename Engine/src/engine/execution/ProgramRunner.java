@@ -19,12 +19,16 @@ public class ProgramRunner implements Runner {
     private long cycles = 0;
 
     public ProgramRunner(Program program) {
+        this(program, new VariableTable());
+    }
+
+    public ProgramRunner(Program program, VariableContext variableContext) {
         this.program = program;
-        variableContext = new VariableTable();
+        this.variableContext = variableContext;
     }
 
     @Override
-    public void run(int expansionLevel) {
+    public Label run(int expansionLevel) {
         Optional<Instruction> currInstruction;
         Label jumpLabel = FixedLabel.EMPTY;
 
@@ -40,12 +44,14 @@ public class ProgramRunner implements Runner {
                         .ifPresent(lineId -> pc = lineId);
 
             }
-            jumpLabel = executeInstruction(currInstruction.orElse(null));
+            jumpLabel = executeInstruction(expansionLevel, currInstruction.orElse(null));
             if(jumpLabel == FixedLabel.EXIT) {break;} // check for exit
         }
         while (currInstruction.isPresent());
-    }
 
+        // return the last jump label
+        return jumpLabel;
+    }
 
     @Override
     public Long getResult() {
@@ -70,10 +76,33 @@ public class ProgramRunner implements Runner {
         }
     }
 
+    // expands and executes
+    private Label executeInstruction(int expansionLevel, Instruction instruction) {
+        if (instruction == null) {
+            pc++;
+            return FixedLabel.EMPTY;
+        }
+
+        Optional<Program> expansion = instruction.getExpansion(pc);
+
+        // if expansion is empty the instruction is synthetic
+        if (expansionLevel == 0 || expansion.isEmpty()) {
+            return executeInstruction(instruction);
+        }
+
+        pc++;
+        // run with the same variable context
+        ProgramRunner runner = new ProgramRunner(expansion.get(), variableContext);
+        Label result = runner.run(expansionLevel-1);
+        cycles += runner.getCycles();
+        return result;
+    }
+
+    // executes instruction the normal
     private Label executeInstruction(Instruction instruction) {
         pc++;
         Optional<Instruction> optionalInstruction = Optional.ofNullable(instruction);
-        optionalInstruction.ifPresent(ins -> cycles += ins.cycles());
+        optionalInstruction.ifPresent(i -> cycles += i.cycles());
 
         return optionalInstruction
                 .map(ins -> ins.execute(variableContext))

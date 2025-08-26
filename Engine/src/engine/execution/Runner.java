@@ -1,6 +1,7 @@
 package engine.execution;
 
 import engine.execution.context.VariableContext;
+import engine.label.Label;
 
 public interface Runner {
     // TODO: javadoc
@@ -8,7 +9,7 @@ public interface Runner {
     /**
      * executes the program given initial values of input variables
      */
-    void run(int expansionLevel);
+    Label run(int expansionLevel);
 
     /**
      * @return the result variable 'y'

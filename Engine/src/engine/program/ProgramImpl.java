@@ -49,14 +49,15 @@ public class ProgramImpl implements Program {
     public Optional<Instruction> getInstruction(Label label) {
         if(label == FixedLabel.EMPTY)
             return Optional.empty();
-        return Optional.of(labeledInstructions.get(label).instruction());
+        return Optional.ofNullable(labeledInstructions.get(label).instruction());
     }
 
     @Override
     public Optional<Integer> getLabelLineId(Label label) {
         if(label == FixedLabel.EMPTY)
             return Optional.empty();
-        return Optional.of(labeledInstructions.get(label).lineId());
+        return Optional.ofNullable(labeledInstructions.get(label))
+                .map(InstructionLocator::lineId);
     }
 
     @Override

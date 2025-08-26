@@ -28,12 +28,12 @@ public interface Program {
     boolean hasLabel(Label label);
     /**
      * @param label the instruction label
-     * @return lineId of that label, empty if label is EMPTY
+     * @return lineId of that label, empty if label is EMPTY or doesn't exist (sometimes in expansion)s
      */
     Optional<Integer> getLabelLineId(Label label);
     /**
      * @param label the instruction label
-     * @return instruction by Label, empty if label is EMPTY
+     * @return instruction by Label, empty if label is EMPTY or doesn't exist (sometimes in expansion)
      */
     Optional<Instruction> getInstruction(Label label);
     /**
