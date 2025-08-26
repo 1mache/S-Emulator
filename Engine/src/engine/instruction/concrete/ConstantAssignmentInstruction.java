@@ -8,7 +8,7 @@ import engine.instruction.Instruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.InstructionLocator;
+import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.ProgramImpl;
 import engine.variable.Variable;
@@ -27,7 +27,7 @@ public class ConstantAssignmentInstruction extends AbstractInstruction {
              Variable variable,
              Label label,
              ConstantArgument constant,
-             InstructionLocator expanding
+             InstructionReference expanding
     ) {
         super(InstructionData.CONSTANT_ASSIGNMENT, variable, label, expanding);
         this.constant = constant;
@@ -51,7 +51,7 @@ public class ConstantAssignmentInstruction extends AbstractInstruction {
 
     @Override
     protected Program getSyntheticExpansion(int lineNumber) {
-        InstructionLocator locator = new InstructionLocator(this, lineNumber);
+        InstructionReference locator = new InstructionReference(this, lineNumber);
         List<Instruction> instructionList = new ArrayList<>();
         Variable thisVariable = getVariable();
 

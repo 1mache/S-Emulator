@@ -7,7 +7,7 @@ import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.label.NumericLabel;
-import engine.program.InstructionLocator;
+import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.ProgramImpl;
 import engine.variable.Variable;
@@ -25,7 +25,7 @@ public class AssignmentInstruction extends AbstractInstruction {
             Variable variable,
             Label label,
             Variable assignedVariable,
-            InstructionLocator expanding
+            InstructionReference expanding
     ) {
         super(InstructionData.ASSIGNMENT, variable, label, expanding);
         this.assignedVariable = assignedVariable;
@@ -49,7 +49,7 @@ public class AssignmentInstruction extends AbstractInstruction {
 
     @Override
     protected Program getSyntheticExpansion(int lineNumber) {
-        InstructionLocator locator = new InstructionLocator(this, lineNumber);
+        InstructionReference locator = new InstructionReference(this, lineNumber);
         Label l1 = new NumericLabel(1);
         Label l2 = new NumericLabel(2);
         Label l3 = new NumericLabel(3);

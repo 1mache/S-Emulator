@@ -6,7 +6,7 @@ import engine.instruction.AbstractInstruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.InstructionLocator;
+import engine.program.InstructionReference;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -17,7 +17,7 @@ public class IncreaseInstruction extends AbstractInstruction {
         this(variable, label, null);
     }
 
-    public IncreaseInstruction(Variable variable, Label label, InstructionLocator expanding) {
+    public IncreaseInstruction(Variable variable, Label label, InstructionReference expanding) {
         super(InstructionData.INCREASE, variable, label, expanding);
     }
 

@@ -10,7 +10,7 @@ import java.util.*;
 
 public class ProgramImpl implements Program {
 
-    private final Map<Label, InstructionLocator> labeledInstructions;
+    private final Map<Label, InstructionReference> labeledInstructions;
     private final List<Instruction> instructions;
 
     private final String name;
@@ -57,7 +57,7 @@ public class ProgramImpl implements Program {
         if(label == FixedLabel.EMPTY)
             return Optional.empty();
         return Optional.ofNullable(labeledInstructions.get(label))
-                .map(InstructionLocator::lineId);
+                .map(InstructionReference::lineId);
     }
 
     @Override

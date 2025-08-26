@@ -1,7 +1,7 @@
 package engine.instruction;
 
 import engine.label.Label;
-import engine.program.InstructionLocator;
+import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.variable.Variable;
 
@@ -13,12 +13,12 @@ public abstract class AbstractInstruction implements Instruction {
     private final Label label;
 
     // which instruction am I expanding
-    private final InstructionLocator expanding; // can be null
+    private final InstructionReference expanding; // can be null
 
     public AbstractInstruction(InstructionData data, Variable variable, Label label) {
         this(data, variable, label, null);
     }
-    public AbstractInstruction(InstructionData data, Variable variable, Label label,  InstructionLocator expanding)
+    public AbstractInstruction(InstructionData data, Variable variable, Label label,  InstructionReference expanding)
     {
         this.data = data;
         this.label = label;
@@ -52,7 +52,7 @@ public abstract class AbstractInstruction implements Instruction {
     }
 
     @Override
-    public Optional<InstructionLocator> getExpanding() {
+    public Optional<InstructionReference> getExpanding() {
         return Optional.ofNullable(expanding);
     }
 

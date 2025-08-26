@@ -3,7 +3,7 @@ package engine.instruction;
 import engine.argument.Argument;
 import engine.execution.context.VariableContext;
 import engine.label.Label;
-import engine.program.InstructionLocator;
+import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.variable.Variable;
 
@@ -21,5 +21,5 @@ public interface Instruction {
     Label getLabel();
     List<Argument> getArguments();
     Optional<Program> getExpansion(int lineNumber);
-    Optional<InstructionLocator> getExpanding();
+    Optional<InstructionReference> getExpanding();
 }

@@ -6,7 +6,7 @@ import engine.instruction.InstructionData;
 import engine.instruction.AbstractJumpInstruction;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.InstructionLocator;
+import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.ProgramImpl;
 import engine.variable.Variable;
@@ -24,7 +24,7 @@ public class GotoLabelInstruction extends AbstractJumpInstruction {
             Variable variable,
             Label label,
             Label tagetLabel,
-            InstructionLocator expanding
+            InstructionReference expanding
     ) {
         super(InstructionData.GOTO_LABEL, variable, label, tagetLabel, expanding);
     }
@@ -51,7 +51,7 @@ public class GotoLabelInstruction extends AbstractJumpInstruction {
 
     @Override
     protected Program getSyntheticExpansion(int lineNumber) {
-        InstructionLocator locator = new InstructionLocator(this, lineNumber);
+        InstructionReference locator = new InstructionReference(this, lineNumber);
         return new ProgramImpl(
                 getName() + "Expansion",
                 List.of(

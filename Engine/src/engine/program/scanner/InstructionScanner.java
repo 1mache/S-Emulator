@@ -5,7 +5,7 @@ import engine.instruction.Instruction;
 import engine.jaxb.loader.ArgumentLabelInfo;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.InstructionLocator;
+import engine.program.InstructionReference;
 import engine.variable.Variable;
 import engine.variable.VariableType;
 
@@ -22,10 +22,10 @@ public class InstructionScanner {
         return extractVariables(instructions, VariableType.WORK);
     }
 
-    public static Map<Label, InstructionLocator> extractLabeledInstructions(
+    public static Map<Label, InstructionReference> extractLabeledInstructions(
             List<Instruction> instructions
     ) {
-        Map<Label, InstructionLocator> result = new HashMap<>();
+        Map<Label, InstructionReference> result = new HashMap<>();
 
         /* populate labeledInstructions with instructionData's of instructions
            with nonempty labels*/
@@ -33,7 +33,7 @@ public class InstructionScanner {
             Instruction instruction = instructions.get(i);
             if(!instruction.getLabel().equals(FixedLabel.EMPTY))
                 result.put(
-                        instruction.getLabel(), new InstructionLocator(instruction, i)
+                        instruction.getLabel(), new InstructionReference(instruction, i)
                 );
         }
 
@@ -50,7 +50,7 @@ public class InstructionScanner {
     }
 
     public static List<Label> extractUsedLabels(
-            Map<Label, InstructionLocator> labeledInstructions,
+            Map<Label, InstructionReference> labeledInstructions,
             List<ArgumentLabelInfo> argumentLabels
     ) {
         List<Label> instructionLabels = new ArrayList<>(

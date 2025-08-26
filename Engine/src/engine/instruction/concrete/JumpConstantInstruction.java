@@ -9,7 +9,7 @@ import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.label.NumericLabel;
-import engine.program.InstructionLocator;
+import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.ProgramImpl;
 import engine.variable.Variable;
@@ -29,7 +29,7 @@ public class JumpConstantInstruction extends AbstractJumpInstruction {
            Label label,
            Label tagetLabel,
            ConstantArgument constant,
-           InstructionLocator expanding
+           InstructionReference expanding
     ) {
         super(InstructionData.JUMP_EQUAL_CONSTANT, variable, label, tagetLabel, expanding);
         this.constant = constant;
@@ -53,7 +53,7 @@ public class JumpConstantInstruction extends AbstractJumpInstruction {
 
     @Override
     protected Program getSyntheticExpansion(int lineNumber) {
-        InstructionLocator locator = new InstructionLocator(this, lineNumber);
+        InstructionReference locator = new InstructionReference(this, lineNumber);
         Variable z1 = Variable.createWorkVariable(1);
         Variable z2 = Variable.createWorkVariable(2);
         Label l1 = new NumericLabel(1);
