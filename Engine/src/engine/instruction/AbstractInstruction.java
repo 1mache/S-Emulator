@@ -1,6 +1,5 @@
 package engine.instruction;
 
-import engine.execution.context.VariableContext;
 import engine.label.Label;
 import engine.program.InstructionLocator;
 import engine.program.Program;

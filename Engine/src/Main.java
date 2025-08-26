@@ -14,14 +14,16 @@ public class Main {
 
         try {
             loader.loadXML(
-                    "C:\\Users\\Dmytro\\Akademit\\Java\\tests\\synthetic.xml"
+                    "C:\\Users\\Dmytro\\Akademit\\Java\\tests\\basic.xml"
             );
 
             loader.validateProgram();
             Program program = loader.getProgram();
             Runner runner = new ProgramRunner(program);
-            runner.run(5L, 3L);
+            runner.initInputVariables(5L, 3L);
+            runner.run(0);
             System.out.println(runner.getResult());
+            System.out.println("Took cycles: " + runner.getCycles());
 
         } catch (FileNotFoundException e) {
             System.out.println("File not found: " + e.getMessage());

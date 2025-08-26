@@ -16,6 +16,7 @@ public class ProgramRunner implements Runner {
 
     // instruction pointer
     private int pc = 0;
+    private long cycles = 0;
 
     public ProgramRunner(Program program) {
         this.program = program;
@@ -23,9 +24,7 @@ public class ProgramRunner implements Runner {
     }
 
     @Override
-    public void run(Long... initInput) {
-        initInputVariables(initInput);
-
+    public void run(int expansionLevel) {
         Optional<Instruction> currInstruction;
         Label jumpLabel = FixedLabel.EMPTY;
 
@@ -54,11 +53,16 @@ public class ProgramRunner implements Runner {
     }
 
     @Override
+    public Long getCycles() {
+        return cycles;
+    }
+
+    @Override
     public VariableContext getVariableContext() {
         return variableContext;
     }
 
-    private void initInputVariables(Long... initInput) {
+    public void initInputVariables(Long... initInput) {
         int counter = 1;
         for(Long input : initInput) {
             variableContext.setVariableValue(Variable.createInputVariable(counter), input);
@@ -69,6 +73,8 @@ public class ProgramRunner implements Runner {
     private Label executeInstruction(Instruction instruction) {
         pc++;
         Optional<Instruction> optionalInstruction = Optional.ofNullable(instruction);
+        optionalInstruction.ifPresent(ins -> cycles += ins.cycles());
+
         return optionalInstruction
                 .map(ins -> ins.execute(variableContext))
                 .orElse(FixedLabel.EMPTY);
