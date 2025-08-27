@@ -1,5 +1,4 @@
 import engine.execution.ProgramRunner;
-import engine.execution.Runner;
 import engine.jaxb.loader.ProgramLoader;
 import engine.jaxb.loader.XMLLoader;
 import engine.jaxb.loader.exception.NotXMLException;
@@ -19,7 +18,7 @@ public class Main {
 
             loader.validateProgram();
             Program program = loader.getProgram();
-            Runner runner = new ProgramRunner(program);
+            var runner = new ProgramRunner(program);
             runner.initInputVariables(1L, 2L);
             runner.run(3);
             System.out.println(runner.getResult());

@@ -11,7 +11,7 @@ import engine.variable.Variable;
 
 import java.util.Optional;
 
-public class ProgramRunner implements Runner {
+public class ProgramRunner {
     private final Program program;
     private final VariableContext variableContext;
     private final LabelVariableGenerator labelVariableGenerator;
@@ -33,7 +33,6 @@ public class ProgramRunner implements Runner {
         this.labelVariableGenerator = labelVariableGenerator;
     }
 
-    @Override
     public Label run(int expansionLevel) {
         Optional<Instruction> currInstruction;
         Label jumpLabel = FixedLabel.EMPTY;
@@ -62,17 +61,14 @@ public class ProgramRunner implements Runner {
         return jumpLabel;
     }
 
-    @Override
     public Long getResult() {
         return variableContext.getVariableValue(Variable.RESULT);
     }
 
-    @Override
     public Long getCycles() {
         return cycles;
     }
 
-    @Override
     public VariableContext getVariableContext() {
         return variableContext;
     }
