@@ -16,7 +16,7 @@ public class LabelVariableGenerator {
         List<Label> labels = program.getUsedLabels();
         List<Variable> workVariables = program.getWorkVariables();
 
-        // take the first label and variable number available
+        // take the first label and variable lineId available
         if(labels.isEmpty() || labels.equals(List.of(FixedLabel.EXIT)))
             labelCounter = 0;
         else if(labels.getLast().equals(FixedLabel.EXIT))

@@ -60,7 +60,7 @@ public class InstructionFactory {
     private static void checkArguments(List<Argument> arguments, InstructionData instructionData){
         var neededTypes = instructionData.getArgumentTypes();
         if(neededTypes.size() != arguments.size())
-            throw new InstructionArgumentsException("Wrong number of arguments in instruction: " +
+            throw new InstructionArgumentsException("Wrong lineId of arguments in instruction: " +
                                                         instructionData.name());
 
         List<ArgumentType> givenTypes = arguments.stream()

@@ -16,9 +16,6 @@ public abstract class AbstractInstruction implements Instruction {
     // which instruction am I expanding
     private final InstructionReference expanding; // can be null
 
-    public AbstractInstruction(InstructionData data, Variable variable, Label label) {
-        this(data, variable, label, null);
-    }
     public AbstractInstruction(InstructionData data, Variable variable, Label label,  InstructionReference expanding)
     {
         this.data = data;

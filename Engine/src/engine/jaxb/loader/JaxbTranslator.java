@@ -92,7 +92,7 @@ public class JaxbTranslator {
         if(str.equals(FixedLabel.EXIT.stringRepresentation().toLowerCase()))
             return FixedLabel.EXIT; // exit label
 
-        // take only the number part and construct a numeric label
+        // take only the lineId part and construct a numeric label
         return new NumericLabel(Integer.parseInt(str.replaceAll("\\D", "")));
     }
 

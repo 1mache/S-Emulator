@@ -41,7 +41,7 @@ public interface Program {
      */
     Optional<Instruction> getInstruction(Label label);
     /**
-     * @return next instruction by index (line number) in the Program.
+     * @return next instruction by index (line lineId) in the Program.
      *         empty if index out of bounds
      */
     Optional<Instruction> getInstructionByIndex(int index);

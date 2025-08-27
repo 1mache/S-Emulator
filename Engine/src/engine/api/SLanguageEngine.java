@@ -3,12 +3,14 @@ package engine.api;
 import engine.api.dto.InstructionPeek;
 import engine.api.dto.ProgramPeek;
 import engine.execution.ProgramRunner;
+import engine.execution.exception.SEngineIllegalOperationException;
 import engine.instruction.Instruction;
 import engine.jaxb.loader.ProgramLoader;
 import engine.jaxb.loader.XMLLoader;
 import engine.jaxb.loader.exception.NotXMLException;
 import engine.jaxb.loader.exception.UnknownLabelException;
 import engine.label.Label;
+import engine.peeker.ProgramPeeker;
 import engine.program.Program;
 import engine.variable.Variable;
 
@@ -20,7 +22,7 @@ import java.util.Optional;
 public class SLanguageEngine {
     private Program program;
     private ProgramRunner programRunner;
-
+    private int programMaxDegree;
     // Singleton
     private static final SLanguageEngine instance = new SLanguageEngine();
 
@@ -37,51 +39,27 @@ public class SLanguageEngine {
 
         loader.validateProgram();
         program = loader.getProgram();
+        programRunner = new ProgramRunner(program);
+        programMaxDegree = programRunner.getMaxExpansionDegree();
     }
 
-    public boolean isProgramLoaded(){
-        return program != null;
+    public boolean programNotLoaded(){
+        return program == null;
     }
 
     public ProgramPeek getProgramPeek() {
-        return new ProgramPeek(
-                program.getName(),
-                getInputVariablePeeks(),
-                getLabelStrings(),
-                getInstructionPeeks()
-        );
+        return getExpandedProgramPeek(1) ;
     }
 
-    private List<InstructionPeek> getInstructionPeeks() {
-        List<InstructionPeek> instructionPeekList = new ArrayList<>();
+    public ProgramPeek getExpandedProgramPeek(int expansionDegree) {
+        if(expansionDegree > programMaxDegree)
+            throw new SEngineIllegalOperationException(
+                    "The degree requested is bigger than the max degree:" + programMaxDegree
+            );
 
-        int instructionNumber = 0;
-        Optional<Instruction> nextInstruction = program.getInstructionByIndex(instructionNumber);
-        while(nextInstruction.isPresent()){
-            Instruction instruction = nextInstruction.get();
-            instructionPeekList.add(new InstructionPeek(
-                    instruction.stringRepresentation(),
-                    instruction.getLabel().stringRepresentation(),
-                    instruction.isSynthetic(),
-                    instruction.cycles(),
-                    instructionNumber
-            ));
+        if(programNotLoaded())
+            throw new SEngineIllegalOperationException("Program is not loaded");
 
-            instructionNumber++;
-            nextInstruction = program.getInstructionByIndex(instructionNumber);
-        }
-        return instructionPeekList;
-    }
-
-    private List<String> getInputVariablePeeks(){
-        return program.getInputVariables().stream()
-                .map(Variable::stringRepresentation)
-                .toList();
-    }
-
-    private List<String> getLabelStrings(){
-        return program.getUsedLabels().stream()
-                .map(Label::stringRepresentation)
-                .toList();
+        return new ProgramPeeker(program).getProgramPeek(expansionDegree);
     }
 }

@@ -83,7 +83,7 @@ public class ProgramRunner {
 
     public int getMaxExpansionDegree() {
         int maxExpansionDegree = 0;
-        int fooLineNumber = 0; // line number isn't important here
+        int fooLineNumber = 0; // line lineId isn't important here
 
         for(Instruction instruction : program.getInstructions()) {
             int expansionDegree = instruction.getExpansion(fooLineNumber, labelVariableGenerator)

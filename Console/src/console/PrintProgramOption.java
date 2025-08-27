@@ -8,12 +8,12 @@ import java.util.List;
 
 public class PrintProgramOption extends MenuPage {
     public PrintProgramOption() {
-        super("Print Program Option", "");
+        super("Print Program", "");
     }
 
     @Override
     public void execute(SLanguageEngine engine) {
-        if(!engine.isProgramLoaded()){
+        if(engine.programNotLoaded()){
             System.out.println("Error: Program Not Loaded!");
             return;
         }
@@ -28,8 +28,8 @@ public class PrintProgramOption extends MenuPage {
 
     private void printInstructions(List<InstructionPeek> instructions) {
         for (InstructionPeek instr : instructions) {
-            // number
-            String number = "#" + (instr.number() + 1); // +1 so it starts with 1
+            // lineId
+            String number = "#" + (instr.lineId() + 1); // +1 so it starts with 1
 
             // synthetic or base
             String type = instr.isSynthetic() ? "(S)" : "(B)";

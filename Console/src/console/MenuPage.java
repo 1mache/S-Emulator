@@ -88,7 +88,7 @@ public class MenuPage implements MenuOption {
                 int input = scanner.nextInt();
                 optionId = input - 1;
                 if (invalidOptionId(optionId)) {
-                    System.out.printf("Invalid option number. Please try again.%n");
+                    System.out.printf("Invalid option lineId. Please try again.%n");
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter an integer.");

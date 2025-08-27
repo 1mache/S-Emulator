@@ -86,7 +86,7 @@ public class InstructionScanner {
         Set<Variable> allInputs = new HashSet<>(operatedVars);
         allInputs.addAll(argumentVars);
 
-        // convert to list and sort by number
+        // convert to list and sort by lineId
         return allInputs.stream()
                 .sorted(Comparator.comparingInt(Variable::getNumber))
                 .toList();
