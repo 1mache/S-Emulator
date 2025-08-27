@@ -81,6 +81,22 @@ public class ProgramRunner {
         }
     }
 
+    public int getMaxExpansionDegree() {
+        int maxExpansionDegree = 0;
+        int fooLineNumber = 0; // line number isn't important here
+
+        for(Instruction instruction : program.getInstructions()) {
+            int expansionDegree = instruction.getExpansion(fooLineNumber, labelVariableGenerator)
+                    .map(expansion -> new ProgramRunner(expansion).getMaxExpansionDegree() + 1)
+                    .orElse(0);
+
+            maxExpansionDegree = Math.max(maxExpansionDegree, expansionDegree);
+        }
+        return maxExpansionDegree;
+    }
+
+    // private:
+
     // expands and executes
     private Label executeInstruction(int expansionLevel, Instruction instruction) {
         if (instruction == null) {

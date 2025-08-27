@@ -2,6 +2,7 @@ package engine.api;
 
 import engine.api.dto.InstructionPeek;
 import engine.api.dto.ProgramPeek;
+import engine.execution.ProgramRunner;
 import engine.instruction.Instruction;
 import engine.jaxb.loader.ProgramLoader;
 import engine.jaxb.loader.XMLLoader;
@@ -18,6 +19,9 @@ import java.util.Optional;
 
 public class SLanguageEngine {
     private Program program;
+    private ProgramRunner programRunner;
+
+    // Singleton
     private static final SLanguageEngine instance = new SLanguageEngine();
 
     public static SLanguageEngine getInstance(){
