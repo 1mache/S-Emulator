@@ -6,6 +6,7 @@ import engine.instruction.Instruction;
 import engine.label.Label;
 import engine.label.FixedLabel;
 import engine.program.Program;
+import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.Optional;
@@ -13,18 +14,23 @@ import java.util.Optional;
 public class ProgramRunner implements Runner {
     private final Program program;
     private final VariableContext variableContext;
+    private final LabelVariableGenerator labelVariableGenerator;
 
     // instruction pointer
     private int pc = 0;
     private long cycles = 0;
 
     public ProgramRunner(Program program) {
-        this(program, new VariableTable());
+        this(program, new VariableTable(), new  LabelVariableGenerator(program));
     }
 
-    public ProgramRunner(Program program, VariableContext variableContext) {
+    // private ctor for internal logic use
+    private ProgramRunner(Program program,
+                         VariableContext variableContext,
+                         LabelVariableGenerator labelVariableGenerator) {
         this.program = program;
         this.variableContext = variableContext;
+        this.labelVariableGenerator = labelVariableGenerator;
     }
 
     @Override
@@ -35,6 +41,7 @@ public class ProgramRunner implements Runner {
         do {
             if (jumpLabel == FixedLabel.EMPTY) {
                 currInstruction = program.getInstructionByIndex(pc);
+                jumpLabel = executeInstruction(expansionLevel, currInstruction.orElse(null));
             }
             else {
                 // jump needs to happen
@@ -43,8 +50,10 @@ public class ProgramRunner implements Runner {
                 program.getLabelLineId(jumpLabel)
                         .ifPresent(lineId -> pc = lineId);
 
+                if(currInstruction.isPresent())
+                    jumpLabel = executeInstruction(expansionLevel, currInstruction.get());
+
             }
-            jumpLabel = executeInstruction(expansionLevel, currInstruction.orElse(null));
             if(jumpLabel == FixedLabel.EXIT) {break;} // check for exit
         }
         while (currInstruction.isPresent());
@@ -83,7 +92,7 @@ public class ProgramRunner implements Runner {
             return FixedLabel.EMPTY;
         }
 
-        Optional<Program> expansion = instruction.getExpansion(pc);
+        Optional<Program> expansion = instruction.getExpansion(pc, labelVariableGenerator);
 
         // if expansion is empty the instruction is synthetic
         if (expansionLevel == 0 || expansion.isEmpty()) {
@@ -91,8 +100,8 @@ public class ProgramRunner implements Runner {
         }
 
         pc++;
-        // run with the same variable context
-        ProgramRunner runner = new ProgramRunner(expansion.get(), variableContext);
+        // run with the same variable context and labelVariableGenerator
+        ProgramRunner runner = new ProgramRunner(expansion.get(), variableContext, labelVariableGenerator);
         Label result = runner.run(expansionLevel-1);
         cycles += runner.getCycles();
         return result;

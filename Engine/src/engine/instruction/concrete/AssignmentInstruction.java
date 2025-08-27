@@ -6,10 +6,10 @@ import engine.instruction.AbstractInstruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.label.NumericLabel;
 import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.ProgramImpl;
+import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -48,21 +48,20 @@ public class AssignmentInstruction extends AbstractInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(int lineNumber) {
+    protected Program getSyntheticExpansion(int lineNumber, LabelVariableGenerator generator) {
         InstructionReference locator = new InstructionReference(this, lineNumber);
-        Label l1 = new NumericLabel(1);
-        Label l2 = new NumericLabel(2);
-        Label l3 = new NumericLabel(3);
+        Label l1 = generator.getNextLabel();
+        Label l2 = generator.getNextLabel();
+        Label l3 = generator.getNextLabel();
         Label empty = FixedLabel.EMPTY;
-        Variable z1 = Variable.createWorkVariable(1);
-        Variable z2 = Variable.createWorkVariable(2);
+        Variable z1 = generator.getNextWorkVariable();
 
         return new ProgramImpl(
                 getName() + "Expansion",
                 List.of(
-                        new ZeroVariableInstruction(getVariable(), empty, locator),
+                        new ZeroVariableInstruction(getVariable(), getLabel(), locator),
                         new JumpNotZeroInstruction(assignedVariable, empty, l1, locator),
-                        new GotoLabelInstruction(z2,empty, l3, locator),
+                        new GotoLabelInstruction(empty, l3, locator),
                         new DecreaseInstruction(assignedVariable, l1, locator),
                         new IncreaseInstruction(z1, empty, locator),
                         new JumpNotZeroInstruction(assignedVariable, empty, l1, locator),

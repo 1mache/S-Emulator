@@ -14,14 +14,14 @@ public class Main {
 
         try {
             loader.loadXML(
-                    "C:\\Users\\Dmytro\\Akademit\\Java\\tests\\basic.xml"
+                    "C:\\Users\\Dmytro\\Akademit\\Java\\tests\\synthetic.xml"
             );
 
             loader.validateProgram();
             Program program = loader.getProgram();
             Runner runner = new ProgramRunner(program);
-            runner.initInputVariables(5L, 3L);
-            runner.run(0);
+            runner.initInputVariables(1L, 2L);
+            runner.run(3);
             System.out.println(runner.getResult());
             System.out.println("Took cycles: " + runner.getCycles());
 

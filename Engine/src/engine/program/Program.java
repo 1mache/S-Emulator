@@ -17,10 +17,14 @@ public interface Program {
      */
     List<Variable> getInputVariables();
     /**
+     * @return sorted list of all the work variables used by the Program
+     */
+    List<Variable> getWorkVariables();
+    /**
      * @return sorted list of all the labels used by the Program,
      *         Exit in the end if used
      */
-    List<Label> getLabels();
+    List<Label> getUsedLabels();
     /**
      * Checks if label is present in the program
      * @param label (if EMPTY returns true, but has no meaning)

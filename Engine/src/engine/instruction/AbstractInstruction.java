@@ -3,6 +3,7 @@ package engine.instruction;
 import engine.label.Label;
 import engine.program.InstructionReference;
 import engine.program.Program;
+import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.Optional;
@@ -57,15 +58,15 @@ public abstract class AbstractInstruction implements Instruction {
     }
 
     @Override
-    public Optional<Program> getExpansion(int lineNumber) {
+    public Optional<Program> getExpansion(int lineNumber, LabelVariableGenerator generator) {
         if(!isSynthetic())
             return Optional.empty();
         
-        return Optional.of(getSyntheticExpansion(lineNumber));
+        return Optional.of(getSyntheticExpansion(lineNumber, generator));
     }
 
     // to be implemented by concrete classes.
-    protected Program getSyntheticExpansion(int lineNumber) {
+    protected Program getSyntheticExpansion(int lineNumber, LabelVariableGenerator generator) {
         // if all instructions implement it this should never happen
         throw new UnsupportedOperationException("Instruction " + getName() + " does not support synthetic expansion.");
     }

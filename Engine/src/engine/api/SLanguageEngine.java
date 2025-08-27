@@ -76,7 +76,7 @@ public class SLanguageEngine {
     }
 
     private List<String> getLabelStrings(){
-        return program.getLabels().stream()
+        return program.getUsedLabels().stream()
                 .map(Label::stringRepresentation)
                 .toList();
     }

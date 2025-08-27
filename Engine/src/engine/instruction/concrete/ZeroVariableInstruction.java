@@ -3,15 +3,17 @@ package engine.instruction.concrete;
 import engine.argument.Argument;
 import engine.execution.context.VariableContext;
 import engine.instruction.AbstractInstruction;
+import engine.instruction.Instruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.label.NumericLabel;
 import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.ProgramImpl;
+import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ZeroVariableInstruction extends AbstractInstruction {
@@ -45,15 +47,22 @@ public class ZeroVariableInstruction extends AbstractInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(int lineNumber) {
+    protected Program getSyntheticExpansion(int lineNumber, LabelVariableGenerator generator) {
         InstructionReference locator = new InstructionReference(this, lineNumber);
-        Label l1 = new NumericLabel(1);
+        Label l1 = generator.getNextLabel();
+        List<Instruction> instructionList = new ArrayList<>();
+
+        /* this instruction has a label on its first expanded instruction, if the original
+        also had a label, we need to add NOOP. 2 labels aren't allowed on 1 instruction*/
+        if(getLabel() != FixedLabel.EMPTY)
+            instructionList.add(new NeutralInstruction(Variable.RESULT, getLabel(), locator));
+
+        instructionList.add(new DecreaseInstruction(getVariable(), l1, locator));
+        instructionList.add(new JumpNotZeroInstruction(getVariable(), FixedLabel.EMPTY, l1, locator));
+
         return new ProgramImpl(
                 getName() + "Expansion",
-                List.of(
-                        new DecreaseInstruction(getVariable(), l1, locator),
-                        new JumpNotZeroInstruction(getVariable(), FixedLabel.EMPTY, l1, locator)
-                )
+                instructionList
         );
     }
 }

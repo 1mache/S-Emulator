@@ -33,7 +33,12 @@ public class ProgramImpl implements Program {
     }
 
     @Override
-    public List<Label> getLabels() {
+    public List<Variable> getWorkVariables() {
+        return InstructionScanner.extractWorkVariables(instructions);
+    }
+
+    @Override
+    public List<Label> getUsedLabels() {
         return InstructionScanner.extractUsedLabels(
                 labeledInstructions,
                 InstructionScanner.getArgumentLabels(instructions)
@@ -49,7 +54,8 @@ public class ProgramImpl implements Program {
     public Optional<Instruction> getInstruction(Label label) {
         if(label == FixedLabel.EMPTY)
             return Optional.empty();
-        return Optional.ofNullable(labeledInstructions.get(label).instruction());
+        return Optional.ofNullable(labeledInstructions.get(label))
+                .map(InstructionReference::instruction);
     }
 
     @Override

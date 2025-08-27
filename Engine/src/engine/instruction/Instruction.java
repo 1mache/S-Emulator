@@ -5,6 +5,7 @@ import engine.execution.context.VariableContext;
 import engine.label.Label;
 import engine.program.InstructionReference;
 import engine.program.Program;
+import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -20,6 +21,6 @@ public interface Instruction {
     Variable getVariable();
     Label getLabel();
     List<Argument> getArguments();
-    Optional<Program> getExpansion(int lineNumber);
+    Optional<Program> getExpansion(int lineNumber, LabelVariableGenerator generator);
     Optional<InstructionReference> getExpanding();
 }

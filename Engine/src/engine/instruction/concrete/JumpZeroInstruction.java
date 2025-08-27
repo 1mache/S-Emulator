@@ -6,10 +6,10 @@ import engine.instruction.InstructionData;
 import engine.instruction.AbstractJumpInstruction;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.label.NumericLabel;
 import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.ProgramImpl;
+import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -45,16 +45,15 @@ public class JumpZeroInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(int lineNumber) {
+    protected Program getSyntheticExpansion(int lineNumber, LabelVariableGenerator generator) {
         InstructionReference locator = new InstructionReference(this, lineNumber);
-        Variable z1 = Variable.createWorkVariable(1);
-        Label l1 = new NumericLabel(1);
+        Label l1 = generator.getNextLabel();
 
         return new ProgramImpl(
                 getName() + "Expansion",
                 List.of(
-                        new JumpNotZeroInstruction(getVariable(), FixedLabel.EMPTY, l1, locator),
-                        new GotoLabelInstruction(z1, FixedLabel.EMPTY, getTargetLabel() , locator),
+                        new JumpNotZeroInstruction(getVariable(), getLabel(), l1, locator),
+                        new GotoLabelInstruction(FixedLabel.EMPTY, getTargetLabel() , locator),
                         new NeutralInstruction(Variable.RESULT, l1, locator)
                 )
         );

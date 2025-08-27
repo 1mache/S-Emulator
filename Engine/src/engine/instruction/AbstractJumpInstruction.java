@@ -9,11 +9,6 @@ import engine.variable.Variable;
 public abstract class AbstractJumpInstruction extends AbstractInstruction {
     private final Label tagetLabel;
 
-    public AbstractJumpInstruction(InstructionData data, Variable variable, Label label, Label targetLabel) {
-        super(data, variable, label);
-        this.tagetLabel = targetLabel;
-    }
-
     public AbstractJumpInstruction(
            InstructionData data,
            Variable variable,

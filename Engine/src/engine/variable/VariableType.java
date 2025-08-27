@@ -12,6 +12,10 @@ public enum VariableType {
     RESULT{
         @Override
         public String stringRepresentation() {return Character.toString(RESULT_VARIABLE_CHAR);}
+    },
+    NONE{
+        @Override
+        public String stringRepresentation() {return "NONE";}
     }
     ;
 

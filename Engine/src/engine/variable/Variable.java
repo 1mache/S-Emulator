@@ -16,7 +16,7 @@ public class Variable implements Argument {
 
     // only one variable of type RESULT is allowed in the program
     public static final Variable RESULT = new Variable(VariableType.RESULT, 0);
-
+    public static final Variable NO_VAR =  new Variable(VariableType.NONE, 0);
     public static Variable createInputVariable(int number) {
         return new Variable(VariableType.INPUT, number);
     }

@@ -11,6 +11,7 @@ import engine.label.Label;
 import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.ProgramImpl;
+import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.ArrayList;
@@ -50,12 +51,12 @@ public class ConstantAssignmentInstruction extends AbstractInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(int lineNumber) {
+    protected Program getSyntheticExpansion(int lineNumber, LabelVariableGenerator generator) {
         InstructionReference locator = new InstructionReference(this, lineNumber);
         List<Instruction> instructionList = new ArrayList<>();
         Variable thisVariable = getVariable();
 
-        instructionList.add(new ZeroVariableInstruction(thisVariable, FixedLabel.EMPTY, locator));
+        instructionList.add(new ZeroVariableInstruction(thisVariable, getLabel(), locator));
         for (int i = 0; i < constant.value(); i++)
             instructionList.add(new IncreaseInstruction(thisVariable, FixedLabel.EMPTY, locator));
         

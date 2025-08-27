@@ -6,10 +6,10 @@ import engine.instruction.AbstractJumpInstruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.label.NumericLabel;
 import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.ProgramImpl;
+import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -51,26 +51,25 @@ public class JumpVariableInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(int lineNumber) {
+    protected Program getSyntheticExpansion(int lineNumber, LabelVariableGenerator generator) {
         InstructionReference locator = new InstructionReference(this, lineNumber);
-        Variable z1 = Variable.createWorkVariable(1);
-        Variable z2 = Variable.createWorkVariable(2);
-        Variable z3 = Variable.createWorkVariable(3);
-        Label l1 = new NumericLabel(1);
-        Label l2 = new NumericLabel(2);
-        Label l3 = new NumericLabel(3);
+        Variable z1 = generator.getNextWorkVariable();
+        Variable z2 = generator.getNextWorkVariable();
+        Label l1 = generator.getNextLabel();
+        Label l2 = generator.getNextLabel();
+        Label l3 = generator.getNextLabel();
         Label empty = FixedLabel.EMPTY;
 
         return new ProgramImpl(
                 getName() + "Expansion",
                 List.of(
-                        new AssignmentInstruction(z1, empty, getVariable(), locator),
+                        new AssignmentInstruction(z1, getLabel(), getVariable(), locator),
                         new AssignmentInstruction(z2, empty, otherVariable, locator),
                         new JumpZeroInstruction(z1, l2, l3, locator),
                         new JumpZeroInstruction(z2, empty, l1, locator),
                         new DecreaseInstruction(z1, empty, locator),
                         new DecreaseInstruction(z2, empty, locator),
-                        new GotoLabelInstruction(z3,empty, l2, locator),
+                        new GotoLabelInstruction(empty, l2, locator),
                         new JumpZeroInstruction(z2, l3, getTargetLabel(), locator),
                         new NeutralInstruction(Variable.RESULT, l1, locator)
                 )
