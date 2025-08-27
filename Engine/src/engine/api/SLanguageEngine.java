@@ -1,23 +1,16 @@
 package engine.api;
 
-import engine.api.dto.InstructionPeek;
 import engine.api.dto.ProgramPeek;
 import engine.execution.ProgramRunner;
 import engine.execution.exception.SEngineIllegalOperationException;
-import engine.instruction.Instruction;
 import engine.jaxb.loader.ProgramLoader;
 import engine.jaxb.loader.XMLLoader;
 import engine.jaxb.loader.exception.NotXMLException;
 import engine.jaxb.loader.exception.UnknownLabelException;
-import engine.label.Label;
 import engine.peeker.ProgramPeeker;
 import engine.program.Program;
-import engine.variable.Variable;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 public class SLanguageEngine {
     private Program program;
