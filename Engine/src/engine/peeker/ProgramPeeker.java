@@ -33,7 +33,7 @@ public class ProgramPeeker {
     public ProgramPeek getProgramPeek(int expansionDegree) {
         List<InstructionPeek> instructionPeekList = new ArrayList<>();
         /* preserve order, avoid dups
-         include the program’s own labels (base case, no expansions)*/1
+         include the program’s own labels (base case, no expansions)*/
         Set<String> allLabels = new LinkedHashSet<>(getLabelStrings());
 
         // start the line counter from the original instruction 'expandedFrom' lineId
