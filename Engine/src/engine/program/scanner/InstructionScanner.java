@@ -49,6 +49,10 @@ public class InstructionScanner {
                 .toList();
     }
 
+    public static List<Label> extractUsedLabels(List<Instruction> instructions) {
+        return extractUsedLabels(extractLabeledInstructions(instructions), getArgumentLabels(instructions));
+    }
+
     public static List<Label> extractUsedLabels(
             Map<Label, InstructionReference> labeledInstructions,
             List<ArgumentLabelInfo> argumentLabels

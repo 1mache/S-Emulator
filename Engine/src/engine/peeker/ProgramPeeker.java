@@ -6,6 +6,7 @@ import engine.instruction.Instruction;
 import engine.label.Label;
 import engine.program.Program;
 import engine.program.generator.LabelVariableGenerator;
+import engine.program.scanner.InstructionScanner;
 import engine.variable.Variable;
 
 import java.util.*;
@@ -32,37 +33,41 @@ public class ProgramPeeker {
 
     public ProgramPeek getProgramPeek(int expansionDegree) {
         List<InstructionPeek> instructionPeekList = new ArrayList<>();
-        /* preserve order, avoid dups
-         include the program’s own labels (base case, no expansions)*/
-        Set<String> allLabels = new LinkedHashSet<>(getLabelStrings());
+        List<Instruction> baseInstructions = program.getInstructions();
 
         // start the line counter from the original instruction 'expandedFrom' lineId
         int lineCounter = Optional.ofNullable(expandedFrom)
                 .map(InstructionPeek::lineId)
                 .orElse(0);
 
-        for (Instruction instruction : program.getInstructions()) {
+        // we will gather all instructions (expanded or not) in this list
+        List<Instruction> allInstructions = new ArrayList<>(baseInstructions);
+
+        for (Instruction instruction : baseInstructions) {
             int currentLine = lineCounter;
             ProgramPeek expansionPeek = null;
 
             if (expansionDegree > 0) {
                 expansionPeek = instruction.getExpansion(currentLine, labelVariableGenerator)
-                        .map(expansion -> new ProgramPeeker(
-                                expansion,
-                                labelVariableGenerator,
-                                getInstructionPeek(instruction, currentLine, expandedFrom)
-                        ).getProgramPeek(expansionDegree - 1))
+                        .map(expansion -> {
+                            // collect the expansion’s instructions, but don’t touch baseInstructions
+                            allInstructions.addAll(expansion.getInstructions());
+
+                            return new ProgramPeeker(
+                                    expansion,
+                                    labelVariableGenerator,
+                                    getInstructionPeek(instruction, currentLine, expandedFrom)
+                            ).getProgramPeek(expansionDegree - 1);
+                        })
                         .orElse(null);
             }
 
             if (expansionPeek == null) {
                 InstructionPeek peek = getInstructionPeek(instruction, currentLine, expandedFrom);
                 instructionPeekList.add(peek);
-                allLabels.add(instruction.getLabel().stringRepresentation());
                 lineCounter++;
             } else {
                 instructionPeekList.addAll(expansionPeek.instructions());
-                allLabels.addAll(expansionPeek.labelsUsed()); // << merge labels from expansion
                 lineCounter += expansionPeek.instructions().size();
             }
         }
@@ -70,11 +75,10 @@ public class ProgramPeeker {
         return new ProgramPeek(
                 program.getName(),
                 getInputVariablePeeks(),
-                new ArrayList<>(allLabels),
+                getLabelStrings(InstructionScanner.extractUsedLabels(allInstructions)),
                 instructionPeekList
         );
     }
-
 
     private InstructionPeek getInstructionPeek(Instruction instruction, int lineId, InstructionPeek expandedFrom) {
         return new InstructionPeek(
@@ -94,7 +98,12 @@ public class ProgramPeeker {
     }
 
     private List<String> getLabelStrings(){
-        return program.getUsedLabels().stream()
+        return getLabelStrings(program.getUsedLabels());
+    }
+
+
+    private List<String> getLabelStrings(List<Label> labels){
+        return labels.stream()
                 .map(Label::stringRepresentation)
                 .toList();
     }
