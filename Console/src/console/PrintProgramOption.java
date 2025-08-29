@@ -1,10 +1,8 @@
 package console;
 
 import engine.api.SLanguageEngine;
-import engine.api.dto.InstructionPeek;
 import engine.api.dto.ProgramPeek;
 
-import java.util.List;
 
 public class PrintProgramOption extends MenuPage {
     public PrintProgramOption() {

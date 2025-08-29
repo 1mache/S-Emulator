@@ -27,10 +27,6 @@ public class ProgramViewer {
         this.expandedFrom = expandedFrom;
     }
 
-    public ProgramPeek getProgramPeek() {
-        return getProgramPeek(0);
-    }
-
     public ProgramPeek getProgramPeek(int expansionDegree){
         return getProgramPeekRec(expansionDegree, 0, new ArrayList<>());
     }
@@ -47,7 +43,6 @@ public class ProgramViewer {
 
         for (Instruction instruction : baseInstructions) {
             int currentLine = lineCounter;
-            int currentInstructionCount = instructionCount;
 
             ProgramPeek expansionPeek = null;
 
