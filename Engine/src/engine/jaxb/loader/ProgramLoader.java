@@ -6,7 +6,7 @@ import engine.jaxb.loader.exception.SProgramXMLException;
 import engine.jaxb.loader.exception.UnknownLabelException;
 import engine.label.FixedLabel;
 import engine.program.Program;
-import engine.program.scanner.InstructionScanner;
+import engine.instruction.utility.Instructions;
 import jakarta.xml.bind.JAXBException;
 
 import java.io.FileNotFoundException;
@@ -30,7 +30,7 @@ public class ProgramLoader implements XMLLoader{
 
     @Override
     public void validateProgram() throws UnknownLabelException {
-        List<ArgumentLabelInfo> argumentLabels = InstructionScanner.getArgumentLabels(program.getInstructions());
+        List<ArgumentLabelInfo> argumentLabels = Instructions.getArgumentLabels(program.getInstructions());
         for(var info : argumentLabels){
             if(info.label() != FixedLabel.EXIT && !program.hasLabel(info.label()))
                 throw new UnknownLabelException("Error: Unknown label "

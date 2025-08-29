@@ -1,4 +1,4 @@
-package engine.program.scanner;
+package engine.instruction.utility;
 
 import engine.argument.ArgumentType;
 import engine.instruction.Instruction;
@@ -12,7 +12,7 @@ import engine.variable.VariableType;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class InstructionScanner {
+public class Instructions {
 
     public static List<Variable> extractInputVariables(List<Instruction> instructions) {
         return extractVariables(instructions, VariableType.INPUT);
@@ -53,6 +53,7 @@ public class InstructionScanner {
         return extractUsedLabels(extractLabeledInstructions(instructions), getArgumentLabels(instructions));
     }
 
+    // overloading for when you have the results of the functions cached
     public static List<Label> extractUsedLabels(
             Map<Label, InstructionReference> labeledInstructions,
             List<ArgumentLabelInfo> argumentLabels

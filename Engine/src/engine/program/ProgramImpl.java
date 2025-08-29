@@ -3,7 +3,7 @@ package engine.program;
 import engine.instruction.Instruction;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.scanner.InstructionScanner;
+import engine.instruction.utility.Instructions;
 import engine.variable.Variable;
 
 import java.util.*;
@@ -19,7 +19,7 @@ public class ProgramImpl implements Program {
         this.name = name;
         this.instructions = instructions;
 
-        labeledInstructions = InstructionScanner.extractLabeledInstructions(instructions);
+        labeledInstructions = Instructions.extractLabeledInstructions(instructions);
     }
 
     @Override
@@ -29,19 +29,19 @@ public class ProgramImpl implements Program {
 
     @Override
     public List<Variable> getInputVariables() {
-        return InstructionScanner.extractInputVariables(instructions);
+        return Instructions.extractInputVariables(instructions);
     }
 
     @Override
     public List<Variable> getWorkVariables() {
-        return InstructionScanner.extractWorkVariables(instructions);
+        return Instructions.extractWorkVariables(instructions);
     }
 
     @Override
     public List<Label> getUsedLabels() {
-        return InstructionScanner.extractUsedLabels(
+        return Instructions.extractUsedLabels(
                 labeledInstructions,
-                InstructionScanner.getArgumentLabels(instructions)
+                Instructions.getArgumentLabels(instructions)
         );
     }
 

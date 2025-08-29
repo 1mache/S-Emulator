@@ -7,7 +7,7 @@ import engine.jaxb.loader.ProgramLoader;
 import engine.jaxb.loader.XMLLoader;
 import engine.jaxb.loader.exception.NotXMLException;
 import engine.jaxb.loader.exception.UnknownLabelException;
-import engine.peeker.ProgramPeeker;
+import engine.peeker.ProgramViewer;
 import engine.program.Program;
 
 import java.io.FileNotFoundException;
@@ -40,8 +40,12 @@ public class SLanguageEngine {
         return program == null;
     }
 
+    public int getMaxExpansionDegree(){
+        return programMaxDegree;
+    }
+
     public ProgramPeek getProgramPeek() {
-        return getExpandedProgramPeek(1) ;
+        return getExpandedProgramPeek(0) ;
     }
 
     public ProgramPeek getExpandedProgramPeek(int expansionDegree) {
@@ -53,6 +57,6 @@ public class SLanguageEngine {
         if(programNotLoaded())
             throw new SEngineIllegalOperationException("Program is not loaded");
 
-        return new ProgramPeeker(program).getProgramPeek(expansionDegree);
+        return new ProgramViewer(program).getProgramPeek(expansionDegree);
     }
 }

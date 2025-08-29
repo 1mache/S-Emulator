@@ -1,6 +1,8 @@
 package console;
 
 import engine.api.SLanguageEngine;
+import engine.api.dto.InstructionPeek;
+import engine.api.dto.ProgramPeek;
 
 import java.util.ArrayList;
 import java.util.InputMismatchException;
@@ -76,6 +78,38 @@ public class MenuPage implements MenuOption {
             List<MenuOption> toAdd = otherOptions.subList(0, otherOptions.size() - 1);
             // Add all at the beginning of the 'options' list
             options.addAll(0, toAdd);
+        }
+    }
+
+    protected void printInstruction(InstructionPeek instruction) {
+        // lineId
+        String number = "#" + (instruction.lineId() + 1); // +1 so it starts with 1
+
+        // synthetic or base
+        String type = instruction.isSynthetic() ? "(S)" : "(B)";
+
+        // label formatting: 5 characters wide, label starts at position 2
+        String formattedLabel = String.format("[ %-4s]", instruction.label()); // left-padded, width 5;
+
+        // instruction string
+        String instrString = instruction.stringRepresentation();
+
+        // cycles in parentheses
+        String cycles = "(" + instruction.cycles() + ")";
+
+        System.out.printf("%s %s %s %s %s", number, type, formattedLabel, instrString, cycles);
+    }
+
+    protected void printProgramPeek(ProgramPeek programPeek, int expansionDegree) {
+        for(var instruction : programPeek.instructions()){
+            InstructionPeek expandedFrom = instruction.expandedFrom();
+            printInstruction(instruction);
+            for (int i = 0; i < expansionDegree && expandedFrom != null; i++) {
+                System.out.print(" <<< ");
+                printInstruction(expandedFrom);
+            }
+
+            System.out.println();
         }
     }
 
