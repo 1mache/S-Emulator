@@ -35,6 +35,7 @@ public class ProgramViewer {
     private ProgramPeek getProgramPeekRec(int expansionDegree, int lineCounter, List<Instruction> allInstructions) {
         List<InstructionPeek> instructionPeekList = new ArrayList<>();
         List<Instruction> baseInstructions = program.getInstructions();
+        allInstructions.addAll(baseInstructions);
 
         // start the line counter from the original instruction 'expandedFrom' lineId
         int instructionCount = Optional.ofNullable(expandedFrom)
