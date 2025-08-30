@@ -6,23 +6,18 @@ import engine.instruction.InstructionData;
 import engine.instruction.AbstractJumpInstruction;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.InstructionReference;
 import engine.variable.Variable;
 
 import java.util.List;
 
 public class JumpNotZeroInstruction extends AbstractJumpInstruction {
-    public JumpNotZeroInstruction(Variable variable, Label label, Label targetLabel) {
-        this(variable, label, targetLabel, null);
-    }
 
     public JumpNotZeroInstruction(
               Variable variable,
               Label label,
-              Label tagetLabel,
-              InstructionReference expanding
+              Label tagetLabel
     ) {
-        super(InstructionData.JUMP_NOT_ZERO, variable, label, tagetLabel, expanding);
+        super(InstructionData.JUMP_NOT_ZERO, variable, label, tagetLabel);
     }
 
     @Override

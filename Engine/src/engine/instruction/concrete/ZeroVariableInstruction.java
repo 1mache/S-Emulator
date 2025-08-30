@@ -7,7 +7,6 @@ import engine.instruction.Instruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.ProgramImpl;
 import engine.program.generator.LabelVariableGenerator;
@@ -18,16 +17,11 @@ import java.util.List;
 
 public class ZeroVariableInstruction extends AbstractInstruction {
 
-    public ZeroVariableInstruction(Variable variable, Label label) {
-        this(variable, label, null);
-    }
-
     public ZeroVariableInstruction(
            Variable variable,
-           Label label,
-           InstructionReference expanding
+           Label label
     ) {
-        super(InstructionData.ZERO_VARIABLE, variable, label, expanding);
+        super(InstructionData.ZERO_VARIABLE, variable, label);
     }
 
     @Override
@@ -47,18 +41,17 @@ public class ZeroVariableInstruction extends AbstractInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(int lineNumber, LabelVariableGenerator generator) {
-        InstructionReference locator = new InstructionReference(this, lineNumber);
+    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
         Label l1 = generator.getNextLabel();
         List<Instruction> instructionList = new ArrayList<>();
 
         /* this instruction has a label on its first expanded instruction, if the original
         also had a label, we need to add NOOP. 2 labels aren't allowed on 1 instruction*/
         if(getLabel() != FixedLabel.EMPTY)
-            instructionList.add(new NeutralInstruction(Variable.RESULT, getLabel(), locator));
+            instructionList.add(new NeutralInstruction(Variable.RESULT, getLabel()));
 
-        instructionList.add(new DecreaseInstruction(getVariable(), l1, locator));
-        instructionList.add(new JumpNotZeroInstruction(getVariable(), FixedLabel.EMPTY, l1, locator));
+        instructionList.add(new DecreaseInstruction(getVariable(), l1));
+        instructionList.add(new JumpNotZeroInstruction(getVariable(), FixedLabel.EMPTY, l1));
 
         return new ProgramImpl(
                 getName() + "Expansion",

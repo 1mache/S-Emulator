@@ -6,7 +6,6 @@ import engine.instruction.AbstractJumpInstruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.ProgramImpl;
 import engine.program.generator.LabelVariableGenerator;
@@ -17,18 +16,13 @@ import java.util.List;
 public class JumpVariableInstruction extends AbstractJumpInstruction {
     private final Variable otherVariable;
 
-    public JumpVariableInstruction(Variable variable, Label label, Label targetLabel, Variable otherVariable) {
-        this(variable, label, targetLabel, otherVariable, null);
-    }
-
     public JumpVariableInstruction(
            Variable variable,
            Label label,
            Label tagetLabel,
-           Variable otherVariable,
-           InstructionReference expanding
+           Variable otherVariable
     ) {
-        super(InstructionData.JUMP_EQUAL_VARIABLE, variable, label, tagetLabel, expanding);
+        super(InstructionData.JUMP_EQUAL_VARIABLE, variable, label, tagetLabel);
         this.otherVariable = otherVariable;
     }
 
@@ -51,8 +45,7 @@ public class JumpVariableInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(int lineNumber, LabelVariableGenerator generator) {
-        InstructionReference locator = new InstructionReference(this, lineNumber);
+    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
         Variable z1 = generator.getNextWorkVariable();
         Variable z2 = generator.getNextWorkVariable();
         Label l1 = generator.getNextLabel();
@@ -63,15 +56,15 @@ public class JumpVariableInstruction extends AbstractJumpInstruction {
         return new ProgramImpl(
                 getName() + "Expansion",
                 List.of(
-                        new AssignmentInstruction(z1, getLabel(), getVariable(), locator),
-                        new AssignmentInstruction(z2, empty, otherVariable, locator),
-                        new JumpZeroInstruction(z1, l2, l3, locator),
-                        new JumpZeroInstruction(z2, empty, l1, locator),
-                        new DecreaseInstruction(z1, empty, locator),
-                        new DecreaseInstruction(z2, empty, locator),
-                        new GotoLabelInstruction(empty, l2, locator),
-                        new JumpZeroInstruction(z2, l3, getTargetLabel(), locator),
-                        new NeutralInstruction(Variable.RESULT, l1, locator)
+                        new AssignmentInstruction(z1, getLabel(), getVariable()),
+                        new AssignmentInstruction(z2, empty, otherVariable),
+                        new JumpZeroInstruction(z1, l2, l3),
+                        new JumpZeroInstruction(z2, empty, l1),
+                        new DecreaseInstruction(z1, empty),
+                        new DecreaseInstruction(z2, empty),
+                        new GotoLabelInstruction(empty, l2),
+                        new JumpZeroInstruction(z2, l3, getTargetLabel()),
+                        new NeutralInstruction(Variable.RESULT, l1)
                 )
         );
     }

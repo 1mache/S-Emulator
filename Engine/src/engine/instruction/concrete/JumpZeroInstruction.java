@@ -6,7 +6,6 @@ import engine.instruction.InstructionData;
 import engine.instruction.AbstractJumpInstruction;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.ProgramImpl;
 import engine.program.generator.LabelVariableGenerator;
@@ -15,17 +14,13 @@ import engine.variable.Variable;
 import java.util.List;
 
 public class JumpZeroInstruction extends AbstractJumpInstruction {
-    public JumpZeroInstruction(Variable variable, Label label, Label targetLabel) {
-        this(variable, label, targetLabel, null);
-    }
 
     public JumpZeroInstruction(
            Variable variable,
            Label label,
-           Label tagetLabel,
-           InstructionReference expanding
+           Label tagetLabel
     ) {
-        super(InstructionData.JUMP_ZERO, variable, label, tagetLabel, expanding);
+        super(InstructionData.JUMP_ZERO, variable, label, tagetLabel);
     }
 
     @Override
@@ -45,16 +40,15 @@ public class JumpZeroInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(int lineNumber, LabelVariableGenerator generator) {
-        InstructionReference locator = new InstructionReference(this, lineNumber);
+    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
         Label l1 = generator.getNextLabel();
 
         return new ProgramImpl(
                 getName() + "Expansion",
                 List.of(
-                        new JumpNotZeroInstruction(getVariable(), getLabel(), l1, locator),
-                        new GotoLabelInstruction(FixedLabel.EMPTY, getTargetLabel() , locator),
-                        new NeutralInstruction(Variable.RESULT, l1, locator)
+                        new JumpNotZeroInstruction(getVariable(), getLabel(), l1),
+                        new GotoLabelInstruction(FixedLabel.EMPTY, getTargetLabel()),
+                        new NeutralInstruction(Variable.RESULT, l1)
                 )
         );
     }

@@ -92,10 +92,9 @@ public class ProgramRunner {
 
     public int getMaxExpansionDegree() {
         int maxExpansionDegree = 0;
-        int fooLineNumber = 0; // line lineId isn't important here
 
         for(Instruction instruction : program.getInstructions()) {
-            int expansionDegree = instruction.getExpansion(fooLineNumber, labelVariableGenerator)
+            int expansionDegree = instruction.getExpansion(labelVariableGenerator)
                     .map(expansion -> new ProgramRunner(expansion).getMaxExpansionDegree() + 1)
                     .orElse(0);
 
@@ -115,10 +114,12 @@ public class ProgramRunner {
             return FixedLabel.EMPTY;
         }
 
-        Optional<Program> expansion = instruction.getExpansion(pc, labelVariableGenerator);
+        Optional<Program> expansion = Optional.empty();
+        if(expansionLevel != 0)
+            expansion = instruction.getExpansion(labelVariableGenerator);
 
         // if expansion is empty the instruction is synthetic
-        if (expansionLevel == 0 || expansion.isEmpty()) {
+        if (expansion.isEmpty()) {
             return executeInstruction(instruction);
         }
 

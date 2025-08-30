@@ -6,23 +6,17 @@ import engine.instruction.AbstractInstruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.InstructionReference;
 import engine.variable.Variable;
 
 import java.util.List;
 
 public class NeutralInstruction extends AbstractInstruction {
 
-    public NeutralInstruction(Variable variable, Label label) {
-        this(variable, label, null);
-    }
-
     public NeutralInstruction(
               Variable variable,
-              Label label,
-              InstructionReference expanding
+              Label label
     ) {
-        super(InstructionData.NEUTRAL, variable, label, expanding);
+        super(InstructionData.NEUTRAL, variable, label);
     }
 
     @Override

@@ -3,7 +3,6 @@ package engine.instruction;
 import engine.execution.context.VariableContext;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.InstructionReference;
 import engine.variable.Variable;
 
 public abstract class AbstractJumpInstruction extends AbstractInstruction {
@@ -13,10 +12,9 @@ public abstract class AbstractJumpInstruction extends AbstractInstruction {
            InstructionData data,
            Variable variable,
            Label label,
-           Label tagetLabel,
-           InstructionReference expanding
+           Label tagetLabel
     ) {
-        super(data, variable, label, expanding);
+        super(data, variable, label);
         this.tagetLabel = tagetLabel;
     }
 

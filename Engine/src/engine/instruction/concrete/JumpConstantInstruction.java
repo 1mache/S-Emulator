@@ -8,7 +8,6 @@ import engine.instruction.Instruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.ProgramImpl;
 import engine.program.generator.LabelVariableGenerator;
@@ -20,18 +19,13 @@ import java.util.List;
 public class JumpConstantInstruction extends AbstractJumpInstruction {
     private final ConstantArgument constant;
 
-    public JumpConstantInstruction(Variable variable, Label label, Label targetLabel, ConstantArgument constant) {
-        this(variable, label, targetLabel, constant,null);
-    }
-
     public JumpConstantInstruction(
            Variable variable,
            Label label,
            Label tagetLabel,
-           ConstantArgument constant,
-           InstructionReference expanding
+           ConstantArgument constant
     ) {
-        super(InstructionData.JUMP_EQUAL_CONSTANT, variable, label, tagetLabel, expanding);
+        super(InstructionData.JUMP_EQUAL_CONSTANT, variable, label, tagetLabel);
         this.constant = constant;
     }
 
@@ -52,23 +46,22 @@ public class JumpConstantInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(int lineNumber, LabelVariableGenerator generator) {
-        InstructionReference locator = new InstructionReference(this, lineNumber);
+    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
         Variable z1 = generator.getNextWorkVariable();
         Label l1 = generator.getNextLabel();
         Label empty = FixedLabel.EMPTY;
 
         List<Instruction> instructions = new ArrayList<>();
-        instructions.add(new AssignmentInstruction(z1, getLabel(), getVariable(), locator));
+        instructions.add(new AssignmentInstruction(z1, getLabel(), getVariable()));
 
         for (int i = 0; i < constant.value(); i++) {
-            instructions.add(new JumpZeroInstruction(z1, empty, l1, locator));
-            instructions.add(new DecreaseInstruction(z1, empty, locator));
+            instructions.add(new JumpZeroInstruction(z1, empty, l1));
+            instructions.add(new DecreaseInstruction(z1, empty));
         }
 
-        instructions.add(new JumpNotZeroInstruction(z1, empty, l1, locator));
-        instructions.add(new GotoLabelInstruction(empty, getTargetLabel(), locator));
-        instructions.add(new NeutralInstruction(Variable.RESULT, l1, locator));
+        instructions.add(new JumpNotZeroInstruction(z1, empty, l1));
+        instructions.add(new GotoLabelInstruction(empty, getTargetLabel()));
+        instructions.add(new NeutralInstruction(Variable.RESULT, l1));
         return new ProgramImpl(getName() + "Expansion", instructions);
     }
 }

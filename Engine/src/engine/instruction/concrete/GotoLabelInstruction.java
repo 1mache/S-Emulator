@@ -6,7 +6,6 @@ import engine.instruction.InstructionData;
 import engine.instruction.AbstractJumpInstruction;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.ProgramImpl;
 import engine.program.generator.LabelVariableGenerator;
@@ -17,16 +16,11 @@ import java.util.List;
 
 public class GotoLabelInstruction extends AbstractJumpInstruction {
 
-    public GotoLabelInstruction(Label label, Label targetLabel) {
-        this(label, targetLabel, null);
-    }
-
     public GotoLabelInstruction(
             Label label,
-            Label tagetLabel,
-            InstructionReference expanding
+            Label tagetLabel
     ) {
-        super(InstructionData.GOTO_LABEL, Variable.NO_VAR, label, tagetLabel, expanding);
+        super(InstructionData.GOTO_LABEL, Variable.NO_VAR, label, tagetLabel);
     }
 
     @Override
@@ -50,15 +44,14 @@ public class GotoLabelInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(int lineNumber, LabelVariableGenerator generator) {
-        InstructionReference locator = new InstructionReference(this, lineNumber);
+    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
         Variable z1 = generator.getNextWorkVariable();
 
         return new ProgramImpl(
                 getName() + "Expansion",
                 List.of(
-                        new IncreaseInstruction(z1, getLabel(), locator),
-                        new JumpNotZeroInstruction(z1, FixedLabel.EMPTY, getTargetLabel(), locator)
+                        new IncreaseInstruction(z1, getLabel()),
+                        new JumpNotZeroInstruction(z1, FixedLabel.EMPTY, getTargetLabel())
                 )
         );
     }

@@ -8,7 +8,6 @@ import engine.instruction.Instruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.ProgramImpl;
 import engine.program.generator.LabelVariableGenerator;
@@ -20,17 +19,12 @@ import java.util.List;
 public class ConstantAssignmentInstruction extends AbstractInstruction {
     private final ConstantArgument constant;
 
-    public ConstantAssignmentInstruction(Variable variable, Label label, ConstantArgument constant) {
-        this(variable, label, constant, null);
-    }
-
     public ConstantAssignmentInstruction(
              Variable variable,
              Label label,
-             ConstantArgument constant,
-             InstructionReference expanding
+             ConstantArgument constant
     ) {
-        super(InstructionData.CONSTANT_ASSIGNMENT, variable, label, expanding);
+        super(InstructionData.CONSTANT_ASSIGNMENT, variable, label);
         this.constant = constant;
     }
 
@@ -51,14 +45,13 @@ public class ConstantAssignmentInstruction extends AbstractInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(int lineNumber, LabelVariableGenerator generator) {
-        InstructionReference locator = new InstructionReference(this, lineNumber);
+    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
         List<Instruction> instructionList = new ArrayList<>();
         Variable thisVariable = getVariable();
 
-        instructionList.add(new ZeroVariableInstruction(thisVariable, getLabel(), locator));
+        instructionList.add(new ZeroVariableInstruction(thisVariable, getLabel()));
         for (int i = 0; i < constant.value(); i++)
-            instructionList.add(new IncreaseInstruction(thisVariable, FixedLabel.EMPTY, locator));
+            instructionList.add(new IncreaseInstruction(thisVariable, FixedLabel.EMPTY));
         
         return new ProgramImpl(
                 getName() + "Expansion",

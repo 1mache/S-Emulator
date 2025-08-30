@@ -3,7 +3,6 @@ package engine.instruction;
 import engine.argument.Argument;
 import engine.execution.context.VariableContext;
 import engine.label.Label;
-import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
@@ -21,6 +20,5 @@ public interface Instruction {
     Variable getVariable();
     Label getLabel();
     List<Argument> getArguments();
-    Optional<Program> getExpansion(int lineNumber, LabelVariableGenerator generator);
-    Optional<InstructionReference> getExpanding();
+    Optional<Program> getExpansion(LabelVariableGenerator generator);
 }

@@ -1,7 +1,6 @@
 package engine.instruction;
 
 import engine.label.Label;
-import engine.program.InstructionReference;
 import engine.program.Program;
 import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
@@ -13,15 +12,12 @@ public abstract class AbstractInstruction implements Instruction {
     private final Variable variable;
     private final Label label;
 
-    // which instruction am I expanding
-    private final InstructionReference expanding; // can be null
 
-    public AbstractInstruction(InstructionData data, Variable variable, Label label,  InstructionReference expanding)
+    public AbstractInstruction(InstructionData data, Variable variable, Label label)
     {
         this.data = data;
         this.label = label;
         this.variable = variable;
-        this.expanding = expanding;
     }
 
     @Override
@@ -50,20 +46,15 @@ public abstract class AbstractInstruction implements Instruction {
     }
 
     @Override
-    public Optional<InstructionReference> getExpanding() {
-        return Optional.ofNullable(expanding);
-    }
-
-    @Override
-    public Optional<Program> getExpansion(int lineNumber, LabelVariableGenerator generator) {
+    public Optional<Program> getExpansion(LabelVariableGenerator generator) {
         if(!isSynthetic())
             return Optional.empty();
         
-        return Optional.of(getSyntheticExpansion(lineNumber, generator));
+        return Optional.of(getSyntheticExpansion(generator));
     }
 
     // to be implemented by concrete classes.
-    protected Program getSyntheticExpansion(int lineNumber, LabelVariableGenerator generator) {
+    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
         // if all instructions implement it this should never happen
         throw new UnsupportedOperationException("Instruction " + getName() + " does not support synthetic expansion.");
     }
