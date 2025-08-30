@@ -1,5 +1,7 @@
-package console;
+package console.menu;
 
+import console.menu.option.MenuOption;
+import console.menu.option.MenuPage;
 import engine.api.SLanguageEngine;
 
 public class Menu {

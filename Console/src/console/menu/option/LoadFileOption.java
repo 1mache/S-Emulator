@@ -1,4 +1,4 @@
-package console;
+package console.menu.option;
 
 import engine.api.SLanguageEngine;
 import engine.jaxb.loader.exception.NotXMLException;
@@ -7,7 +7,7 @@ import engine.jaxb.loader.exception.UnknownLabelException;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-public class LoadFileOption extends MenuPage{
+public class LoadFileOption extends MenuPage {
     public LoadFileOption() {
         super("Load program XML file", "");
     }

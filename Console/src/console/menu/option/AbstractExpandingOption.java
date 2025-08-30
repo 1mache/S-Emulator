@@ -1,9 +1,9 @@
-package console;
+package console.menu.option;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-public abstract class AbstractExpandingOption extends MenuPage{
+public abstract class AbstractExpandingOption extends MenuPage {
 
     public AbstractExpandingOption(String name, String message) {
         super(name, message);
