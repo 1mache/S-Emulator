@@ -71,10 +71,11 @@ public class RunProgramOption extends AbstractExpandingOption {
             // Check validity first
             List<Integer> badIndices = getBadIndices(parts);
             if (!badIndices.isEmpty()) {
+                System.out.print("Inputs: [");
                 for (int idx : badIndices) {
                     System.out.print("x" + (idx + 1) + " ");
                 }
-                System.out.println("are invalid (not non-negative integers). Please enter all values again:");
+                System.out.println("] are invalid (not non-negative integers). Please enter all values again:");
                 continue;
             }
 

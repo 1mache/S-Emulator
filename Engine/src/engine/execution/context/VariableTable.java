@@ -12,8 +12,6 @@ public class VariableTable implements VariableContext {
 
     @Override
     public Long getVariableValue(Variable variable) {
-        if(variable.equals(Variable.createWorkVariable(9)))
-            System.out.println("DEBUG");
         return variableMap.getOrDefault(variable, 0L);
     }
 

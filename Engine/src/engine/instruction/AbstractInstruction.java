@@ -12,6 +12,8 @@ public abstract class AbstractInstruction implements Instruction {
     private final Variable variable;
     private final Label label;
 
+    // cached expansion of the instruction
+    private Program expansion;
 
     public AbstractInstruction(InstructionData data, Variable variable, Label label)
     {
@@ -49,8 +51,11 @@ public abstract class AbstractInstruction implements Instruction {
     public Optional<Program> getExpansion(LabelVariableGenerator generator) {
         if(!isSynthetic())
             return Optional.empty();
-        
-        return Optional.of(getSyntheticExpansion(generator));
+
+        if(expansion == null)
+           expansion = Optional.of(getSyntheticExpansion(generator)).orElse(null);
+
+        return Optional.of(expansion);
     }
 
     // to be implemented by concrete classes.
