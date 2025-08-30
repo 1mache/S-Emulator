@@ -27,6 +27,7 @@ public class LoadFileOption extends MenuPage{
             System.out.println("Program loaded successfully");
         }
         catch (FileNotFoundException | NotXMLException | UnknownLabelException e) {
+            System.out.println();
             System.out.println("Error: Couldn't load file. "+ e.getMessage());
         }
     }

@@ -9,11 +9,13 @@ import engine.program.Program;
 import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class ProgramRunner {
     private final Program program;
-    private final VariableContext variableContext;
+    private VariableContext variableContext;
     private final LabelVariableGenerator labelVariableGenerator;
 
     // instruction pointer
@@ -21,7 +23,7 @@ public class ProgramRunner {
     private long cycles = 0;
 
     public ProgramRunner(Program program) {
-        this(program, new VariableTable(), new  LabelVariableGenerator(program));
+        this(program, new VariableTable(), new LabelVariableGenerator(program));
     }
 
     // private ctor for internal logic use
@@ -31,6 +33,13 @@ public class ProgramRunner {
         this.program = program;
         this.variableContext = variableContext;
         this.labelVariableGenerator = labelVariableGenerator;
+    }
+
+    public void reset(){
+        labelVariableGenerator.reset();
+        variableContext = new VariableTable();
+        pc = 0;
+        cycles = 0;
     }
 
     public Label run(int expansionLevel) {
@@ -61,19 +70,19 @@ public class ProgramRunner {
         return jumpLabel;
     }
 
-    public Long getResult() {
+    public Long getRunOutput(){
         return variableContext.getVariableValue(Variable.RESULT);
+    }
+
+    public Map<String, Long> getVariableValues() {
+        return variableContext.getVariables();
     }
 
     public Long getCycles() {
         return cycles;
     }
 
-    public VariableContext getVariableContext() {
-        return variableContext;
-    }
-
-    public void initInputVariables(Long... initInput) {
+    public void initInputVariables(List<Long> initInput) {
         int counter = 1;
         for(Long input : initInput) {
             variableContext.setVariableValue(Variable.createInputVariable(counter), input);
@@ -92,6 +101,8 @@ public class ProgramRunner {
 
             maxExpansionDegree = Math.max(maxExpansionDegree, expansionDegree);
         }
+
+        labelVariableGenerator.reset(); // need to reset because it uses this
         return maxExpansionDegree;
     }
 

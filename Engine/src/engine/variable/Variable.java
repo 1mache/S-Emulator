@@ -3,6 +3,7 @@ package engine.variable;
 import engine.argument.Argument;
 import engine.argument.ArgumentType;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 public class Variable implements Argument {
@@ -24,6 +25,28 @@ public class Variable implements Argument {
     public static Variable createWorkVariable(int number) {
         return new Variable(VariableType.WORK, number);
     }
+
+    public static final Comparator<Variable> VARIABLE_COMPARATOR = (v1, v2) -> {
+        // RESULT always first
+        if (v1.getType() == VariableType.RESULT && v2.getType() != VariableType.RESULT) return -1;
+        if (v2.getType() == VariableType.RESULT && v1.getType() != VariableType.RESULT) return 1;
+
+        // INPUT before WORK
+        if (v1.getType() == VariableType.INPUT && v2.getType() == VariableType.WORK) return -1;
+        if (v1.getType() == VariableType.WORK && v2.getType() == VariableType.INPUT) return 1;
+
+        // NONE goes last
+        if (v1.getType() == VariableType.NONE && v2.getType() != VariableType.NONE) return 1;
+        if (v2.getType() == VariableType.NONE && v1.getType() != VariableType.NONE) return -1;
+
+        // Same type → compare by number
+        if (v1.getType() == v2.getType()) {
+            return Integer.compare(v1.getNumber(), v2.getNumber());
+        }
+
+        // Fallback to type name just in case
+        return v1.getType().compareTo(v2.getType());
+    };
 
     public String stringRepresentation() {
         String representation = type.stringRepresentation();

@@ -2,7 +2,7 @@ package console;
 
 import engine.api.SLanguageEngine;
 import engine.api.dto.ProgramPeek;
-import engine.execution.exception.SEngineIllegalOperationException;
+import engine.execution.exception.SProgramNotLoadedException;
 
 public class ExpandProgramOption extends AbstractExpandingOption {
 
@@ -12,20 +12,15 @@ public class ExpandProgramOption extends AbstractExpandingOption {
 
     @Override
     public void execute(SLanguageEngine engine) {
-        if(engine.programNotLoaded()){
-            System.out.println("Error: Program not loaded! Load program first.");
-            return;
-        }
-
-        int expansionDegree = getExpansionDegree(engine.getMaxExpansionDegree());
         try{
+            int expansionDegree = getExpansionDegree(engine.getMaxExpansionDegree());
             ProgramPeek programPeek = engine.getExpandedProgramPeek(expansionDegree);
             System.out.println("Program name: " + programPeek.name());
             System.out.println("Input variables used: " + programPeek.inputVariables());
             System.out.println("Labels used: " + programPeek.labelsUsed());
-            printProgramPeek(programPeek, expansionDegree);
-        } catch(SEngineIllegalOperationException e){
-            System.out.println("Error: " + e.getMessage());
+            printProgramPeek(programPeek, expansionDegree, true);
+        } catch(SProgramNotLoadedException e){
+            System.out.println("Error: Program is not loaded. Load it first (option 1)");
         }
     }
 }

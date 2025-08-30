@@ -100,13 +100,16 @@ public class MenuPage implements MenuOption {
         System.out.printf("%s %s %s %s %s", number, type, formattedLabel, instrString, cycles);
     }
 
-    protected void printProgramPeek(ProgramPeek programPeek, int expansionDegree) {
+    protected void printProgramPeek(ProgramPeek programPeek, int expansionDegree, boolean printHierarchy) {
         for(var instruction : programPeek.instructions()){
             InstructionPeek expandedFrom = instruction.expandedFrom();
             printInstruction(instruction);
-            for (int i = 0; i < expansionDegree && expandedFrom != null; i++) {
-                System.out.print(" <<< ");
-                printInstruction(expandedFrom);
+
+            if(printHierarchy) {
+                for (int i = 0; i < expansionDegree && expandedFrom != null; i++) {
+                    System.out.print(" <<< ");
+                    printInstruction(expandedFrom);
+                }
             }
 
             System.out.println();
@@ -122,7 +125,7 @@ public class MenuPage implements MenuOption {
                 int input = scanner.nextInt();
                 optionId = input - 1;
                 if (invalidOptionId(optionId)) {
-                    System.out.printf("Invalid option lineId. Please try again.%n");
+                    System.out.printf("Invalid option number. Please try again.%n");
                 }
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter an integer.");
