@@ -12,21 +12,22 @@ import engine.peeker.ProgramViewer;
 import engine.program.Program;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SLanguageEngine {
     private Program program;
     private ProgramRunner programRunner;
     private int programMaxDegree;
+    private List<ExecutionResult> previousExecutions;
 
+    private SLanguageEngine(){}
     // Singleton
     private static final SLanguageEngine instance = new SLanguageEngine();
 
     public static SLanguageEngine getInstance(){
         return instance;
     }
-
-    private SLanguageEngine(){}
 
     public void loadProgram(String path)
             throws NotXMLException, FileNotFoundException, UnknownLabelException {
@@ -37,6 +38,7 @@ public class SLanguageEngine {
         program = loader.getProgram();
         programRunner = new ProgramRunner(program);
         programMaxDegree = programRunner.getMaxExpansionDegree();
+        previousExecutions = new ArrayList<>();
     }
 
     public boolean programNotLoaded(){
@@ -73,9 +75,21 @@ public class SLanguageEngine {
         programRunner.initInputVariables(inputs);
         programRunner.run(expansionDegree);
 
-        return new ExecutionResult(
+        var executionResult = new ExecutionResult(
                 programRunner.getRunOutput(),
                 programRunner.getVariableValues(),
-                programRunner.getCycles());
+                inputs,
+                expansionDegree,
+                programRunner.getCycles()
+        );
+        previousExecutions.add(executionResult);
+        return executionResult;
+    }
+
+    public List<ExecutionResult> getExecutionHistory() throws SProgramNotLoadedException {
+        if(programNotLoaded())
+            throw new SProgramNotLoadedException("Program is not loaded");
+
+        return previousExecutions;
     }
 }
