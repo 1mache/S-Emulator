@@ -92,8 +92,16 @@ public class JaxbTranslator {
         if(str.equals(FixedLabel.EXIT.stringRepresentation().toLowerCase()))
             return FixedLabel.EXIT; // exit label
 
+        // all labels should be L[some number] so this should never throw
+        if(!str.matches("l\\d++"))
+            throw new SProgramXMLException("Unknown label format: " + str);
+        int numberPart = Integer.parseInt(str.replaceAll("\\D", ""));
+
+        if(numberPart == 0) // negatives wont match at prec check anyways
+            throw new SProgramXMLException("Invalid label number: " + str);
+
         // take only the lineId part and construct a numeric label
-        return new NumericLabel(Integer.parseInt(str.replaceAll("\\D", "")));
+        return new NumericLabel(numberPart);
     }
 
     private List<Argument> getArguments(SInstruction sInstruction) {
