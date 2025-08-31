@@ -60,9 +60,10 @@ public class RunProgramOption extends AbstractExpandingOption {
         Scanner scanner = new Scanner(System.in);
         List<Long> values = new ArrayList<>();
 
-        System.out.println("Please enter input variable values separated with a ',' (e.g 1,2,3).\n" +
-                "Blank = No inputs\n" +
-                "Note that x1 will get the value of the first input, x2 will get the value of the second and so on in order:");
+        System.out.println("""
+                Please enter input variable values separated with a ',' (e.g 1,2,3).
+                Blank = No inputs
+                Note that x1 will get the value of the first input, x2 will get the value of the second and so on in order:""");
 
         String[] parts;
         while (true) {
