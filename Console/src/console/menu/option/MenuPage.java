@@ -102,13 +102,14 @@ public class MenuPage implements MenuOption {
 
     protected void printProgramPeek(ProgramPeek programPeek, int expansionDegree, boolean printHierarchy) {
         for(var instruction : programPeek.instructions()){
-            InstructionPeek expandedFrom = instruction.expandedFrom();
             printInstruction(instruction);
 
             if(printHierarchy) {
-                for (int i = 0; i < expansionDegree && expandedFrom != null; i++) {
+                instruction = instruction.expandedFrom();
+                for (int i = 0; i < expansionDegree && instruction != null; i++) {
                     System.out.print(" <<< ");
-                    printInstruction(expandedFrom);
+                    printInstruction(instruction);
+                    instruction = instruction.expandedFrom();
                 }
             }
 

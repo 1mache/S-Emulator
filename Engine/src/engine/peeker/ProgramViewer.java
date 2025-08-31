@@ -44,13 +44,12 @@ public class ProgramViewer {
 
         for (Instruction instruction : baseInstructions) {
             int currentLine = lineCounter;
+            // this is the "root peek" for this instruction at the current level
+            InstructionPeek basePeek = getInstructionPeek(instruction, instructionCount, expandedFrom);
 
             ProgramPeek expansionPeek = null;
 
             if (expansionDegree > 0) {
-                // this is the "root peek" for this instruction at the current level
-                InstructionPeek basePeek = getInstructionPeek(instruction, instructionCount, expandedFrom);
-
                 expansionPeek = instruction.getExpansion(labelVariableGenerator)
                         .map(expansion -> {
                             allInstructions.addAll(expansion.getInstructions());
