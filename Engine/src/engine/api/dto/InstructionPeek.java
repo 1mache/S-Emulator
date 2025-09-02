@@ -6,6 +6,7 @@ public record InstructionPeek(
         String label,
         boolean isSynthetic,
         int cycles,
+        // which instruction was this expanded from
         InstructionPeek expandedFrom, // can be null
         int lineId
 ){}

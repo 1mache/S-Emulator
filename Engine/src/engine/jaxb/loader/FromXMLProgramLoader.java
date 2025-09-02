@@ -12,10 +12,10 @@ import jakarta.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
 import java.util.List;
 
-public class ProgramLoader implements XMLLoader{
-    private Program program;
+public class FromXMLProgramLoader {
+    private Program program; // if this is null, the program isn't loaded
+    private boolean validated = false;
 
-    @Override
     public void loadXML(String path) throws FileNotFoundException, NotXMLException{
         if(!path.endsWith(".xml"))
             throw new NotXMLException(path + " is not an xml file");
@@ -28,19 +28,25 @@ public class ProgramLoader implements XMLLoader{
         }
     }
 
-    @Override
     public void validateProgram() throws UnknownLabelException {
+        validated = false;
+
         List<ArgumentLabelInfo> argumentLabels = Instructions.getArgumentLabels(program.getInstructions());
         for(var info : argumentLabels){
             if(info.label() != FixedLabel.EXIT && !program.hasLabel(info.label()))
-                throw new UnknownLabelException("Error: Unknown label "
+                 throw new UnknownLabelException("Error: Unknown label "
                         + info.label().stringRepresentation()
                         + " in Instruction: " + info.instructionName());
         }
+
+        validated = true;
     }
 
-    @Override
     public Program getProgram() {
+        if(program == null)
+            throw new IllegalStateException("Program has not been loaded");
+        if(!validated)
+            throw new IllegalStateException("Program has not been validated");
         return program;
     }
 }

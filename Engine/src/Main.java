@@ -1,6 +1,5 @@
 import engine.execution.ProgramRunner;
-import engine.jaxb.loader.ProgramLoader;
-import engine.jaxb.loader.XMLLoader;
+import engine.jaxb.loader.FromXMLProgramLoader;
 import engine.jaxb.loader.exception.NotXMLException;
 import engine.jaxb.loader.exception.UnknownLabelException;
 import engine.program.Program;
@@ -10,7 +9,7 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        XMLLoader loader = new ProgramLoader();
+        FromXMLProgramLoader loader = new FromXMLProgramLoader();
 
         try {
             loader.loadXML(
@@ -19,6 +18,7 @@ public class Main {
 
             loader.validateProgram();
             Program program = loader.getProgram();
+
             var runner = new ProgramRunner(program);
             System.out.println("Max expansion degree: " + runner.getMaxExpansionDegree());
             runner.initInputVariables(List.of(5L,2L));

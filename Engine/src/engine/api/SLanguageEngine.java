@@ -4,8 +4,7 @@ import engine.api.dto.ExecutionResult;
 import engine.api.dto.ProgramPeek;
 import engine.execution.ProgramRunner;
 import engine.execution.exception.SProgramNotLoadedException;
-import engine.jaxb.loader.ProgramLoader;
-import engine.jaxb.loader.XMLLoader;
+import engine.jaxb.loader.FromXMLProgramLoader;
 import engine.jaxb.loader.exception.NotXMLException;
 import engine.jaxb.loader.exception.UnknownLabelException;
 import engine.peeker.ProgramViewer;
@@ -31,11 +30,11 @@ public class SLanguageEngine {
 
     public void loadProgram(String path)
             throws NotXMLException, FileNotFoundException, UnknownLabelException {
-        XMLLoader loader = new ProgramLoader();
+        FromXMLProgramLoader loader = new FromXMLProgramLoader();
         loader.loadXML(path);
-
         loader.validateProgram();
         program = loader.getProgram();
+
         programRunner = new ProgramRunner(program);
         programMaxDegree = programRunner.getMaxExpansionDegree();
         previousExecutions = new ArrayList<>();
