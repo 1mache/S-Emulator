@@ -48,19 +48,27 @@ public abstract class AbstractInstruction implements Instruction {
     }
 
     @Override
-    public Optional<Program> getExpansion(LabelVariableGenerator generator) {
+    public Optional<Program> getExpansionInProgram(LabelVariableGenerator generator) {
         if(!isSynthetic())
             return Optional.empty();
 
         if(expansion == null)
-           expansion = Optional.of(getSyntheticExpansion(generator)).orElse(null);
+           expansion = Optional.of(getSyntheticExpansion(generator)).get();
 
         return Optional.of(expansion);
     }
 
+    @Override
+    public Optional<Program> getExpansionStandalone() {
+        if(!isSynthetic())
+            return Optional.empty();
+
+        return Optional.of(getSyntheticExpansion(new LabelVariableGenerator()));
+    }
+
     // to be implemented by concrete classes.
     protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
-        // if all instructions implement it this should never happen
+        // if all instructions implement it, this should never happen
         throw new UnsupportedOperationException("Instruction " + getName() + " does not support synthetic expansion.");
     }
 }

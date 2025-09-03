@@ -42,27 +42,27 @@ public class ProgramRunner {
         cycles = 0;
     }
 
-    public Label run(int expansionLevel) {
+    public Label run(int expansionDegree) {
         Optional<Instruction> currInstruction;
         Label jumpLabel = FixedLabel.EMPTY;
 
         do {
             if (jumpLabel == FixedLabel.EMPTY) {
                 currInstruction = program.getInstructionByIndex(pc);
-                jumpLabel = executeInstruction(expansionLevel, currInstruction.orElse(null));
+                jumpLabel = executeInstruction(expansionDegree, currInstruction.orElse(null));
             }
             else {
                 // jump needs to happen
-                currInstruction = program.getInstruction(jumpLabel);
+                currInstruction = program.getInstructionByLabel(jumpLabel);
                 // set the pc to the relevant line
-                program.getLabelLineId(jumpLabel)
+                program.getLineNumberOfLabel(jumpLabel)
                         .ifPresent(lineId -> pc = lineId);
 
                 if(currInstruction.isPresent())
-                    jumpLabel = executeInstruction(expansionLevel, currInstruction.get());
+                    jumpLabel = executeInstruction(expansionDegree, currInstruction.get());
 
             }
-            if(jumpLabel == FixedLabel.EXIT) {break;} // check for exit
+            if(jumpLabel == FixedLabel.EXIT) break; // check for exit
         }
         while (currInstruction.isPresent());
 
@@ -75,7 +75,7 @@ public class ProgramRunner {
     }
 
     public Map<String, Long> getVariableValues() {
-        return variableContext.getVariables();
+        return variableContext.getOrganizedVariableValues();
     }
 
     public Long getCycles() {
@@ -90,35 +90,19 @@ public class ProgramRunner {
         }
     }
 
-    public int getMaxExpansionDegree() {
-        int maxExpansionDegree = 0;
-
-        for(Instruction instruction : program.getInstructions()) {
-            int expansionDegree = instruction.getExpansion(labelVariableGenerator)
-                    .map(expansion -> new ProgramRunner(expansion).getMaxExpansionDegree() + 1)
-                    .orElse(0);
-
-            maxExpansionDegree = Math.max(maxExpansionDegree, expansionDegree);
-        }
-
-        labelVariableGenerator.reset(); // need to reset because it uses this
-        return maxExpansionDegree;
-    }
-
-    // private:
+    // ------------ private: -------------
 
     // expands and executes
     private Label executeInstruction(int expansionLevel, Instruction instruction) {
         if (instruction == null) {
-            pc++;
             return FixedLabel.EMPTY;
         }
 
         Optional<Program> expansion = Optional.empty();
         if(expansionLevel != 0)
-            expansion = instruction.getExpansion(labelVariableGenerator);
+            expansion = instruction.getExpansionInProgram(labelVariableGenerator);
 
-        // if expansion is empty the instruction is synthetic
+        // if expansion is empty, the instruction is synthetic
         if (expansion.isEmpty()) {
             return executeInstruction(instruction);
         }
@@ -131,7 +115,7 @@ public class ProgramRunner {
         return result;
     }
 
-    // executes instruction the normal
+    // executes instruction the normal way
     private Label executeInstruction(Instruction instruction) {
         pc++;
         Optional<Instruction> optionalInstruction = Optional.ofNullable(instruction);

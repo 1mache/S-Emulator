@@ -17,7 +17,6 @@ import java.util.List;
 public class SLanguageEngine {
     private Program program;
     private ProgramRunner programRunner;
-    private int programMaxDegree;
     private List<ExecutionResult> previousExecutions;
 
     private SLanguageEngine(){}
@@ -36,7 +35,6 @@ public class SLanguageEngine {
         program = loader.getProgram();
 
         programRunner = new ProgramRunner(program);
-        programMaxDegree = programRunner.getMaxExpansionDegree();
         previousExecutions = new ArrayList<>();
     }
 
@@ -47,7 +45,7 @@ public class SLanguageEngine {
     public int getMaxExpansionDegree() throws SProgramNotLoadedException {
         if(programNotLoaded())
             throw new SProgramNotLoadedException("Program has not been loaded");
-        return programMaxDegree;
+        return program.getMaxExpansionDegree();
     }
 
     public ProgramPeek getProgramPeek() throws SProgramNotLoadedException {
@@ -55,18 +53,18 @@ public class SLanguageEngine {
     }
 
     public ProgramPeek getExpandedProgramPeek(int expansionDegree) throws SProgramNotLoadedException {
-        if(expansionDegree > programMaxDegree)
-            throw new IllegalArgumentException(
-                    "The degree requested is bigger than the max degree:" + programMaxDegree
-            );
-
-        if(programNotLoaded())
+        if(expansionDegree > getMaxExpansionDegree())
+            throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + program.getMaxExpansionDegree());
+        if(programNotLoaded()) {
             throw new SProgramNotLoadedException("Program is not loaded");
+        }
 
         return new ProgramViewer(program).getProgramPeek(expansionDegree);
     }
 
     public ExecutionResult runProgram(List<Long> inputs, int expansionDegree) throws SProgramNotLoadedException {
+        if(expansionDegree > program.getMaxExpansionDegree())
+            throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + program.getMaxExpansionDegree());
         if(programNotLoaded())
             throw new SProgramNotLoadedException("Program is not loaded");
 

@@ -12,6 +12,8 @@ public class VariableTable implements VariableContext {
 
     @Override
     public Long getVariableValue(Variable variable) {
+        if(variable.equals(Variable.createWorkVariable(9)))
+            System.out.println("Here");
         return variableMap.getOrDefault(variable, 0L);
     }
 
@@ -21,7 +23,7 @@ public class VariableTable implements VariableContext {
     }
 
     @Override
-    public Map<String, Long> getVariables() {
+    public Map<String, Long> getOrganizedVariableValues() {
         return variableMap.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(Variable.VARIABLE_COMPARATOR))
                 .collect(Collectors.toMap(

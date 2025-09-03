@@ -34,12 +34,12 @@ public interface Program {
      * @param label the instruction label
      * @return lineId of that label, empty if label is EMPTY or doesn't exist (sometimes in expansion)s
      */
-    Optional<Integer> getLabelLineId(Label label);
+    Optional<Integer> getLineNumberOfLabel(Label label);
     /**
      * @param label the instruction label
      * @return instruction by Label, empty if label is EMPTY or doesn't exist (sometimes in expansion)
      */
-    Optional<Instruction> getInstruction(Label label);
+    Optional<Instruction> getInstructionByLabel(Label label);
     /**
      * @return next instruction by index (line lineId) in the Program.
      *         empty if index out of bounds
@@ -49,4 +49,9 @@ public interface Program {
      * @return all the instructions in the program
      */
     List<Instruction> getInstructions();
+
+    /**
+     * @return the max degree this program can be expanded to
+     */
+    int getMaxExpansionDegree();
 }

@@ -15,6 +15,9 @@ public class ProgramImpl implements Program {
 
     private final String name;
 
+    // cached because calculation is expensive
+    private Integer maxExpansionDegree;
+
     public ProgramImpl(String name, List<Instruction> instructions) {
         this.name = name;
         this.instructions = instructions;
@@ -51,7 +54,7 @@ public class ProgramImpl implements Program {
     }
 
     @Override
-    public Optional<Instruction> getInstruction(Label label) {
+    public Optional<Instruction> getInstructionByLabel(Label label) {
         if(label == FixedLabel.EMPTY)
             return Optional.empty();
         return Optional.ofNullable(labeledInstructions.get(label))
@@ -59,7 +62,7 @@ public class ProgramImpl implements Program {
     }
 
     @Override
-    public Optional<Integer> getLabelLineId(Label label) {
+    public Optional<Integer> getLineNumberOfLabel(Label label) {
         if(label == FixedLabel.EMPTY)
             return Optional.empty();
         return Optional.ofNullable(labeledInstructions.get(label))
@@ -76,5 +79,27 @@ public class ProgramImpl implements Program {
     @Override
     public List<Instruction> getInstructions() {
         return instructions;
+    }
+
+    @Override
+    public int getMaxExpansionDegree() {
+        if(maxExpansionDegree == null)
+            maxExpansionDegree = calculateMaxExpansionDegree();
+
+        return maxExpansionDegree;
+    }
+
+    private int calculateMaxExpansionDegree() {
+        maxExpansionDegree = 0;
+
+        for(Instruction instruction : getInstructions()) {
+            int expansionDegree = instruction.getExpansionStandalone()
+                    .map(expansion -> expansion.getMaxExpansionDegree() + 1)
+                    .orElse(0);
+
+            maxExpansionDegree = Math.max(maxExpansionDegree, expansionDegree);
+        }
+
+        return maxExpansionDegree;
     }
 }

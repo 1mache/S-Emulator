@@ -82,7 +82,15 @@ public interface Instruction {
      *
      * @param generator the label-variable generator to use for creating fresh labels and variables
      * @return an {@link Optional} containing the expanded program,
-     *         or empty if this instruction does not expand
+     *         or empty if this instruction does not expand.
+     *         Note: this caches the expansion! Because otherwise it would generate new
+     *               variables and labels every time we expand
      */
-    Optional<Program> getExpansion(LabelVariableGenerator generator);
+    Optional<Program> getExpansionInProgram(LabelVariableGenerator generator);
+
+    /**
+     * same but because no generator is provided, this expansion is not Program context-dependent,
+     * it will use any labels and variables, and it is uncached
+     */
+    Optional<Program> getExpansionStandalone();
 }

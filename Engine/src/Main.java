@@ -20,7 +20,7 @@ public class Main {
             Program program = loader.getProgram();
 
             var runner = new ProgramRunner(program);
-            System.out.println("Max expansion degree: " + runner.getMaxExpansionDegree());
+            System.out.println("Max expansion degree: " + program.getMaxExpansionDegree());
             runner.initInputVariables(List.of(5L,2L));
             runner.run(2);
             System.out.println(runner.getVariableValues());

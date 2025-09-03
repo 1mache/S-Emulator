@@ -50,7 +50,7 @@ public class ProgramViewer {
             ProgramPeek expansionPeek = null;
 
             if (expansionDegree > 0) {
-                expansionPeek = instruction.getExpansion(labelVariableGenerator)
+                expansionPeek = instruction.getExpansionInProgram(labelVariableGenerator)
                         .map(expansion -> {
                             allInstructions.addAll(expansion.getInstructions());
 
