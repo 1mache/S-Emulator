@@ -15,37 +15,46 @@ public class ProgramViewer {
     private final Program program;
     private final LabelVariableGenerator labelVariableGenerator;
     private final InstructionPeek expandedFrom; // can be null
+    // all instructions that we've seen, to extract labels
+    private final Set<Instruction> allInstructions;
 
     public ProgramViewer(Program program) {
-        this(program, new LabelVariableGenerator(program),null);
+        this(program, new LabelVariableGenerator(program),null, new HashSet<>());
     }
 
     // for internal use
-    private ProgramViewer(Program program, LabelVariableGenerator labelVariableGenerator, InstructionPeek expandedFrom) {
+    private ProgramViewer(
+            Program program,
+            LabelVariableGenerator labelVariableGenerator,
+            InstructionPeek expandedFrom,
+            Set<Instruction> allInstructions
+    ) {
         this.program = program;
         this.labelVariableGenerator = labelVariableGenerator;
         this.expandedFrom = expandedFrom;
+        this.allInstructions = allInstructions;
     }
 
     public ProgramPeek getProgramPeek(int expansionDegree){
-        return getProgramPeekRec(expansionDegree, 0, new ArrayList<>());
+        return getProgramPeekRec(expansionDegree, 0);
     }
 
     // "recursive" version
-    private ProgramPeek getProgramPeekRec(int expansionDegree, int lineCounter, List<Instruction> allInstructions) {
+    private ProgramPeek getProgramPeekRec(int expansionDegree, int globalLineCount) {
         List<InstructionPeek> instructionPeekList = new ArrayList<>();
         List<Instruction> baseInstructions = program.getInstructions();
-        allInstructions.addAll(baseInstructions);
 
-        // start the line counter from the original instruction 'expandedFrom' lineId
-        int instructionCount = Optional.ofNullable(expandedFrom)
+        /* start the instruction counter from the original instructions lineId.
+           if the original instruction was at line 5, we want the expansion to
+            start at line 5 */
+        int baseInstructionId = Optional.ofNullable(expandedFrom)
                 .map(InstructionPeek::lineId)
                 .orElse(0);
 
         for (Instruction instruction : baseInstructions) {
-            int currentLine = lineCounter;
+            int currentLine = globalLineCount;
             // this is the "root peek" for this instruction at the current level
-            InstructionPeek basePeek = getInstructionPeek(instruction, instructionCount, expandedFrom);
+            InstructionPeek basePeek = getInstructionPeek(instruction, baseInstructionId, expandedFrom);
 
             ProgramPeek expansionPeek = null;
 
@@ -57,8 +66,9 @@ public class ProgramViewer {
                             return new ProgramViewer(
                                     expansion,
                                     labelVariableGenerator,
-                                    basePeek
-                            ).getProgramPeekRec(expansionDegree - 1, currentLine, allInstructions);
+                                    basePeek,
+                                    allInstructions
+                            ).getProgramPeekRec(expansionDegree - 1, currentLine);
                         })
                         .orElse(null);
             }
@@ -66,19 +76,19 @@ public class ProgramViewer {
             if (expansionPeek == null) {
                 InstructionPeek peek = getInstructionPeek(instruction, currentLine, expandedFrom);
                 instructionPeekList.add(peek);
-                lineCounter++;
+                globalLineCount++;
             } else {
                 instructionPeekList.addAll(expansionPeek.instructions());
-                lineCounter += expansionPeek.instructions().size();
+                globalLineCount += expansionPeek.instructions().size();
             }
 
-            instructionCount++;
+            baseInstructionId++;
         }
 
         return new ProgramPeek(
                 program.getName(),
                 getInputVariablePeeks(),
-                getLabelStrings(Instructions.extractUsedLabels(allInstructions)),
+                getLabelStrings(Instructions.extractUsedLabels(allInstructions.stream().toList())),
                 instructionPeekList
         );
     }
