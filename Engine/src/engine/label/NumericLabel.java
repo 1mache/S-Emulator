@@ -1,6 +1,5 @@
 package engine.label;
 
-
 public class NumericLabel implements Label {
     private final int number;
 

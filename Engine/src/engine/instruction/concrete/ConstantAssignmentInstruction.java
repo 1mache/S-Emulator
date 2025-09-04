@@ -9,7 +9,7 @@ import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.program.Program;
-import engine.program.ProgramImpl;
+import engine.program.StandardProgram;
 import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
@@ -53,7 +53,7 @@ public class ConstantAssignmentInstruction extends AbstractInstruction {
         for (int i = 0; i < constant.value(); i++)
             instructionList.add(new IncreaseInstruction(thisVariable, FixedLabel.EMPTY));
         
-        return new ProgramImpl(
+        return new StandardProgram(
                 getName() + "Expansion",
                 instructionList
         );

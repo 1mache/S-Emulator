@@ -8,7 +8,7 @@ import engine.variable.Variable;
 
 import java.util.*;
 
-public class ProgramImpl implements Program {
+public class StandardProgram implements Program {
 
     private final Map<Label, InstructionReference> labeledInstructions;
     private final List<Instruction> instructions;
@@ -18,7 +18,7 @@ public class ProgramImpl implements Program {
     // cached because calculation is expensive
     private Integer maxExpansionDegree;
 
-    public ProgramImpl(String name, List<Instruction> instructions) {
+    public StandardProgram(String name, List<Instruction> instructions) {
         this.name = name;
         this.instructions = instructions;
 

@@ -7,7 +7,7 @@ import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.program.Program;
-import engine.program.ProgramImpl;
+import engine.program.StandardProgram;
 import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
@@ -53,7 +53,7 @@ public class JumpVariableInstruction extends AbstractJumpInstruction {
         Label l3 = generator.getNextLabel();
         Label empty = FixedLabel.EMPTY;
 
-        return new ProgramImpl(
+        return new StandardProgram(
                 getName() + "Expansion",
                 List.of(
                         new AssignmentInstruction(z1, getLabel(), getVariable()),
