@@ -78,7 +78,7 @@ public class ProgramImpl implements Program {
 
     @Override
     public List<Instruction> getInstructions() {
-        return instructions;
+        return instructions.stream().toList();
     }
 
     @Override
@@ -92,7 +92,7 @@ public class ProgramImpl implements Program {
     private int calculateMaxExpansionDegree() {
         maxExpansionDegree = 0;
 
-        for(Instruction instruction : getInstructions()) {
+        for(Instruction instruction : instructions) {
             int expansionDegree = instruction.getExpansionStandalone()
                     .map(expansion -> expansion.getMaxExpansionDegree() + 1)
                     .orElse(0);
