@@ -7,7 +7,7 @@ import engine.instruction.AbstractJumpInstruction;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.program.Program;
-import engine.program.ProgramImpl;
+import engine.program.StandardProgram;
 import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
@@ -43,7 +43,7 @@ public class JumpZeroInstruction extends AbstractJumpInstruction {
     protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
         Label l1 = generator.getNextLabel();
 
-        return new ProgramImpl(
+        return new StandardProgram(
                 getName() + "Expansion",
                 List.of(
                         new JumpNotZeroInstruction(getVariable(), getLabel(), l1),

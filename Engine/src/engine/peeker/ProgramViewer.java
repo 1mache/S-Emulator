@@ -44,29 +44,37 @@ public class ProgramViewer {
         List<InstructionPeek> instructionPeekList = new ArrayList<>();
         List<Instruction> baseInstructions = program.getInstructions();
 
-        /* start the instruction counter from the original instructions lineId.
-           if the original instruction was at line 5, we want the expansion to
-            start at line 5 */
-        int baseInstructionId = Optional.ofNullable(expandedFrom)
+        /* start the instruction counter from the expandedFrom instruction lineId.
+           if the instruction we are expanding was at line <k>, we want to
+            start counting expanded instructions at line <k> */
+        int baseInstructionCounter = Optional.ofNullable(expandedFrom)
                 .map(InstructionPeek::lineId)
                 .orElse(0);
 
         for (Instruction instruction : baseInstructions) {
+            // which line are we on in the final ProgramPeek
             int currentLine = globalLineCount;
-            // this is the "root peek" for this instruction at the current level
-            InstructionPeek basePeek = getInstructionPeek(instruction, baseInstructionId, expandedFrom);
 
             ProgramPeek expansionPeek = null;
 
             if (expansionDegree > 0) {
+                int lineNumberOfThisWithoutExpansions = baseInstructionCounter;
                 expansionPeek = instruction.getExpansionInProgram(labelVariableGenerator)
                         .map(expansion -> {
                             allInstructions.addAll(expansion.getInstructions());
 
+                            // this is the peek for this instruction as a base for other instructions
+                            InstructionPeek basePeek = getInstructionPeek(
+                                    instruction,
+                                    lineNumberOfThisWithoutExpansions,
+                                    expandedFrom
+                            );
+
+                            // view the expansion with another ProgramViewer
                             return new ProgramViewer(
                                     expansion,
                                     labelVariableGenerator,
-                                    basePeek,
+                                    basePeek, // this instruction is what we expanded from
                                     allInstructions
                             ).getProgramPeekRec(expansionDegree - 1, currentLine);
                         })
@@ -74,15 +82,14 @@ public class ProgramViewer {
             }
 
             if (expansionPeek == null) {
-                InstructionPeek peek = getInstructionPeek(instruction, currentLine, expandedFrom);
-                instructionPeekList.add(peek);
+                instructionPeekList.add(getInstructionPeek(instruction, currentLine, expandedFrom));
                 globalLineCount++;
             } else {
                 instructionPeekList.addAll(expansionPeek.instructions());
                 globalLineCount += expansionPeek.instructions().size();
             }
 
-            baseInstructionId++;
+            baseInstructionCounter++;
         }
 
         return new ProgramPeek(

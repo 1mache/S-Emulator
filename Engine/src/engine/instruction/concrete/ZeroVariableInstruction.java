@@ -8,7 +8,7 @@ import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.program.Program;
-import engine.program.ProgramImpl;
+import engine.program.StandardProgram;
 import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
@@ -53,7 +53,7 @@ public class ZeroVariableInstruction extends AbstractInstruction {
         instructionList.add(new DecreaseInstruction(getVariable(), l1));
         instructionList.add(new JumpNotZeroInstruction(getVariable(), FixedLabel.EMPTY, l1));
 
-        return new ProgramImpl(
+        return new StandardProgram(
                 getName() + "Expansion",
                 instructionList
         );

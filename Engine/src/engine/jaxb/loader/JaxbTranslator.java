@@ -8,7 +8,7 @@ import engine.jaxb.generated.*;
 import engine.jaxb.loader.exception.SProgramXMLException;
 import engine.label.*;
 import engine.program.Program;
-import engine.program.ProgramImpl;
+import engine.program.StandardProgram;
 
 import engine.variable.Variable;
 import engine.variable.VariableType;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public class JaxbTranslator {
-    public static final Map<String, ArgumentType> argumentTypes = Map.ofEntries(
+    private static final Map<String, ArgumentType> argumentTypes = Map.ofEntries(
             // JUMP_NOT_ZERO
             Map.entry("JNZLabel", ArgumentType.LABEL),
 
@@ -47,6 +47,7 @@ public class JaxbTranslator {
     public Program getProgram(SProgram sProgram) {
         List<Instruction> instructions = new ArrayList<>();
         List<SInstruction> sInstructions = sProgram.getSInstructions().getSInstruction();
+
         for (SInstruction sInstruction : sInstructions) {
             InstructionData instructionData = InstructionData.valueOf(sInstruction.getName());
             Variable variable = str2Variable(sInstruction.getSVariable());
@@ -60,7 +61,7 @@ public class JaxbTranslator {
             instructions.add(instruction);
         }
 
-        return new ProgramImpl(sProgram.getName(), instructions);
+        return new StandardProgram(sProgram.getName(), instructions);
     }
 
     private Variable str2Variable(String str) {

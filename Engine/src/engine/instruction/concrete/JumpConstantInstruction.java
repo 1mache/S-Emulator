@@ -9,7 +9,7 @@ import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.program.Program;
-import engine.program.ProgramImpl;
+import engine.program.StandardProgram;
 import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
@@ -62,6 +62,6 @@ public class JumpConstantInstruction extends AbstractJumpInstruction {
         instructions.add(new JumpNotZeroInstruction(z1, empty, l1));
         instructions.add(new GotoLabelInstruction(empty, getTargetLabel()));
         instructions.add(new NeutralInstruction(Variable.RESULT, l1));
-        return new ProgramImpl(getName() + "Expansion", instructions);
+        return new StandardProgram(getName() + "Expansion", instructions);
     }
 }
