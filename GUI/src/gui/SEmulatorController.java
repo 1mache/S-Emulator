@@ -48,7 +48,7 @@ public class SEmulatorController implements Initializable {
         try {
             engine.loadProgram(fileChosen.getAbsolutePath());
             filenameLabel.setText("Loaded file: " + fileChosen.getName());
-            filenameLabel.setStyle("-fx-text-fill: black");
+            filenameLabel.setStyle(filenameLabel.getStylesheets().toString());
             showCatImage();
         } catch (NotXMLException e) {
             showError("Error. File not an XML");
