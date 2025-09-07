@@ -8,7 +8,6 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 
-
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.SEmulatorController">
    <top>
       <HBox alignment="CENTER_LEFT" minHeight="100.0" minWidth="100.0" prefHeight="80.0" spacing="10.0" BorderPane.alignment="CENTER">
@@ -28,7 +27,9 @@
       </HBox>
    </top>
    <center>
-      <ImageView id="catImage" fx:id="catImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" scaleX="2.0" scaleY="1.5" BorderPane.alignment="CENTER">
-      </ImageView>
+      <ImageView id="catImage" fx:id="goofyImageView" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" scaleX="2.0" scaleY="1.5" BorderPane.alignment="CENTER">
+         <image>
+            <Image url="@images/thmbs_up.jpg" />
+         </image></ImageView>
    </center>
 </BorderPane>

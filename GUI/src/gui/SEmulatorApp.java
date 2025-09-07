@@ -11,7 +11,7 @@ import javafx.stage.Stage;
 public class SEmulatorApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
-        final String LAYOUT_FXML = "../app_layout.fxml";
+        final String LAYOUT_FXML = "/app_layout.fxml";
 
         SLanguageEngine engine = SLanguageEngine.getInstance();
 
@@ -28,7 +28,6 @@ public class SEmulatorApp extends Application {
         BorderPane root = loader.load();
 
         SEmulatorController controller = loader.getController();
-        controller.setStage(stage);
         controller.setEngine(engine);
 
         Scene scene = new Scene(root);
