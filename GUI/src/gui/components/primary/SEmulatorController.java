@@ -1,4 +1,4 @@
-package gui;
+package gui.components.primary;
 
 import engine.api.SLanguageEngine;
 import engine.jaxb.loader.exception.NotXMLException;
@@ -11,8 +11,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -27,10 +25,6 @@ public class SEmulatorController implements Initializable {
     private Image catImage;
     private Image monkeImage;
 
-    private Media click;
-    private Media success;
-    private Media clickReverb;
-
     private SLanguageEngine engine;
 
     @FXML
@@ -43,7 +37,7 @@ public class SEmulatorController implements Initializable {
     private Button openFileButton;
 
     @FXML
-    void openFileButtonActionListener(ActionEvent event) {
+    void openFileButtonAction(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open S Language File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
@@ -51,7 +45,6 @@ public class SEmulatorController implements Initializable {
         //get the stage from one of the components
         Stage stage = (Stage) openFileButton.getScene().getWindow();
 
-        new MediaPlayer(click).play();
         File fileChosen = fileChooser.showOpenDialog(stage);
         if(fileChosen == null) return;
 
@@ -60,7 +53,6 @@ public class SEmulatorController implements Initializable {
             filenameLabel.setText("Loaded file: " + fileChosen.getName());
             filenameLabel.setStyle(filenameLabel.getStylesheets().toString());
             showCatImage();
-            new MediaPlayer(success).play();
         } catch (NotXMLException e) {
             showError("Error. File not an XML");
         } catch (FileNotFoundException e) {
@@ -83,9 +75,6 @@ public class SEmulatorController implements Initializable {
 
         var catUrl = getClass().getResource(CAT_IMAGE_PATH);
         var monkeUrl = getClass().getResource(MONKE_IMAGE_PATH);
-        var clickUrl = getClass().getResource("/sounds/perfect-fart.mp3");
-        var clickReverbUrl = getClass().getResource("/sounds/fart-with-reverb.mp3");
-        var successSoundUrl = getClass().getResource("/sounds/brain-fart.mp3");
         if(catUrl == null && monkeUrl == null){
             failedToLoadResource("images", CAT_IMAGE_PATH, MONKE_IMAGE_PATH);
             return;
@@ -101,10 +90,11 @@ public class SEmulatorController implements Initializable {
 
         catImage = new Image(catUrl.toExternalForm());
         monkeImage = new Image(monkeUrl.toExternalForm());
-
-        click = new Media(clickUrl.toExternalForm());
-        clickReverb = new Media(clickReverbUrl.toExternalForm());
-        success = new Media(successSoundUrl.toExternalForm());
+        openFileButton.pressedProperty().addListener(
+                (v,t1,t2) -> {
+                    if(!t1 && t2) goofyImageView.setOpacity(1.0);
+                }
+        );
     }
 
     private void failedToLoadResource(String resourceKind, String... resourceNames) {
@@ -117,18 +107,15 @@ public class SEmulatorController implements Initializable {
 
     private void showCatImage(){
         goofyImageView.setImage(catImage);
-        goofyImageView.setOpacity(1.0);
     }
 
     private void showMonkeImage(){
         goofyImageView.setImage(monkeImage);
-        goofyImageView.setOpacity(1.0);
     }
 
     private void showError(String s) {
         filenameLabel.setText(s);
         filenameLabel.setStyle("-fx-text-fill: red");
-        new MediaPlayer(clickReverb).play();
         showMonkeImage();
     }
 }

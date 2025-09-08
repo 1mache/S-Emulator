@@ -1,6 +1,7 @@
 package gui;
 
 import engine.api.SLanguageEngine;
+import gui.components.primary.SEmulatorController;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -10,9 +11,8 @@ import javafx.stage.Stage;
 
 public class SEmulatorApp extends Application {
     @Override
-    public void start(Stage stage) throws Exception {
-        final String LAYOUT_FXML = "/app_layout.fxml";
-
+    public void start(Stage primaryStage) throws Exception {
+        final String LAYOUT_FXML = "components/primary/app_layout.fxml";
         SLanguageEngine engine = SLanguageEngine.getInstance();
 
         var fxmlUrl = getClass().getResource(LAYOUT_FXML);
@@ -31,9 +31,9 @@ public class SEmulatorApp extends Application {
         controller.setEngine(engine);
 
         Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setTitle("SEmulator");
-        stage.show();
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("SEmulator");
+        primaryStage.show();
     }
 
     public static void main(String[] args) {
