@@ -11,6 +11,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -24,6 +26,8 @@ public class SEmulatorController implements Initializable {
 
     private Image catImage;
     private Image monkeImage;
+
+    private Media mamaligaSound;
 
     private SLanguageEngine engine;
 
@@ -72,6 +76,7 @@ public class SEmulatorController implements Initializable {
 
         final String CAT_IMAGE_PATH = "/images/thmbs_up.jpg";
         final String MONKE_IMAGE_PATH = "/images/monke.jpeg";
+        final String MAMALIGA_SOUND_PATH = "/sound/magic_mamaliga.mp3";
 
         var catUrl = getClass().getResource(CAT_IMAGE_PATH);
         var monkeUrl = getClass().getResource(MONKE_IMAGE_PATH);
@@ -86,6 +91,12 @@ public class SEmulatorController implements Initializable {
         else if(monkeUrl == null){
             failedToLoadResource("image", MONKE_IMAGE_PATH);
             return;
+        }
+
+        var mamaligaUrl = getClass().getResource(MAMALIGA_SOUND_PATH);
+        if(mamaligaUrl != null){
+            mamaligaSound = new Media(mamaligaUrl.toExternalForm());
+            new MediaPlayer(mamaligaSound).play();
         }
 
         catImage = new Image(catUrl.toExternalForm());
