@@ -23,11 +23,10 @@ import java.util.Arrays;
 import java.util.ResourceBundle;
 
 public class SEmulatorController implements Initializable {
+    private final boolean DEBUG = true;
 
     private Image catImage;
     private Image monkeImage;
-
-    private Media mamaligaSound;
 
     private SLanguageEngine engine;
 
@@ -94,8 +93,8 @@ public class SEmulatorController implements Initializable {
         }
 
         var mamaligaUrl = getClass().getResource(MAMALIGA_SOUND_PATH);
-        if(mamaligaUrl != null){
-            mamaligaSound = new Media(mamaligaUrl.toExternalForm());
+        if(mamaligaUrl != null && !DEBUG) {
+            Media mamaligaSound = new Media(mamaligaUrl.toExternalForm());
             new MediaPlayer(mamaligaSound).play();
         }
 
