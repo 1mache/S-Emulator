@@ -12,7 +12,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.media.Media;
@@ -23,7 +23,9 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class PrimaryController implements Initializable {
@@ -33,6 +35,7 @@ public class PrimaryController implements Initializable {
     private Image monkeImage;
 
     private SLanguageEngine engine;
+    private int currentExpansionDegree = 0;
 
     @FXML
     private ImageView goofyImageView;
@@ -44,13 +47,16 @@ public class PrimaryController implements Initializable {
     private Button openFileButton;
 
     @FXML
-    private TableView<InstructionPeek> mainInstructionTable;
+    private TextField expansionDegTextField;
 
     @FXML
     private InstructionTableController mainInstructionTableController;
 
     @FXML
-    void openFileButtonAction(ActionEvent event) {
+    private InstructionTableController expansionTableController;
+
+    @FXML
+    public void openFileButtonAction(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open S Language File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
@@ -82,12 +88,27 @@ public class PrimaryController implements Initializable {
         this.engine = engine;
     }
 
+    @FXML
+    public void handleExpansionTextFieldAction(ActionEvent event){
+        try {
+            int requested = Integer.parseInt(expansionDegTextField.getText());
+            if( 0 <= requested && requested <= engine.getMaxExpansionDegree()) {
+                currentExpansionDegree = requested;
+                mainInstructionTableController.setInstructions(
+                        engine.getExpandedProgramPeek(currentExpansionDegree).instructions()
+                );
+            }
+        } catch (NumberFormatException ignored){
+        } catch (SProgramNotLoadedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        goofyImageView.setOpacity(0.0);
 
-        if(mainInstructionTable == null)
-            throw new IllegalStateException("mainInstructionTable was not injected properly");
+        if(mainInstructionTableController == null || expansionTableController == null)
+            throw new IllegalStateException("Controllers were not injected properly");
 
         final String CAT_IMAGE_PATH = "/images/thmbs_up.jpg";
         final String MONKE_IMAGE_PATH = "/images/monke.jpeg";
@@ -108,11 +129,13 @@ public class PrimaryController implements Initializable {
             return;
         }
 
+        goofyImageView.setOpacity(0.0);
+
         var mamaligaUrl = getClass().getResource(MAMALIGA_SOUND_PATH);
         if(mamaligaUrl != null && !DEBUG) {
             Media mamaligaSound = new Media(mamaligaUrl.toExternalForm());
             MediaPlayer player = new MediaPlayer(mamaligaSound);
-            player.setVolume(1100000);
+            player.setCycleCount(MediaPlayer.INDEFINITE);
             player.play();
         }
 
@@ -122,6 +145,13 @@ public class PrimaryController implements Initializable {
                 (v,t1,t2) -> {
                     if(!t1 && t2) goofyImageView.setOpacity(1.0);
                 }
+        );
+
+        mainInstructionTableController.setPlaceholderMessage("No program loaded");
+        expansionTableController.setPlaceholderMessage("Pick instruction to see its source");
+
+        mainInstructionTableController.addRowClickListener(rowClickAction ->
+                showExpansionChain(rowClickAction.getRowData())
         );
     }
 
@@ -145,5 +175,27 @@ public class PrimaryController implements Initializable {
         filenameLabel.setText(s);
         filenameLabel.setStyle("-fx-text-fill: red");
         showMonkeImage();
+    }
+
+    private void showExpansionChain(InstructionPeek instruction){
+        List<InstructionPeek> expansionChain = new ArrayList<>();
+        instruction = instruction.expandedFrom();
+        if(instruction == null) {
+            expansionTableController.setPlaceholderMessage("This instruction was in the original program. Was not expanded");
+            expansionTableController.clear();
+            return;
+        }
+        if(currentExpansionDegree == 0) {
+            expansionTableController.setPlaceholderMessage("The expansion degree is 0. Choose a higher expansion degree.");
+            expansionTableController.clear();
+            return;
+        }
+
+        for (int i = 0; i < currentExpansionDegree && instruction != null; i++) {
+            expansionChain.add(instruction);
+            instruction = instruction.expandedFrom();
+        }
+
+        expansionTableController.setInstructions(expansionChain);
     }
 }
