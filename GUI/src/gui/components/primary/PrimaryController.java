@@ -1,14 +1,18 @@
 package gui.components.primary;
 
 import engine.api.SLanguageEngine;
+import engine.api.dto.InstructionPeek;
+import engine.execution.exception.SProgramNotLoadedException;
 import engine.jaxb.loader.exception.NotXMLException;
 import engine.jaxb.loader.exception.UnknownLabelException;
+import gui.components.instruction.table.InstructionTableController;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.media.Media;
@@ -22,7 +26,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.ResourceBundle;
 
-public class SEmulatorController implements Initializable {
+public class PrimaryController implements Initializable {
     private final boolean DEBUG = true;
 
     private Image catImage;
@@ -40,6 +44,12 @@ public class SEmulatorController implements Initializable {
     private Button openFileButton;
 
     @FXML
+    private TableView<InstructionPeek> mainInstructionTable;
+
+    @FXML
+    private InstructionTableController mainInstructionTableController;
+
+    @FXML
     void openFileButtonAction(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open S Language File");
@@ -53,15 +63,18 @@ public class SEmulatorController implements Initializable {
 
         try {
             engine.loadProgram(fileChosen.getAbsolutePath());
-            filenameLabel.setText("Loaded file: " + fileChosen.getName());
+            filenameLabel.setText("Loaded file: " + fileChosen.getAbsolutePath());
             filenameLabel.setStyle(filenameLabel.getStylesheets().toString());
             showCatImage();
+            mainInstructionTableController.setInstructions(engine.getProgramPeek().instructions());
         } catch (NotXMLException e) {
             showError("Error. File not an XML");
         } catch (FileNotFoundException e) {
             showError("Error. File not found");
         } catch (UnknownLabelException e) {
             showError(e.getMessage());
+        } catch (SProgramNotLoadedException e) {
+            throw new AssertionError(e); // will never happen, we loaded a program
         }
     }
 
@@ -72,6 +85,9 @@ public class SEmulatorController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         goofyImageView.setOpacity(0.0);
+
+        if(mainInstructionTable == null)
+            throw new IllegalStateException("mainInstructionTable was not injected properly");
 
         final String CAT_IMAGE_PATH = "/images/thmbs_up.jpg";
         final String MONKE_IMAGE_PATH = "/images/monke.jpeg";
@@ -95,7 +111,9 @@ public class SEmulatorController implements Initializable {
         var mamaligaUrl = getClass().getResource(MAMALIGA_SOUND_PATH);
         if(mamaligaUrl != null && !DEBUG) {
             Media mamaligaSound = new Media(mamaligaUrl.toExternalForm());
-            new MediaPlayer(mamaligaSound).play();
+            MediaPlayer player = new MediaPlayer(mamaligaSound);
+            player.setVolume(1100000);
+            player.play();
         }
 
         catImage = new Image(catUrl.toExternalForm());

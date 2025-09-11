@@ -1,7 +1,7 @@
 package gui;
 
 import engine.api.SLanguageEngine;
-import gui.components.primary.SEmulatorController;
+import gui.components.primary.PrimaryController;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -27,7 +27,7 @@ public class SEmulatorApp extends Application {
 
         BorderPane root = loader.load();
 
-        SEmulatorController controller = loader.getController();
+        PrimaryController controller = loader.getController();
         controller.setEngine(engine);
 
         Scene scene = new Scene(root);
