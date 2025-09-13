@@ -3,13 +3,13 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 
-<TableView fx:id="instructionTable" editable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="250.0" prefWidth="400.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/24.0.1" fx:controller="gui.component.instruction.table.InstructionTableController">
+<TableView fx:id="instructionTable" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="250.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.component.instruction.table.InstructionTableController">
   <columns>
-    <TableColumn fx:id="lineNumberColumn" editable="false" prefWidth="75.0" sortable="false" text="Line" />
-    <TableColumn fx:id="labelColumn" editable="false" prefWidth="75.0" sortable="false" text="Label" />
-      <TableColumn fx:id="baseOrSynthColumn" editable="false" prefWidth="75.0" sortable="false" text="B/S" />
-      <TableColumn fx:id="instructionColumn" editable="false" minWidth="50.0" prefWidth="300.0" sortable="false" text="Instruction" />
-      <TableColumn fx:id="cyclesColumn" editable="false" prefWidth="75.0" sortable="false" text="Cycles" />
+    <TableColumn fx:id="lineNumberColumn" editable="false" maxWidth="1.7976931348623157E308" minWidth="40.0" prefWidth="75.0" sortable="false" text="Line" />
+    <TableColumn fx:id="labelColumn" editable="false" maxWidth="1.7976931348623157E308" minWidth="40.0" prefWidth="75.0" sortable="false" text="Label" />
+      <TableColumn fx:id="baseOrSynthColumn" editable="false" maxWidth="1.7976931348623157E308" minWidth="40.0" prefWidth="75.0" sortable="false" text="B/S" />
+      <TableColumn fx:id="instructionColumn" editable="false" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="300.0" sortable="false" text="Instruction" />
+      <TableColumn fx:id="cyclesColumn" editable="false" maxWidth="1.7976931348623157E308" minWidth="30.0" prefWidth="75.0" sortable="false" text="Cycles" />
   </columns>
    <columnResizePolicy>
       <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
