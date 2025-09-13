@@ -4,7 +4,6 @@ import engine.api.SLanguageEngine;
 import engine.api.dto.InstructionPeek;
 import engine.loader.exception.NotXMLException;
 import engine.loader.exception.UnknownLabelException;
-import engine.program.Program;
 import gui.component.instruction.table.InstructionTableController;
 import gui.task.ProgramLoadTask;
 import javafx.application.Platform;
@@ -16,6 +15,7 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
@@ -32,7 +32,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.geometry.Insets;
 
-import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
@@ -99,21 +98,17 @@ public class PrimaryController implements Initializable {
         dialog.setResizable(false);
         dialog.setAlwaysOnTop(true);
 
-        dialog.setOnCloseRequest(e ->
-                e.consume()
-        );
+        dialog.setOnCloseRequest(Event::consume);
 
         rootBorderPane.setDisable(true);
 
 
-        loaderTask.setOnSucceeded(e -> {
-            Platform.runLater(() -> {
-                programLoadedProperty.set(true);
-                programPathProperty.setValue(fileChosen.getAbsolutePath());
-                rootBorderPane.setDisable(false);
-                dialog.close();
-            });
-        });
+        loaderTask.setOnSucceeded(e -> Platform.runLater(() -> {
+            programLoadedProperty.set(true);
+            programPathProperty.setValue(fileChosen.getAbsolutePath());
+            rootBorderPane.setDisable(false);
+            dialog.close();
+        }));
 
         loaderTask.setOnFailed(e -> {
             Platform.runLater(() -> {
@@ -215,13 +210,6 @@ public class PrimaryController implements Initializable {
                         mainInstructionTableController.setInstructions(engine.getProgramPeek().instructions());
                 }
         );
-    }
-    private void failedToLoadResource(String resourceKind, String... resourceNames) {
-        System.out.print("Error: Could not load " + resourceKind + " ");
-        Arrays.stream(resourceNames)
-                .forEach(s ->  System.out.print(s + " "));
-        System.out.println();
-        Platform.exit();
     }
 
     private void showExpansionChain(InstructionPeek instruction){
