@@ -20,9 +20,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.SplitPane;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.FileChooser;
@@ -43,10 +41,7 @@ public class PrimaryController implements Initializable {
     private final StringProperty  programPathProperty   = new SimpleStringProperty("None");
 
     @FXML
-    private SplitPane centerSplitPane;
-
-    @FXML
-    private SplitPane rightSplitPane;
+    private BorderPane rootBorderPane;
 
     @FXML
     private Label filenameLabel;
@@ -106,6 +101,7 @@ public class PrimaryController implements Initializable {
 
         mainInstructionTableController.setPlaceholderMessage("No program loaded");
         expansionTableController.setPlaceholderMessage("Pick instruction to see its source");
+        expansionChoiceBox.setValue(0); // default expansion degree
 
         mainInstructionTableController.addRowClickListener(rowClickAction ->
                 showExpansionChain(rowClickAction.getRowData())
@@ -119,8 +115,6 @@ public class PrimaryController implements Initializable {
         );
 
         bindToProgramLoaded();
-
-        expansionChoiceBox.setValue(0); // default expansion degree
     }
 
     public void setEngine(SLanguageEngine engine) {
@@ -160,8 +154,8 @@ public class PrimaryController implements Initializable {
         );
 
         // other menus
-        centerSplitPane.disableProperty().bind(Bindings.not(programLoadedProperty));
-        rightSplitPane.disableProperty().bind(Bindings.not(programLoadedProperty));
+        rootBorderPane.getCenter().disableProperty().bind(Bindings.not(programLoadedProperty));
+        rootBorderPane.getRight().disableProperty().bind(Bindings.not(programLoadedProperty));
 
         // react to program loaded
         programLoadedProperty.addListener(
