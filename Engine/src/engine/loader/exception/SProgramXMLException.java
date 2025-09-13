@@ -1,4 +1,4 @@
-package engine.jaxb.loader.exception;
+package engine.loader.exception;
 
 /**
  * This exception is for when the formats that were defined for the input XML files aren't

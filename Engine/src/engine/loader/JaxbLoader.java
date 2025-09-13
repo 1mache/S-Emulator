@@ -1,4 +1,4 @@
-package engine.jaxb.loader;
+package engine.loader;
 
 import engine.jaxb.generated.SProgram;
 import jakarta.xml.bind.JAXBContext;

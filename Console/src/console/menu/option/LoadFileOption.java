@@ -1,8 +1,8 @@
 package console.menu.option;
 
 import engine.api.SLanguageEngine;
-import engine.jaxb.loader.exception.NotXMLException;
-import engine.jaxb.loader.exception.UnknownLabelException;
+import engine.loader.exception.NotXMLException;
+import engine.loader.exception.UnknownLabelException;
 
 import java.io.FileNotFoundException;
 import java.util.Scanner;
@@ -23,7 +23,7 @@ public class LoadFileOption extends MenuPage {
         }
 
         try{
-            engine.loadProgram(path);
+            engine.loadProgram(path, null);
             System.out.println("Program loaded successfully");
         }
         catch (FileNotFoundException | NotXMLException | UnknownLabelException e) {

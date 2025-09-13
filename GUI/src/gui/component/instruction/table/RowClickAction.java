@@ -1,4 +1,4 @@
-package gui.components.instruction.table;
+package gui.component.instruction.table;
 
 import engine.api.dto.InstructionPeek;
 import javafx.event.ActionEvent;

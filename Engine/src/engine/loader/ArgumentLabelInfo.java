@@ -1,4 +1,4 @@
-package engine.jaxb.loader;
+package engine.loader;
 
 import engine.label.Label;
 

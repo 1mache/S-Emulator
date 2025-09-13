@@ -1,11 +1,12 @@
-package engine.jaxb.loader;
+package engine.loader;
 
 import engine.argument.Argument;
 import engine.argument.ArgumentType;
 import engine.argument.ConstantArgument;
 import engine.instruction.*;
 import engine.jaxb.generated.*;
-import engine.jaxb.loader.exception.SProgramXMLException;
+import engine.loader.event.LoadingListener;
+import engine.loader.exception.SProgramXMLException;
 import engine.label.*;
 import engine.program.Program;
 import engine.program.StandardProgram;
@@ -44,9 +45,11 @@ public class JaxbTranslator {
     );
 
 
-    public Program getProgram(SProgram sProgram) {
+    public Program getProgram(SProgram sProgram, LoadingListener listener) {
         List<Instruction> instructions = new ArrayList<>();
         List<SInstruction> sInstructions = sProgram.getSInstructions().getSInstruction();
+        int totalInstructions = sInstructions.size();
+        int currentInstruction = 0;
 
         for (SInstruction sInstruction : sInstructions) {
             InstructionData instructionData = InstructionData.valueOf(sInstruction.getName());
@@ -59,6 +62,15 @@ public class JaxbTranslator {
                     createInstruction(instructionData, variable, label, arguments);
 
             instructions.add(instruction);
+            currentInstruction++;
+
+            if(listener != null) {
+                listener.onInstructionProcessed(currentInstruction, totalInstructions);
+            }
+        }
+
+        if(listener != null) {
+            listener.onLoadingCompleted();
         }
 
         return new StandardProgram(sProgram.getName(), instructions);

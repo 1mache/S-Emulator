@@ -1,4 +1,4 @@
-package engine.jaxb.loader.exception;
+package engine.loader.exception;
 
 public class NotXMLException extends Exception {
     public NotXMLException(String message) {

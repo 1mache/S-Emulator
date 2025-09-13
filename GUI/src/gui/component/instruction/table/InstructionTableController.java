@@ -1,7 +1,6 @@
-package gui.components.instruction.table;
+package gui.component.instruction.table;
 
 import engine.api.dto.InstructionPeek;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;

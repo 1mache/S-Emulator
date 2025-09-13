@@ -1,7 +1,7 @@
 import engine.execution.ProgramRunner;
-import engine.jaxb.loader.FromXMLProgramLoader;
-import engine.jaxb.loader.exception.NotXMLException;
-import engine.jaxb.loader.exception.UnknownLabelException;
+import engine.loader.FromXMLProgramLoader;
+import engine.loader.exception.NotXMLException;
+import engine.loader.exception.UnknownLabelException;
 import engine.program.Program;
 
 import java.io.FileNotFoundException;
@@ -13,7 +13,7 @@ public class Main {
 
         try {
             loader.loadXML(
-                    "C:\\Users\\Dmytro\\Akademit\\Java\\tests\\minus.xml"
+                    "C:\\Users\\Dmytro\\Akademit\\Java\\tests\\minus.xml", null
             );
 
             loader.validateProgram();

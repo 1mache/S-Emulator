@@ -1,11 +1,12 @@
-package gui.components.primary;
+package gui.component.primary;
 
 import engine.api.SLanguageEngine;
 import engine.api.dto.InstructionPeek;
-import engine.execution.exception.SProgramNotLoadedException;
-import engine.jaxb.loader.exception.NotXMLException;
-import engine.jaxb.loader.exception.UnknownLabelException;
-import gui.components.instruction.table.InstructionTableController;
+import engine.loader.exception.NotXMLException;
+import engine.loader.exception.UnknownLabelException;
+import engine.program.Program;
+import gui.component.instruction.table.InstructionTableController;
+import gui.task.ProgramLoadTask;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -17,19 +18,26 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.geometry.Insets;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.*;
+import java.util.List;
 
 public class PrimaryController implements Initializable {
     private final boolean DEBUG = true;
@@ -69,22 +77,65 @@ public class PrimaryController implements Initializable {
 
         File fileChosen = fileChooser.showOpenDialog(stage);
         if(fileChosen == null) return;
+        loadProgram(fileChosen);
+    }
 
-        try {
-            engine.loadProgram(fileChosen.getAbsolutePath());
+    private void loadProgram(File fileChosen) {
+        var loaderTask = new ProgramLoadTask(engine, fileChosen.getAbsolutePath());
+        Thread th = new Thread(loaderTask);
+        th.setDaemon(true);
 
-            programLoadedProperty.set(true);
-            programPathProperty.setValue(fileChosen.getAbsolutePath());
+        // create a ProgressBar and bind its progress to the task
+        ProgressBar progressBar = new ProgressBar(0);
+        progressBar.progressProperty().bind(loaderTask.progressProperty());
 
-        } catch (NotXMLException e) {
-            showError("Error. File not an XML");
-        } catch (FileNotFoundException e) {
-            showError("Error. File not found");
-        } catch (UnknownLabelException e) {
-            showError(e.getMessage());
-        } catch (SProgramNotLoadedException e) {
-            throw new AssertionError(e); // will never happen, we loaded a program
-        }
+        // create a dialog/window to show the progress bar
+        Stage dialog = new Stage();
+        VBox box = new VBox(10, new Label("Loading..."), progressBar);
+        box.setPadding(new Insets(20));
+        dialog.setScene(new Scene(box));
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.show();
+        dialog.setResizable(false);
+        dialog.setAlwaysOnTop(true);
+
+        dialog.setOnCloseRequest(e ->
+                e.consume()
+        );
+
+        rootBorderPane.setDisable(true);
+
+
+        loaderTask.setOnSucceeded(e -> {
+            Platform.runLater(() -> {
+                programLoadedProperty.set(true);
+                programPathProperty.setValue(fileChosen.getAbsolutePath());
+                rootBorderPane.setDisable(false);
+                dialog.close();
+            });
+        });
+
+        loaderTask.setOnFailed(e -> {
+            Platform.runLater(() -> {
+                dialog.close();
+                rootBorderPane.setDisable(false);
+            });
+
+            Throwable ex = loaderTask.getException();
+            switch (ex) {
+                case NotXMLException ignored ->
+                        Platform.runLater(() -> showError("Error. File not an XML"));
+                case FileNotFoundException ignored ->
+                        Platform.runLater(() -> showError("Error. File not found"));
+                case UnknownLabelException ignored ->
+                        Platform.runLater(() -> showError(ex.getMessage()));
+                default ->
+                    // Generic fallback
+                        showError("Unhandled error: " + ex.getMessage());
+            }
+        });
+
+        th.start();
     }
 
     @Override

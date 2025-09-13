@@ -1,4 +1,4 @@
-package engine.jaxb.loader.exception;
+package engine.loader.exception;
 
 public class UnknownLabelException extends Exception {
     public UnknownLabelException(String message) {

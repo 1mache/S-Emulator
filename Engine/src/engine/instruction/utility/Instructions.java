@@ -2,7 +2,7 @@ package engine.instruction.utility;
 
 import engine.argument.ArgumentType;
 import engine.instruction.Instruction;
-import engine.jaxb.loader.ArgumentLabelInfo;
+import engine.loader.ArgumentLabelInfo;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.program.InstructionReference;
