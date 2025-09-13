@@ -12,23 +12,27 @@
 
 <BorderPane fx:id="rootBorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" prefHeight="600.0" prefWidth="800.0" stylesheets="@app_styling.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.components.primary.PrimaryController">
    <top>
-      <HBox alignment="CENTER_LEFT" minHeight="80.0" prefHeight="80.0" spacing="10.0" BorderPane.alignment="CENTER">
+      <VBox alignment="CENTER" BorderPane.alignment="CENTER">
          <BorderPane.margin>
             <Insets />
          </BorderPane.margin>
-         <opaqueInsets>
-            <Insets />
-         </opaqueInsets>
          <children>
             <Label fx:id="filenameLabel" minWidth="50.0" styleClass="text-component" text="Please load program file to continue." />
-            <Button fx:id="openFileButton" mnemonicParsing="false" onAction="#openFileButtonAction" styleClass="text-component" text="Open file..." />
-            <Label styleClass="text-component" text="Expansion degree: " />
-            <ChoiceBox fx:id="expansionChoiceBox" disable="true" prefWidth="150.0" />
+            <HBox alignment="CENTER_LEFT" minHeight="80.0" prefHeight="80.0" spacing="10.0">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <children>
+                  <Button fx:id="openFileButton" mnemonicParsing="false" onAction="#openFileButtonAction" styleClass="text-component" text="Open file..." />
+                  <Label styleClass="text-component" text="Expansion degree: " />
+                  <ChoiceBox fx:id="expansionChoiceBox" disable="true" prefWidth="150.0" />
+               </children>
+               <padding>
+                  <Insets left="20.0" />
+               </padding>
+            </HBox>
          </children>
-         <padding>
-            <Insets left="20.0" />
-         </padding>
-      </HBox>
+      </VBox>
    </top>
    <right>
       <SplitPane dividerPositions="0.8549" orientation="VERTICAL" prefHeight="320.0" prefWidth="200.0" BorderPane.alignment="CENTER">
