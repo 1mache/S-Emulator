@@ -1,6 +1,7 @@
 package gui.components.instruction.table;
 
 import engine.api.dto.InstructionPeek;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -48,7 +49,7 @@ public class InstructionTableController implements Initializable {
         setPlaceholderMessage("No instructions to display");
 
         lineNumberColumn.setCellValueFactory(cellData ->
-                new ReadOnlyObjectWrapper<>(cellData.getValue().lineId())
+                new ReadOnlyObjectWrapper<>(cellData.getValue().lineId() + 1)
         );
 
         labelColumn.setCellValueFactory(cellData ->

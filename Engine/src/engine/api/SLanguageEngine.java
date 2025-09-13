@@ -42,17 +42,17 @@ public class SLanguageEngine {
         return program == null;
     }
 
-    public int getMaxExpansionDegree() throws SProgramNotLoadedException {
+    public int getMaxExpansionDegree() {
         if(programNotLoaded())
             throw new SProgramNotLoadedException("Program has not been loaded");
         return program.getMaxExpansionDegree();
     }
 
-    public ProgramPeek getProgramPeek() throws SProgramNotLoadedException {
+    public ProgramPeek getProgramPeek() {
         return getExpandedProgramPeek(0) ;
     }
 
-    public ProgramPeek getExpandedProgramPeek(int expansionDegree) throws SProgramNotLoadedException {
+    public ProgramPeek getExpandedProgramPeek(int expansionDegree) {
         if(expansionDegree > getMaxExpansionDegree())
             throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + program.getMaxExpansionDegree());
         if(programNotLoaded()) {
@@ -62,7 +62,7 @@ public class SLanguageEngine {
         return new ProgramViewer(program).getProgramPeek(expansionDegree);
     }
 
-    public ExecutionResult runProgram(List<Long> inputs, int expansionDegree) throws SProgramNotLoadedException {
+    public ExecutionResult runProgram(List<Long> inputs, int expansionDegree) {
         if(expansionDegree > program.getMaxExpansionDegree())
             throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + program.getMaxExpansionDegree());
         if(programNotLoaded())
@@ -83,7 +83,7 @@ public class SLanguageEngine {
         return executionResult;
     }
 
-    public List<ExecutionResult> getExecutionHistory() throws SProgramNotLoadedException {
+    public List<ExecutionResult> getExecutionHistory(){
         if(programNotLoaded())
             throw new SProgramNotLoadedException("Program is not loaded");
 
