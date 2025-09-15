@@ -17,8 +17,7 @@ public class ProgramLoadTask extends Task<Void> {
         public void onInstructionProcessed(int instructionIndex, int totalInstructions) {
             try {
                 Thread.sleep(10); // Simulate loading time for better UX
-            } catch (InterruptedException ignored) {
-            }
+            } catch (InterruptedException ignored) {}
             updateProgress(instructionIndex, totalInstructions);
         }
 

@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 public class VariableTableController implements Initializable {
-    private record VariableEntry(String name, Long value) {}
-
     @FXML
     private TableColumn<VariableEntry, String> nameColumn;
 
@@ -26,6 +24,7 @@ public class VariableTableController implements Initializable {
     @FXML
     private TableView<VariableEntry> variableTable;
 
+    private record VariableEntry(String name, Long value) {}
     private final ObservableList<VariableEntry> variableEntries = FXCollections.observableArrayList();
 
     @Override

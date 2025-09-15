@@ -42,7 +42,6 @@ public class InstructionTableController implements Initializable {
     private final ObservableList<InstructionPeek> instructions = FXCollections.observableArrayList();
     private final Set<EventHandler<RowClickAction>> rowClickListeners = new HashSet<>();
 
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         setPlaceholderMessage("No instructions to display");
@@ -69,6 +68,7 @@ public class InstructionTableController implements Initializable {
                 new ReadOnlyObjectWrapper<>(cellData.getValue().cycles())
         );
 
+        // clicking on a row triggers an event
         instructionTable.setRowFactory(tv -> {
             TableRow<InstructionPeek> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
@@ -100,8 +100,7 @@ public class InstructionTableController implements Initializable {
     }
 
     private void onRowClick(InstructionPeek rowData) {
-        var listeners = Set.copyOf(rowClickListeners);
-        listeners.forEach(
+        rowClickListeners.forEach(
                 listener -> listener.handle(new RowClickAction(rowData))
         );
     }

@@ -37,14 +37,6 @@ import java.util.*;
 import java.util.List;
 
 public class PrimaryController implements Initializable {
-    private final boolean DEBUG = true;
-
-    private SLanguageEngine engine;
-    private final IntegerProperty expansionDegreeProperty = new SimpleIntegerProperty(0);
-
-    private final BooleanProperty programLoadedProperty = new SimpleBooleanProperty(false);
-    private final StringProperty  programPathProperty   = new SimpleStringProperty("None");
-
     @FXML
     private BorderPane rootBorderPane;
 
@@ -66,26 +58,26 @@ public class PrimaryController implements Initializable {
     @FXML
     private ExecutionTabController executionTabController;
 
+    private SLanguageEngine engine;
+
+    private final IntegerProperty expansionDegreeProperty = new SimpleIntegerProperty(0);
+
+    private final BooleanProperty programLoadedProperty = new SimpleBooleanProperty(false);
+    private final StringProperty  programPathProperty   = new SimpleStringProperty("None");
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        final String MAMALIGA_SOUND_PATH = "/sound/magic_mamaliga.mp3";
-
-        var mamaligaUrl = getClass().getResource(MAMALIGA_SOUND_PATH);
-        if(mamaligaUrl != null && !DEBUG) {
-            Media mamaligaSound = new Media(mamaligaUrl.toExternalForm());
-            MediaPlayer player = new MediaPlayer(mamaligaSound);
-            player.setCycleCount(MediaPlayer.INDEFINITE);
-            player.play();
-        }
+        playSoundTheme();
 
         mainInstructionTableController.setPlaceholderMessage("No program loaded");
         expansionTableController.setPlaceholderMessage("Pick instruction to see its source");
-        expansionChoiceBox.setValue(0); // default expansion degree
 
+        // on row click, show expansion chain in the expansion table
         mainInstructionTableController.addRowClickListener(rowClickAction ->
                 showExpansionChain(rowClickAction.getRowData())
         );
 
+        // what happens on expansion degree change
         expansionDegreeProperty.bind(expansionChoiceBox.getSelectionModel().selectedItemProperty());
         expansionChoiceBox.getSelectionModel().selectedItemProperty().addListener(
                 (v, old, now) ->{
@@ -94,7 +86,8 @@ public class PrimaryController implements Initializable {
                     expansionTableController.clear();
                 }
         );
-        // bind the property to execution tab controller
+
+        // bind the expansion deg. property to execution tab controller
         executionTabController.getExpansionDegreeProperty().bind(expansionDegreeProperty);
 
         bindToProgramLoaded();
@@ -102,14 +95,15 @@ public class PrimaryController implements Initializable {
 
     @FXML
     public void openFileButtonAction(ActionEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open S Language File");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
-
         //get the stage from one of the components
         Stage stage = (Stage) openFileButton.getScene().getWindow();
 
+        // file chooser dialog window
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open S Language File");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
         File fileChosen = fileChooser.showOpenDialog(stage);
+
         if(fileChosen == null) return;
         loadProgram(fileChosen);
     }
@@ -121,6 +115,8 @@ public class PrimaryController implements Initializable {
         this.engine = engine;
         executionTabController.setEngine(engine);
     }
+
+    // ===================== Private =======================
 
     private void bindToProgramLoaded(){
         // file name label
@@ -148,17 +144,15 @@ public class PrimaryController implements Initializable {
                 (v, was, now) -> {
                     if(now) {
                         expansionChoiceBox.setValue(0); // reset to 0 when new program loaded
-                    } else {
-                        expansionChoiceBox.setValue(null); // clear selection when program unloaded
                     }
                 }
         );
 
-        // other menus
+        // disable other menus if no program loaded
         rootBorderPane.getCenter().disableProperty().bind(Bindings.not(programLoadedProperty));
         rootBorderPane.getRight().disableProperty().bind(Bindings.not(programLoadedProperty));
 
-        // react to program loaded
+        // miscellaneous reactions to program loaded
         programLoadedProperty.addListener(
                 (v, was, now) -> {
                     if (now){
@@ -173,6 +167,7 @@ public class PrimaryController implements Initializable {
     private void loadProgram(File fileChosen) {
         programLoadedProperty.set(false);
 
+        // create a task to load the program
         var loaderTask = new ProgramLoadTask(engine, fileChosen.getAbsolutePath());
         Thread th = new Thread(loaderTask);
         th.setDaemon(true);
@@ -180,9 +175,9 @@ public class PrimaryController implements Initializable {
         // create a ProgressBar and bind its progress to the task
         ProgressBar progressBar = new ProgressBar(0);
         progressBar.progressProperty().bind(loaderTask.progressProperty());
+        Stage dialog = getProgressDialogWindow(progressBar);
 
-        Stage dialog = getDialogWindow(progressBar);
-
+        // when the task succeeded
         loaderTask.setOnSucceeded(e -> Platform.runLater(() -> {
             Platform.runLater(() -> {
                 rootBorderPane.setDisable(false);
@@ -192,6 +187,7 @@ public class PrimaryController implements Initializable {
             programPathProperty.setValue(fileChosen.getAbsolutePath());
         }));
 
+        // when the task failed
         loaderTask.setOnFailed(e -> {
             if(!engine.programNotLoaded()){
                 programLoadedProperty.set(true); // if we failed but engine had a program loaded before
@@ -215,10 +211,11 @@ public class PrimaryController implements Initializable {
             }
         });
 
+        // start the loading task
         th.start();
     }
 
-    private Stage getDialogWindow(ProgressBar progressBar) {
+    private Stage getProgressDialogWindow(ProgressBar progressBar) {
         // create a dialog/window to show the progress bar
         Stage dialog = new Stage();
         VBox box = new VBox(10, new Label("Loading..."), progressBar);
@@ -237,8 +234,10 @@ public class PrimaryController implements Initializable {
 
     private void showExpansionChain(InstructionPeek instruction){
         int currentExpansionDegree = expansionDegreeProperty.get();
+
         List<InstructionPeek> expansionChain = new ArrayList<>();
         expansionChain.add(instruction);
+
         instruction = instruction.expandedFrom();
         if(instruction == null) {
             expansionTableController.setPlaceholderMessage("This instruction was in the original program. Was not expanded");
@@ -261,5 +260,18 @@ public class PrimaryController implements Initializable {
 
     private void showError(String s) {
         filenameLabel.setText(s); //TODO:fix this
+    }
+
+    private void playSoundTheme() {
+        final String MAMALIGA_SOUND_PATH = "/sound/magic_mamaliga.mp3";
+        boolean DEBUG = true;
+
+        var mamaligaUrl = getClass().getResource(MAMALIGA_SOUND_PATH);
+        if(mamaligaUrl != null && !DEBUG) {
+            Media mamaligaSound = new Media(mamaligaUrl.toExternalForm());
+            MediaPlayer player = new MediaPlayer(mamaligaSound);
+            player.setCycleCount(MediaPlayer.INDEFINITE);
+            player.play();
+        }
     }
 }

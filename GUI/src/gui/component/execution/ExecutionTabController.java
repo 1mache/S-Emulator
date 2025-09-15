@@ -26,8 +26,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 public class ExecutionTabController implements Initializable {
-    private final String DEFAULT_LABEL_TEXT = "Input Variables (positive integers)";
-
     @FXML
     private VariableTableController variableTableController;
 
@@ -43,6 +41,8 @@ public class ExecutionTabController implements Initializable {
     @FXML
     private Label inputVarsLabel;
 
+    private final String DEFAULT_LABEL_TEXT = "Input Variables (positive integers)";
+
     private SLanguageEngine engine;
     private final Map<String, TextField> inputFields = new HashMap<>();
     private final BooleanProperty inputsValidProperty = new SimpleBooleanProperty(true);
@@ -53,7 +53,7 @@ public class ExecutionTabController implements Initializable {
         inputVariableGrid.getChildren().clear();
 
         inputsValidProperty.addListener(
-                (v, old, now) -> {
+                (v, was, now) -> {
                     if (now) {
                         inputVarsLabel.setText(DEFAULT_LABEL_TEXT);
                         inputVarsLabel.getStyleClass().remove(CssClasses.ERROR_FIELD);
@@ -122,15 +122,15 @@ public class ExecutionTabController implements Initializable {
             // keep reference
             inputFields.put(varName, textField);
 
-            // add row constraint
-            RowConstraints rc = new RowConstraints();
-            rc.setMinHeight(10);
-            rc.setPrefHeight(30);
-            rc.setVgrow(Priority.SOMETIMES);
-            inputVariableGrid.getRowConstraints().add(rc);
-
             row++;
         }
+
+        // add row constraint
+        RowConstraints rc = new RowConstraints();
+        rc.setMinHeight(10);
+        rc.setPrefHeight(30);
+        rc.setVgrow(Priority.SOMETIMES);
+        inputVariableGrid.getRowConstraints().add(rc);
     }
 
     private void validateInputs() {
