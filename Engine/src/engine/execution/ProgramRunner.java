@@ -74,7 +74,7 @@ public class ProgramRunner {
         return variableContext.getVariableValue(Variable.RESULT);
     }
 
-    public Map<String, Long> getVariableValues() {
+    public Map<String, Long> getVariableEndValues() {
         return variableContext.getOrganizedVariableValues();
     }
 
@@ -87,6 +87,21 @@ public class ProgramRunner {
         for(Long input : initInput) {
             variableContext.setVariableValue(Variable.createInputVariable(counter), input);
             counter++;
+        }
+    }
+
+    public void initInputVariablesSpecific(List<Long> initInput) {
+        if(initInput.size() > program.getInputVariables().size())
+            throw new IllegalArgumentException("Too many input values provided. Expected at most " + program.getInputVariables().size() + " but got " + initInput.size());
+
+        var inputVars = program.getInputVariables();
+        int minSize = Math.min(initInput.size(), inputVars.size());
+        int i;
+        for(i = 0; i < minSize; i++) {
+            variableContext.setVariableValue(inputVars.get(i), initInput.get(i));
+        }
+        for(; i < inputVars.size(); i++) {
+            variableContext.setVariableValue(inputVars.get(i), 0L);
         }
     }
 

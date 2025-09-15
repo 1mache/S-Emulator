@@ -24,7 +24,7 @@ public class RunProgramOption extends AbstractExpandingOption {
             System.out.println("Running program:");
             printProgramPeek(engine.getExpandedProgramPeek(expansionDegree), expansionDegree, false);
 
-            ExecutionResult result = engine.runProgram(inputs, expansionDegree);
+            ExecutionResult result = engine.runProgram(inputs, expansionDegree, false);
             System.out.println("Program execution result: " + result.outputValue());
             System.out.println("Variables that were used:");
             result.variableMap().forEach((key, value) -> System.out.println(key + "= " + value));

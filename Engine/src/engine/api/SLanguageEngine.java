@@ -63,19 +63,26 @@ public class SLanguageEngine {
         return new ProgramViewer(program).getProgramPeek(expansionDegree);
     }
 
-    public ExecutionResult runProgram(List<Long> inputs, int expansionDegree) {
+    public ExecutionResult runProgram(List<Long> inputs, int expansionDegree, boolean specificInputs) {
         if(expansionDegree > program.getMaxExpansionDegree())
             throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + program.getMaxExpansionDegree());
         if(programNotLoaded())
             throw new SProgramNotLoadedException("Program is not loaded");
+        for(var input : inputs){
+            if(input < 0)
+                throw new IllegalArgumentException("Input values must be non-negative");
+        }
 
         programRunner.reset(); // reset previous run artifacts
-        programRunner.initInputVariables(inputs);
+        if(specificInputs)
+            programRunner.initInputVariablesSpecific(inputs);
+        else
+            programRunner.initInputVariables(inputs);
         programRunner.run(expansionDegree);
 
         var executionResult = new ExecutionResult(
                 programRunner.getRunOutput(),
-                programRunner.getVariableValues(),
+                programRunner.getVariableEndValues(),
                 inputs,
                 expansionDegree,
                 programRunner.getCycles()
