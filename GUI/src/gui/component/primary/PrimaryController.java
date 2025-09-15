@@ -4,6 +4,7 @@ import engine.api.SLanguageEngine;
 import engine.api.dto.InstructionPeek;
 import engine.loader.exception.NotXMLException;
 import engine.loader.exception.UnknownLabelException;
+import gui.component.execution.ExecutionTabController;
 import gui.component.instruction.table.InstructionTableController;
 import gui.task.ProgramLoadTask;
 import javafx.application.Platform;
@@ -66,72 +67,7 @@ public class PrimaryController implements Initializable {
     private InstructionTableController expansionTableController;
 
     @FXML
-    public void openFileButtonAction(ActionEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open S Language File");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
-
-        //get the stage from one of the components
-        Stage stage = (Stage) openFileButton.getScene().getWindow();
-
-        File fileChosen = fileChooser.showOpenDialog(stage);
-        if(fileChosen == null) return;
-        loadProgram(fileChosen);
-    }
-
-    private void loadProgram(File fileChosen) {
-        var loaderTask = new ProgramLoadTask(engine, fileChosen.getAbsolutePath());
-        Thread th = new Thread(loaderTask);
-        th.setDaemon(true);
-
-        // create a ProgressBar and bind its progress to the task
-        ProgressBar progressBar = new ProgressBar(0);
-        progressBar.progressProperty().bind(loaderTask.progressProperty());
-
-        // create a dialog/window to show the progress bar
-        Stage dialog = new Stage();
-        VBox box = new VBox(10, new Label("Loading..."), progressBar);
-        box.setPadding(new Insets(20));
-        dialog.setScene(new Scene(box));
-        dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.show();
-        dialog.setResizable(false);
-        dialog.setAlwaysOnTop(true);
-
-        dialog.setOnCloseRequest(Event::consume);
-
-        rootBorderPane.setDisable(true);
-
-
-        loaderTask.setOnSucceeded(e -> Platform.runLater(() -> {
-            programLoadedProperty.set(true);
-            programPathProperty.setValue(fileChosen.getAbsolutePath());
-            rootBorderPane.setDisable(false);
-            dialog.close();
-        }));
-
-        loaderTask.setOnFailed(e -> {
-            Platform.runLater(() -> {
-                dialog.close();
-                rootBorderPane.setDisable(false);
-            });
-
-            Throwable ex = loaderTask.getException();
-            switch (ex) {
-                case NotXMLException ignored ->
-                        Platform.runLater(() -> showError("Error. File not an XML"));
-                case FileNotFoundException ignored ->
-                        Platform.runLater(() -> showError("Error. File not found"));
-                case UnknownLabelException ignored ->
-                        Platform.runLater(() -> showError(ex.getMessage()));
-                default ->
-                    // Generic fallback
-                        showError("Unhandled error: " + ex.getMessage());
-            }
-        });
-
-        th.start();
-    }
+    private ExecutionTabController executionTabController;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -163,17 +99,33 @@ public class PrimaryController implements Initializable {
         bindToProgramLoaded();
     }
 
-    public void setEngine(SLanguageEngine engine) {
-        this.engine = engine;
+    @FXML
+    public void openFileButtonAction(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open S Language File");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
+
+        //get the stage from one of the components
+        Stage stage = (Stage) openFileButton.getScene().getWindow();
+
+        File fileChosen = fileChooser.showOpenDialog(stage);
+        if(fileChosen == null) return;
+        loadProgram(fileChosen);
     }
 
-    public void onChoiceBoxSelect(int degreeSelected){
-        if( 0 <= degreeSelected && degreeSelected <= engine.getMaxExpansionDegree()) {
-            currentExpansionDegree = degreeSelected;
-            mainInstructionTableController.setInstructions(
-                    engine.getExpandedProgramPeek(currentExpansionDegree).instructions()
-            );
-        }
+    public void setEngine(SLanguageEngine engine) {
+        if(engine == null)
+            throw new AssertionError("engine is null");
+
+        this.engine = engine;
+        executionTabController.setEngine(engine);
+    }
+
+    private void onChoiceBoxSelect(int degreeSelected){
+        currentExpansionDegree = degreeSelected;
+        mainInstructionTableController.setInstructions(
+                engine.getExpandedProgramPeek(currentExpansionDegree).instructions()
+        );
     }
 
     private void bindToProgramLoaded(){
@@ -206,10 +158,78 @@ public class PrimaryController implements Initializable {
         // react to program loaded
         programLoadedProperty.addListener(
                 (v, was, now) -> {
-                    if (now)
+                    if (now){
                         mainInstructionTableController.setInstructions(engine.getProgramPeek().instructions());
+
+                        executionTabController.buildInputGrid();
+                    }
                 }
         );
+    }
+
+    private void loadProgram(File fileChosen) {
+        programLoadedProperty.set(false);
+
+        var loaderTask = new ProgramLoadTask(engine, fileChosen.getAbsolutePath());
+        Thread th = new Thread(loaderTask);
+        th.setDaemon(true);
+
+        // create a ProgressBar and bind its progress to the task
+        ProgressBar progressBar = new ProgressBar(0);
+        progressBar.progressProperty().bind(loaderTask.progressProperty());
+
+        Stage dialog = getDialogWindow(progressBar);
+
+        loaderTask.setOnSucceeded(e -> Platform.runLater(() -> {
+            Platform.runLater(() -> {
+                rootBorderPane.setDisable(false);
+                dialog.close();
+            });
+            programLoadedProperty.set(true); // succeeded to load program
+            programPathProperty.setValue(fileChosen.getAbsolutePath());
+        }));
+
+        loaderTask.setOnFailed(e -> {
+            if(!engine.programNotLoaded()){
+                programLoadedProperty.set(true); // if we failed but engine had a program loaded before
+            }
+
+            Platform.runLater(() -> {
+                dialog.close();
+                rootBorderPane.setDisable(false);
+            });
+
+            Throwable ex = loaderTask.getException();
+            switch (ex) {
+                case NotXMLException ignored ->
+                        Platform.runLater(() -> showError("Error. File not an XML"));
+                case FileNotFoundException ignored ->
+                        Platform.runLater(() -> showError("Error. File not found"));
+                case UnknownLabelException ignored ->
+                        Platform.runLater(() -> showError(ex.getMessage()));
+                default ->
+                        Platform.runLater(() -> showError("Unhandled error: " + ex.getMessage()));
+            }
+        });
+
+        th.start();
+    }
+
+    private Stage getDialogWindow(ProgressBar progressBar) {
+        // create a dialog/window to show the progress bar
+        Stage dialog = new Stage();
+        VBox box = new VBox(10, new Label("Loading..."), progressBar);
+        box.setPadding(new Insets(20));
+        dialog.setScene(new Scene(box));
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.show();
+        dialog.setResizable(false);
+        dialog.setAlwaysOnTop(true);
+
+        dialog.setOnCloseRequest(Event::consume);
+
+        rootBorderPane.setDisable(true);
+        return dialog;
     }
 
     private void showExpansionChain(InstructionPeek instruction){
@@ -236,6 +256,6 @@ public class PrimaryController implements Initializable {
     }
 
     private void showError(String s) {
-        filenameLabel.setText(s);
+        filenameLabel.setText(s); //TODO:fix this
     }
 }
