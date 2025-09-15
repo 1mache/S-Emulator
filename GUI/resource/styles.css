@@ -1,0 +1,13 @@
+.error-field {
+    -fx-text-fill: red;
+    -fx-border-color: red;
+}
+
+.highlighted {
+    -fx-background-color: yellow;
+}
+
+.debug-highlighted {
+    -fx-background-color: pink;
+    -fx-border-width: 2px;
+}

@@ -9,10 +9,7 @@ import gui.component.instruction.table.InstructionTableController;
 import gui.task.ProgramLoadTask;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -43,7 +40,7 @@ public class PrimaryController implements Initializable {
     private final boolean DEBUG = true;
 
     private SLanguageEngine engine;
-    private int currentExpansionDegree = 0;
+    private final IntegerProperty expansionDegreeProperty = new SimpleIntegerProperty(0);
 
     private final BooleanProperty programLoadedProperty = new SimpleBooleanProperty(false);
     private final StringProperty  programPathProperty   = new SimpleStringProperty("None");
@@ -89,12 +86,16 @@ public class PrimaryController implements Initializable {
                 showExpansionChain(rowClickAction.getRowData())
         );
 
-        expansionChoiceBox.getSelectionModel().selectedIndexProperty().addListener(
+        expansionDegreeProperty.bind(expansionChoiceBox.getSelectionModel().selectedItemProperty());
+        expansionChoiceBox.getSelectionModel().selectedItemProperty().addListener(
                 (v, old, now) ->{
-                    if(old.intValue() != now.intValue())
-                        onChoiceBoxSelect(now.intValue());
+                    mainInstructionTableController.setInstructions(
+                            engine.getExpandedProgramPeek(expansionDegreeProperty.get()).instructions());
+                    expansionTableController.clear();
                 }
         );
+        // bind the property to execution tab controller
+        executionTabController.getExpansionDegreeProperty().bind(expansionDegreeProperty);
 
         bindToProgramLoaded();
     }
@@ -121,13 +122,6 @@ public class PrimaryController implements Initializable {
         executionTabController.setEngine(engine);
     }
 
-    private void onChoiceBoxSelect(int degreeSelected){
-        currentExpansionDegree = degreeSelected;
-        mainInstructionTableController.setInstructions(
-                engine.getExpandedProgramPeek(currentExpansionDegree).instructions()
-        );
-    }
-
     private void bindToProgramLoaded(){
         // file name label
         filenameLabel.textProperty().bind(
@@ -149,6 +143,15 @@ public class PrimaryController implements Initializable {
                         },
                         programLoadedProperty
                 )
+        );
+        programLoadedProperty.addListener(
+                (v, was, now) -> {
+                    if(now) {
+                        expansionChoiceBox.setValue(0); // reset to 0 when new program loaded
+                    } else {
+                        expansionChoiceBox.setValue(null); // clear selection when program unloaded
+                    }
+                }
         );
 
         // other menus
@@ -233,6 +236,7 @@ public class PrimaryController implements Initializable {
     }
 
     private void showExpansionChain(InstructionPeek instruction){
+        int currentExpansionDegree = expansionDegreeProperty.get();
         List<InstructionPeek> expansionChain = new ArrayList<>();
         expansionChain.add(instruction);
         instruction = instruction.expandedFrom();

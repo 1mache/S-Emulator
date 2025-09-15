@@ -19,8 +19,8 @@
             <Label text="Execution / Debug" />
             <TilePane alignment="CENTER" prefHeight="200.0" prefWidth="200.0">
                <children>
-                  <Button fx:id="runProgramButton" mnemonicParsing="false" text="Run Program" />
-                  <Button fx:id="debugProgramButton" mnemonicParsing="false" text="Debug Program" />
+                  <Button fx:id="runProgramButton" mnemonicParsing="false" onAction="#runButtonAction" text="Run Program" />
+                  <Button fx:id="debugProgramButton" mnemonicParsing="false" onAction="#debugButtonAction" text="Debug Program" />
                </children>
             </TilePane>
          </children>
@@ -38,7 +38,7 @@
          <children>
             <VBox fx:id="inputVariablesBox" alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1">
                <children>
-                  <Label text="Input variables" />
+                  <Label fx:id="inputVarsLabel" text="Input variables" />
                   <Separator prefWidth="200.0" />
                   <GridPane fx:id="inputVariableGrid" prefHeight="106.0" prefWidth="200.0">
                     <columnConstraints>

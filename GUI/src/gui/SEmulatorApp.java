@@ -12,12 +12,13 @@ import javafx.stage.Stage;
 public class SEmulatorApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        final String LAYOUT_FXML = "component/primary/app_layout.fxml";
+        final String LAYOUT_FXML_PATH = "component/primary/app_layout.fxml";
+
         SLanguageEngine engine = SLanguageEngine.getInstance();
 
-        var fxmlUrl = getClass().getResource(LAYOUT_FXML);
+        var fxmlUrl = getClass().getResource(LAYOUT_FXML_PATH);
         if (fxmlUrl == null) {
-            System.out.println("Unable to locate " + LAYOUT_FXML);
+            System.out.println("Unable to locate " + LAYOUT_FXML_PATH);
             Platform.exit();
             return;
         }
@@ -31,6 +32,7 @@ public class SEmulatorApp extends Application {
         controller.setEngine(engine);
 
         Scene scene = new Scene(root);
+        loadStyles(scene);
         primaryStage.setScene(scene);
         primaryStage.setTitle("SEmulator");
         primaryStage.show();
@@ -38,5 +40,15 @@ public class SEmulatorApp extends Application {
 
     public static void main(String[] args) {
         Application.launch(args);
+    }
+
+    private void loadStyles(Scene scene){
+        final String STYLES_CSS_PATH = "/styles.css";
+        var stylesUrl = getClass().getResource(STYLES_CSS_PATH);
+        if (stylesUrl != null) {
+            scene.getStylesheets().add(stylesUrl.toExternalForm());
+        } else {
+            System.out.println("Unable to locate " + STYLES_CSS_PATH);
+        }
     }
 }
