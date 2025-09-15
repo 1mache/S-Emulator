@@ -75,7 +75,7 @@ public class SLanguageEngine {
 
         var executionResult = new ExecutionResult(
                 programRunner.getRunOutput(),
-                programRunner.getVariableValues(),
+                programRunner.getVariableEndValues(),
                 inputs,
                 expansionDegree,
                 programRunner.getCycles()

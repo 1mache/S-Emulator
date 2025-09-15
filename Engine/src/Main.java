@@ -23,7 +23,7 @@ public class Main {
             System.out.println("Max expansion degree: " + program.getMaxExpansionDegree());
             runner.initInputVariables(List.of(5L,2L));
             runner.run(2);
-            System.out.println(runner.getVariableValues());
+            System.out.println(runner.getVariableEndValues());
             System.out.println("Took cycles: " + runner.getCycles());
 
         } catch (FileNotFoundException e) {
