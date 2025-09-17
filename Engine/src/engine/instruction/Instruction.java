@@ -4,7 +4,6 @@ import engine.argument.Argument;
 import engine.execution.context.VariableContext;
 import engine.label.Label;
 import engine.program.Program;
-import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -66,6 +65,8 @@ public interface Instruction {
      */
     Label getLabel();
 
+    InstructionData getData();
+
     /**
      * Returns the list of arguments for this instruction.
      *
@@ -74,23 +75,8 @@ public interface Instruction {
     List<Argument> getArguments();
 
     /**
-     * Returns an optional expanded version of this instruction.
-     * <p>
-     * Some high-level instructions may expand into a sequence
-     * of lower-level instructions or an entire {@link Program}.
-     * </p>
-     *
-     * @param generator the label-variable generator to use for creating fresh labels and variables
-     * @return an {@link Optional} containing the expanded program,
-     *         or empty if this instruction does not expand.
-     *         Note: this caches the expansion! Because otherwise it would generate new
-     *               variables and labels every time we expand
+     * Returns the program expansion for this instruction, if it exists.
+     * @return an {@link Optional} containing the expansion {@link Program},
      */
-    Optional<Program> getExpansionInProgram(LabelVariableGenerator generator);
-
-    /**
-     * same but because no generator is provided, this expansion is not Program context-dependent,
-     * it will use any labels and variables, and it is uncached
-     */
-    Optional<Program> getExpansionStandalone();
+    Optional<Program> getExpansion();
 }

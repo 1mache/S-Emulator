@@ -6,6 +6,7 @@ import engine.instruction.AbstractJumpInstruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
+import engine.label.NumericLabel;
 import engine.program.Program;
 import engine.program.StandardProgram;
 import engine.program.generator.LabelVariableGenerator;
@@ -45,12 +46,15 @@ public class JumpVariableInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
-        Variable z1 = generator.getNextWorkVariable();
-        Variable z2 = generator.getNextWorkVariable();
-        Label l1 = generator.getNextLabel();
-        Label l2 = generator.getNextLabel();
-        Label l3 = generator.getNextLabel();
+    protected Program getSyntheticExpansion() {
+        int avaliableWorkVarNumber = getAvaliableWorkVarNumber();
+        int avaliableLabelNumber = getAvaliableLabelNumber();
+
+        Variable z1 = Variable.createWorkVariable(avaliableWorkVarNumber++);
+        Variable z2 = Variable.createWorkVariable(avaliableWorkVarNumber++);
+        Label l1 = new NumericLabel(avaliableLabelNumber++);
+        Label l2 = new NumericLabel(avaliableLabelNumber++);
+        Label l3 = new NumericLabel(avaliableLabelNumber++);
         Label empty = FixedLabel.EMPTY;
 
         return new StandardProgram(

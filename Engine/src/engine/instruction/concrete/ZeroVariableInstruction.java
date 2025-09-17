@@ -7,6 +7,7 @@ import engine.instruction.Instruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
+import engine.label.NumericLabel;
 import engine.program.Program;
 import engine.program.StandardProgram;
 import engine.program.generator.LabelVariableGenerator;
@@ -41,8 +42,8 @@ public class ZeroVariableInstruction extends AbstractInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
-        Label l1 = generator.getNextLabel();
+    protected Program getSyntheticExpansion() {
+        Label l1 = new NumericLabel(getAvaliableLabelNumber());
         List<Instruction> instructionList = new ArrayList<>();
 
         /* this instruction has a label on its first expanded instruction, if the original

@@ -2,6 +2,7 @@ package engine.execution;
 
 import engine.execution.context.VariableContext;
 import engine.execution.context.VariableTable;
+import engine.expander.ProgramExpander;
 import engine.instruction.Instruction;
 import engine.label.Label;
 import engine.label.FixedLabel;
@@ -43,13 +44,14 @@ public class ProgramRunner {
     }
 
     public Label run(int expansionDegree) {
+        Program program = new ProgramExpander(this.program).expand(expansionDegree);
         Optional<Instruction> currInstruction;
         Label jumpLabel = FixedLabel.EMPTY;
 
         do {
             if (jumpLabel == FixedLabel.EMPTY) {
                 currInstruction = program.getInstructionByIndex(pc);
-                jumpLabel = executeInstruction(expansionDegree, currInstruction.orElse(null));
+                jumpLabel = executeInstruction(currInstruction.orElse(null));
             }
             else {
                 // jump needs to happen
@@ -59,7 +61,7 @@ public class ProgramRunner {
                         .ifPresent(lineId -> pc = lineId);
 
                 if(currInstruction.isPresent())
-                    jumpLabel = executeInstruction(expansionDegree, currInstruction.get());
+                    jumpLabel = executeInstruction(currInstruction.get());
 
             }
             if(jumpLabel == FixedLabel.EXIT) break; // check for exit
@@ -105,32 +107,7 @@ public class ProgramRunner {
         }
     }
 
-    // ------------ private: -------------
-
-    // expands and executes
-    private Label executeInstruction(int expansionLevel, Instruction instruction) {
-        if (instruction == null) {
-            return FixedLabel.EMPTY;
-        }
-
-        Optional<Program> expansion = Optional.empty();
-        if(expansionLevel != 0)
-            expansion = instruction.getExpansionInProgram(labelVariableGenerator);
-
-        // if expansion is empty, the instruction is synthetic
-        if (expansion.isEmpty()) {
-            return executeInstruction(instruction);
-        }
-
-        pc++;
-        // run with the same variable context and labelVariableGenerator
-        ProgramRunner runner = new ProgramRunner(expansion.get(), variableContext, labelVariableGenerator);
-        Label result = runner.run(expansionLevel-1);
-        cycles += runner.getCycles();
-        return result;
-    }
-
-    // executes instruction the normal way
+    // ------------ private: ------------
     private Label executeInstruction(Instruction instruction) {
         pc++;
         Optional<Instruction> optionalInstruction = Optional.ofNullable(instruction);

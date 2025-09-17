@@ -8,6 +8,7 @@ import engine.instruction.Instruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
+import engine.label.NumericLabel;
 import engine.program.Program;
 import engine.program.StandardProgram;
 import engine.program.generator.LabelVariableGenerator;
@@ -46,9 +47,9 @@ public class JumpConstantInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
-        Variable z1 = generator.getNextWorkVariable();
-        Label l1 = generator.getNextLabel();
+    protected Program getSyntheticExpansion() {
+        Variable z1 = Variable.createWorkVariable(getAvaliableWorkVarNumber());
+        Label l1 = new NumericLabel(getAvaliableLabelNumber());
         Label empty = FixedLabel.EMPTY;
 
         List<Instruction> instructions = new ArrayList<>();

@@ -1,9 +1,10 @@
 package engine.instruction;
 
 import engine.label.Label;
+import engine.label.NumericLabel;
 import engine.program.Program;
-import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
+import engine.variable.VariableType;
 
 import java.util.Optional;
 
@@ -11,9 +12,6 @@ public abstract class AbstractInstruction implements Instruction {
     private final InstructionData data;
     private final Variable variable;
     private final Label label;
-
-    // cached expansion of the instruction
-    private Program expansion;
 
     public AbstractInstruction(InstructionData data, Variable variable, Label label)
     {
@@ -48,27 +46,48 @@ public abstract class AbstractInstruction implements Instruction {
     }
 
     @Override
-    public Optional<Program> getExpansionInProgram(LabelVariableGenerator generator) {
-        if(!isSynthetic())
-            return Optional.empty();
-
-        if(expansion == null)
-           expansion = Optional.of(getSyntheticExpansion(generator)).get();
-
-        return Optional.of(expansion);
+    public InstructionData getData() {
+        return data;
     }
 
     @Override
-    public Optional<Program> getExpansionStandalone() {
+    public Optional<Program> getExpansion() {
         if(!isSynthetic())
             return Optional.empty();
 
-        return Optional.of(getSyntheticExpansion(new LabelVariableGenerator()));
+        return Optional.of(getSyntheticExpansion());
     }
 
     // to be implemented by concrete classes.
-    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
+    protected Program getSyntheticExpansion() {
         // if all instructions implement it, this should never happen
         throw new UnsupportedOperationException("Instruction " + getName() + " does not support synthetic expansion.");
+    }
+
+    // -- for expansion --
+
+    protected Optional<Integer> getLabelNumber(){
+        if(label instanceof NumericLabel numLabel)
+            return Optional.of(numLabel.getNumber());
+
+        return Optional.empty();
+    }
+
+    protected Optional<Integer> getVariableNumber(){
+        if(variable != Variable.NO_VAR && variable != Variable.RESULT)
+            return Optional.of(variable.getNumber());
+
+        return Optional.empty();
+    }
+
+    protected int getAvaliableLabelNumber(){
+        return getLabelNumber().orElse(0) + 1;
+    }
+
+    protected int getAvaliableWorkVarNumber(){
+        if(variable.getType() == VariableType.WORK)
+           return getVariableNumber().orElse(0) + 1;
+
+        return 0;
     }
 }

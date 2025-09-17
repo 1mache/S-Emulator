@@ -6,6 +6,7 @@ import engine.instruction.InstructionData;
 import engine.instruction.AbstractJumpInstruction;
 import engine.label.FixedLabel;
 import engine.label.Label;
+import engine.label.NumericLabel;
 import engine.program.Program;
 import engine.program.StandardProgram;
 import engine.program.generator.LabelVariableGenerator;
@@ -40,8 +41,8 @@ public class JumpZeroInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
-        Label l1 = generator.getNextLabel();
+    protected Program getSyntheticExpansion() {
+        Label l1 = new NumericLabel(getAvaliableLabelNumber());
 
         return new StandardProgram(
                 getName() + "Expansion",

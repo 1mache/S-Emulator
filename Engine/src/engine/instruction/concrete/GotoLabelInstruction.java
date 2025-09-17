@@ -6,6 +6,7 @@ import engine.instruction.InstructionData;
 import engine.instruction.AbstractJumpInstruction;
 import engine.label.FixedLabel;
 import engine.label.Label;
+import engine.label.NumericLabel;
 import engine.program.Program;
 import engine.program.StandardProgram;
 import engine.program.generator.LabelVariableGenerator;
@@ -44,8 +45,8 @@ public class GotoLabelInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
-        Variable z1 = generator.getNextWorkVariable();
+    protected Program getSyntheticExpansion() {
+        Variable z1 = Variable.createWorkVariable(getAvaliableWorkVarNumber());
 
         return new StandardProgram(
                 getName() + "Expansion",

@@ -6,9 +6,9 @@ import engine.instruction.AbstractInstruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
+import engine.label.NumericLabel;
 import engine.program.Program;
 import engine.program.StandardProgram;
-import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -38,16 +38,18 @@ public class AssignmentInstruction extends AbstractInstruction {
 
     @Override
     public List<Argument> getArguments() {
-        return List.of(assignedVariable); // no arguments
+        return List.of(assignedVariable);
     }
 
     @Override
-    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
-        Label l1 = generator.getNextLabel();
-        Label l2 = generator.getNextLabel();
-        Label l3 = generator.getNextLabel();
+    protected Program getSyntheticExpansion() {
+        int avaliableLabelNumber = getAvaliableLabelNumber();
+
+        Label l1 = new NumericLabel(avaliableLabelNumber++);
+        Label l2 = new NumericLabel(avaliableLabelNumber++);
+        Label l3 = new NumericLabel(avaliableLabelNumber++);
         Label empty = FixedLabel.EMPTY;
-        Variable z1 = generator.getNextWorkVariable();
+        Variable z1 = Variable.createWorkVariable(getAvaliableWorkVarNumber());
 
         return new StandardProgram(
                 getName() + "Expansion",

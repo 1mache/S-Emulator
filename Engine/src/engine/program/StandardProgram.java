@@ -93,7 +93,7 @@ public class StandardProgram implements Program {
         maxExpansionDegree = 0;
 
         for(Instruction instruction : instructions) {
-            int expansionDegree = instruction.getExpansionStandalone()
+            int expansionDegree = instruction.getExpansion()
                     .map(expansion -> expansion.getMaxExpansionDegree() + 1)
                     .orElse(0);
 

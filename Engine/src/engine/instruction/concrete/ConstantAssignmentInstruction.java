@@ -45,7 +45,7 @@ public class ConstantAssignmentInstruction extends AbstractInstruction {
     }
 
     @Override
-    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
+    protected Program getSyntheticExpansion() {
         List<Instruction> instructionList = new ArrayList<>();
         Variable thisVariable = getVariable();
 
