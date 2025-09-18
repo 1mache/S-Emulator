@@ -5,7 +5,6 @@ import engine.instruction.Instruction;
 import engine.loader.ArgumentLabelInfo;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.InstructionReference;
 import engine.variable.Variable;
 import engine.variable.VariableType;
 
@@ -26,20 +25,6 @@ public class Instructions {
                         .toList()
         );
         return variables;
-    }
-
-    public static List<Label> extractLabels(Instruction instruction) {
-        List<Label> labels = new ArrayList<>();
-        if(instruction.getLabel() != FixedLabel.EMPTY)
-            labels.add(instruction.getLabel());
-
-        labels.addAll(
-                instruction.getArguments().stream()
-                        .filter(arg -> arg.getArgumentType() == ArgumentType.LABEL)
-                        .map(arg -> (Label) arg)
-                        .toList()
-        );
-        return labels;
     }
 
     public static List<Variable> extractInputVariables(List<Instruction> instructions) {
@@ -97,6 +82,22 @@ public class Instructions {
 
         return instructionLabels;
     }
+
+    public static List<Label> extractUsedLabels(Instruction instruction) {
+        List<Label> labels = new ArrayList<>();
+        if(instruction.getLabel() != FixedLabel.EMPTY)
+            labels.add(instruction.getLabel());
+
+        labels.addAll(
+                instruction.getArguments().stream()
+                        .filter(arg -> arg.getArgumentType() == ArgumentType.LABEL)
+                        .map(arg -> (Label) arg)
+                        .toList()
+        );
+        return labels;
+    }
+
+    // ------------ private: ------------
 
     private static List<Variable> extractVariablesOfType(List<Instruction> instructions, VariableType variableType) {
         // collect variables directly operated by instructions

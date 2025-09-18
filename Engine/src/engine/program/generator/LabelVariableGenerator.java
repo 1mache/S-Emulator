@@ -15,15 +15,9 @@ public class LabelVariableGenerator {
     private int labelCounter;
     private int variableCounter;
 
-    // no program context
-    public LabelVariableGenerator(){
-        initLabelCounter = 1;
-        initVariableCounter = 1;
-    }
-
-    public LabelVariableGenerator(Program program) {
-        List<Label> labels = program.getUsedLabels();
-        List<Variable> workVariables = program.getWorkVariables();
+    public LabelVariableGenerator(Program contextProgram) {
+        List<Label> labels = contextProgram.getUsedLabels();
+        List<Variable> workVariables = contextProgram.getWorkVariables();
 
         // take the first label and variable lineId available
         if(labels.isEmpty() || labels.equals(List.of(FixedLabel.EXIT)))

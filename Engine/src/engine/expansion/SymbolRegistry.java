@@ -1,4 +1,4 @@
-package engine.expander;
+package engine.expansion;
 
 import engine.label.FixedLabel;
 import engine.label.Label;
@@ -21,10 +21,6 @@ public class SymbolRegistry {
         if(label == FixedLabel.EMPTY || label == FixedLabel.EXIT)
             return;
 
-        if(!labelsUsed.contains(label)){ //DEBUG
-            System.out.println("Registered " + label.stringRepresentation());
-        }
-
         labelsUsed.add(label);
     }
 
@@ -36,9 +32,6 @@ public class SymbolRegistry {
         if(variable == Variable.NO_VAR || variable == Variable.RESULT)
             return;
 
-        if(!variablesUsed.contains(variable)) { //DEBUG
-            System.out.println("Registered " + variable.stringRepresentation());
-        }
         variablesUsed.add(variable);
     }
 

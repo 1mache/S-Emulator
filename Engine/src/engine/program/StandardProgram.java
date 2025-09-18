@@ -1,6 +1,7 @@
 package engine.program;
 
 import engine.instruction.Instruction;
+import engine.instruction.utility.InstructionReference;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.instruction.utility.Instructions;

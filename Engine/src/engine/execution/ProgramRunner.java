@@ -2,7 +2,6 @@ package engine.execution;
 
 import engine.execution.context.VariableContext;
 import engine.execution.context.VariableTable;
-import engine.expander.ProgramExpander;
 import engine.instruction.Instruction;
 import engine.label.Label;
 import engine.label.FixedLabel;
@@ -24,16 +23,9 @@ public class ProgramRunner {
     private long cycles = 0;
 
     public ProgramRunner(Program program) {
-        this(program, new VariableTable(), new LabelVariableGenerator(program));
-    }
-
-    // private ctor for internal logic use
-    private ProgramRunner(Program program,
-                         VariableContext variableContext,
-                         LabelVariableGenerator labelVariableGenerator) {
         this.program = program;
-        this.variableContext = variableContext;
-        this.labelVariableGenerator = labelVariableGenerator;
+        variableContext = new VariableTable();
+        labelVariableGenerator = new LabelVariableGenerator(program);
     }
 
     public void reset(){
@@ -43,8 +35,7 @@ public class ProgramRunner {
         cycles = 0;
     }
 
-    public Label run(int expansionDegree) {
-        Program program = new ProgramExpander(this.program).expand(expansionDegree);
+    public void run() {
         Optional<Instruction> currInstruction;
         Label jumpLabel = FixedLabel.EMPTY;
 
@@ -67,9 +58,6 @@ public class ProgramRunner {
             if(jumpLabel == FixedLabel.EXIT) break; // check for exit
         }
         while (currInstruction.isPresent());
-
-        // return the last jump label
-        return jumpLabel;
     }
 
     public Long getRunOutput(){

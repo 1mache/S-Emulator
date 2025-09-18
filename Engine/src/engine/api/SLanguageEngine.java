@@ -4,6 +4,7 @@ import engine.api.dto.ExecutionResult;
 import engine.api.dto.ProgramPeek;
 import engine.execution.ProgramRunner;
 import engine.execution.exception.SProgramNotLoadedException;
+import engine.expansion.ProgramExpander;
 import engine.loader.FromXMLProgramLoader;
 import engine.loader.event.LoadingListener;
 import engine.loader.exception.NotXMLException;
@@ -17,7 +18,6 @@ import java.util.List;
 
 public class SLanguageEngine {
     private Program program;
-    private ProgramRunner programRunner;
     private List<ExecutionResult> previousExecutions;
 
     private SLanguageEngine(){}
@@ -35,7 +35,6 @@ public class SLanguageEngine {
         loader.validateProgram();
         program = loader.getProgram();
 
-        programRunner = new ProgramRunner(program);
         previousExecutions = new ArrayList<>();
     }
 
@@ -73,12 +72,15 @@ public class SLanguageEngine {
                 throw new IllegalArgumentException("Input values must be non-negative");
         }
 
-        programRunner.reset(); // reset previous run artifacts
+        var expandedProgram = new ProgramExpander(program).expand(expansionDegree);
+        var programRunner = new ProgramRunner(expandedProgram);
+
         if(specificInputs)
             programRunner.initInputVariablesSpecific(inputs);
         else
             programRunner.initInputVariables(inputs);
-        programRunner.run(expansionDegree);
+
+        programRunner.run();
 
         var executionResult = new ExecutionResult(
                 programRunner.getRunOutput(),

@@ -29,7 +29,7 @@ public class Main {
             for (var instr : peek.instructions()) {
                 System.out.println(instr.stringRepresentation());
             }
-            runner.run(2);
+            runner.run();
             System.out.println("Output: " + runner.getRunOutput());
             System.out.println("Took cycles: " + runner.getCycles());
 

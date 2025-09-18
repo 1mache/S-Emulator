@@ -2,44 +2,46 @@ package engine.peeker;
 
 import engine.api.dto.InstructionPeek;
 import engine.api.dto.ProgramPeek;
-import engine.expander.ProgramExpander;
+import engine.expansion.ProgramExpander;
 import engine.instruction.Instruction;
+import engine.instruction.utility.InstructionReference;
 import engine.label.Label;
 import engine.program.Program;
-import engine.program.generator.LabelVariableGenerator;
-import engine.instruction.utility.Instructions;
 import engine.variable.Variable;
 
 import java.util.*;
 
 public class ProgramViewer {
     private final Program program;
-    private final InstructionPeek expandedFrom; // can be null
-    // all instructions that we've seen, to extract labels
-    private final Set<Instruction> allInstructions;
 
     public ProgramViewer(Program program) {
-        this(program, new LabelVariableGenerator(program),null, new HashSet<>());
-    }
-
-    // for internal use
-    private ProgramViewer(
-            Program program,
-            LabelVariableGenerator labelVariableGenerator,
-            InstructionPeek expandedFrom,
-            Set<Instruction> allInstructions
-    ) {
         this.program = program;
-        this.expandedFrom = expandedFrom;
-        this.allInstructions = allInstructions;
     }
 
     public ProgramPeek getProgramPeek(int expansionDegree){
-        Program expandedProgram = new ProgramExpander(program).expand(expansionDegree);
+        var expander = new ProgramExpander(program);
+        Program expandedProgram = expander.expand(expansionDegree);
+
         List<InstructionPeek> instructionPeeks = new ArrayList<>();
-        for (var instruction : expandedProgram.getInstructions()) {
-            int lineId = 0; // TODO: for now
-            instructionPeeks.add(getInstructionPeek(instruction, lineId, expandedFrom));
+
+        for (int lineId = 0; lineId < expandedProgram.getInstructions().size(); lineId++) {
+            List<InstructionReference> expansionChain = expander.getExpansionChainOf(lineId);
+
+            // construct the expandedFrom chain
+            InstructionPeek expandedFrom = null;
+            for (InstructionReference instructionReference : expansionChain) {
+                expandedFrom = getInstructionPeek(
+                        instructionReference.instruction(),
+                        instructionReference.lineId(),
+                        expandedFrom
+                );
+            }
+
+            instructionPeeks.add(getInstructionPeek(
+                    expandedProgram.getInstructions().get(lineId),
+                    lineId,
+                    expandedFrom
+            ));
         }
 
         return new ProgramPeek(

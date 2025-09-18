@@ -1,4 +1,4 @@
-package engine.program;
+package engine.instruction.utility;
 
 import engine.instruction.Instruction;
 

@@ -1,5 +1,6 @@
 package engine.instruction;
 
+import engine.instruction.utility.Instructions;
 import engine.label.Label;
 import engine.label.NumericLabel;
 import engine.program.Program;
@@ -80,14 +81,26 @@ public abstract class AbstractInstruction implements Instruction {
         return Optional.empty();
     }
 
+    // gets the next available label number in the current instruction's context
     protected int getAvaliableLabelNumber(){
-        return getLabelNumber().orElse(0) + 1;
+        final int[] lastUsedLabelNumber = {0};
+        Instructions.extractUsedLabels(this)
+                .stream()
+                .filter(label -> label instanceof NumericLabel)
+                .map(label -> (NumericLabel) label)
+                .forEach(label -> lastUsedLabelNumber[0] = Math.max(lastUsedLabelNumber[0], label.getNumber()));
+        return lastUsedLabelNumber[0] + 1;
     }
 
+    // gets the next available work variable number in the current instruction's context
     protected int getAvaliableWorkVarNumber(){
-        if(variable.getType() == VariableType.WORK)
-           return getVariableNumber().orElse(0) + 1;
+        final int[] lastUsedVarNumber = {0};
+        Instructions.extractVariables(this)
+                .stream()
+                .filter(var -> var.getType() == VariableType.WORK)
+                .map(Variable::getNumber)
+                .forEach(num -> lastUsedVarNumber[0] = Math.max(lastUsedVarNumber[0], num));
 
-        return 1;
+        return lastUsedVarNumber[0] + 1;
     }
 }

@@ -1,7 +1,9 @@
-package engine.expander;
+package engine.expansion;
 
+import engine.expansion.tree.ExpansionNode;
 import engine.instruction.Instruction;
 import engine.instruction.InstructionFactory;
+import engine.instruction.utility.InstructionReference;
 import engine.instruction.utility.Instructions;
 import engine.label.Label;
 import engine.program.Program;
@@ -16,13 +18,21 @@ import java.util.Map;
 
 public class ProgramExpander {
     private final Program program;
+    private List<ExpansionNode> expansionForest;
     private SymbolRegistry programSymbolRegistry;
-    private LabelVariableGenerator generator;
+    private LabelVariableGenerator symbolGenerator;
 
     public ProgramExpander(Program program) {
         this.program = program;
         programSymbolRegistry = new SymbolRegistry(program.getUsedLabels(), program.getWorkVariables());
-        generator = new LabelVariableGenerator(program);
+        symbolGenerator = new LabelVariableGenerator(program);
+
+        expansionForest = new ArrayList<>();
+        int lineCount = 0;
+        for (var instruction: program.getInstructions()) {
+            expansionForest.add(new ExpansionNode(new InstructionReference(instruction, lineCount)));
+            lineCount++;
+        }
     }
 
     public Program getProgram() {
@@ -33,21 +43,42 @@ public class ProgramExpander {
         Program current = program;
         List<Instruction> expandedInstructions = new ArrayList<>();
 
-        for(int currentDegree = 1; currentDegree <= degree; currentDegree++){
-            var instructions = current.getInstructions();
+        for (int currentDegree = 1; currentDegree <= degree; currentDegree++){
+            List<ExpansionNode> nextLevelExpansionForest = new ArrayList<>();
             expandedInstructions.clear();
 
-            for(Instruction instruction : instructions){
+            final int[] lineCounter = {0};
+            for(var expansionNode: expansionForest){
+                Instruction instruction = expansionNode.getInstructionRef().instruction();
+
                 SymbolRegistry externalSymbols = new SymbolRegistry(
-                        Instructions.extractLabels(instruction),
+                        Instructions.extractUsedLabels(instruction),
                         Instructions.extractVariables(instruction)
                 );
 
                 instruction.getExpansion().ifPresentOrElse(
-                        expansion -> expandedInstructions.addAll(
-                                resolveSymbolsCollisions(expansion.getInstructions(), externalSymbols)
-                        ),
-                        () -> expandedInstructions.add(instruction)
+                        expansion -> {
+                            var expansionWithoutCollisions =
+                                    resolveSymbolsCollisions(expansion.getInstructions(), externalSymbols);
+
+                            expandedInstructions.addAll(
+                                    expansionWithoutCollisions
+                            );
+
+                            for (var inst: expansionWithoutCollisions){
+                                ExpansionNode child = expansionNode.addChild(
+                                        new InstructionReference(inst, lineCounter[0])
+                                );
+                                nextLevelExpansionForest.add(child);
+                                lineCounter[0]++;
+                            }
+                        },
+                        //or else
+                        () -> {
+                            expandedInstructions.add(instruction);
+                            nextLevelExpansionForest.add(expansionNode);
+                            lineCounter[0]++;
+                        }
                 );
             }
 
@@ -58,11 +89,33 @@ public class ProgramExpander {
             );
 
             programSymbolRegistry = new SymbolRegistry(current.getUsedLabels(), current.getWorkVariables());
-            generator = new LabelVariableGenerator(current);
+            symbolGenerator = new LabelVariableGenerator(current);
+            expansionForest = nextLevelExpansionForest;
         }
 
         return current;
     }
+
+    public List<InstructionReference> getExpansionChainOf(int lineNumber){
+        if(lineNumber >= expansionForest.size())
+            throw new IndexOutOfBoundsException(
+                    "Expanded program has only " + expansionForest.size() + " instructions. "
+                    + "Expansion chain for line " + lineNumber + "requested"
+            );
+
+        List<InstructionReference> result = new ArrayList<>();
+
+        var currentNode = expansionForest.get(lineNumber).getParent();
+        while(currentNode.isPresent()){
+            result.add(currentNode.get().getInstructionRef());
+            currentNode = currentNode.get().getParent();
+        }
+
+        // reverse it because we need to start from the least expanded downwards
+        return result.reversed();
+    }
+
+    // -------- private ---------
 
     private List<Instruction> resolveSymbolsCollisions(List<Instruction> instructions, SymbolRegistry ignoredSymbols){
         List<Instruction> resolved = new ArrayList<>();
@@ -75,7 +128,7 @@ public class ProgramExpander {
                     variable -> resolveVariable(variable, variableResolutionMap, ignoredSymbols)
             );
 
-            Instructions.extractLabels(instruction).forEach(
+            Instructions.extractUsedLabels(instruction).forEach(
                     label -> resolveLabel(label, labelResolutionMap, ignoredSymbols)
             );
 
@@ -96,7 +149,7 @@ public class ProgramExpander {
             labelResolutionMap.put(label, label);
         }
         else if(!labelResolutionMap.containsKey(label)){
-            Label replacement = generator.getNextLabel();
+            Label replacement = symbolGenerator.getNextLabel();
             programSymbolRegistry.registerLabel(replacement);
             labelResolutionMap.put(label, replacement);
         }
@@ -111,7 +164,7 @@ public class ProgramExpander {
             variableResolutionMap.put(variable, variable);
         }
         else if(!variableResolutionMap.containsKey(variable)){
-            Variable replacement = generator.getNextWorkVariable();
+            Variable replacement = symbolGenerator.getNextWorkVariable();
             programSymbolRegistry.registerVariable(replacement);
             variableResolutionMap.put(variable, replacement);
         }
