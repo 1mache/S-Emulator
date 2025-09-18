@@ -88,6 +88,6 @@ public abstract class AbstractInstruction implements Instruction {
         if(variable.getType() == VariableType.WORK)
            return getVariableNumber().orElse(0) + 1;
 
-        return 0;
+        return 1;
     }
 }

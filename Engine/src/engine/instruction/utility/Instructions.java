@@ -14,12 +14,40 @@ import java.util.stream.Collectors;
 
 public class Instructions {
 
+    public static List<Variable> extractVariables(Instruction instruction) {
+        List<Variable> variables = new ArrayList<>();
+        if(instruction.getVariable() != Variable.NO_VAR)
+            variables.add(instruction.getVariable());
+
+        variables.addAll(
+                instruction.getArguments().stream()
+                        .filter(arg -> arg.getArgumentType() == ArgumentType.VARIABLE)
+                        .map(arg -> (Variable) arg)
+                        .toList()
+        );
+        return variables;
+    }
+
+    public static List<Label> extractLabels(Instruction instruction) {
+        List<Label> labels = new ArrayList<>();
+        if(instruction.getLabel() != FixedLabel.EMPTY)
+            labels.add(instruction.getLabel());
+
+        labels.addAll(
+                instruction.getArguments().stream()
+                        .filter(arg -> arg.getArgumentType() == ArgumentType.LABEL)
+                        .map(arg -> (Label) arg)
+                        .toList()
+        );
+        return labels;
+    }
+
     public static List<Variable> extractInputVariables(List<Instruction> instructions) {
-        return extractVariables(instructions, VariableType.INPUT);
+        return extractVariablesOfType(instructions, VariableType.INPUT);
     }
 
     public static List<Variable> extractWorkVariables(List<Instruction> instructions){
-        return extractVariables(instructions, VariableType.WORK);
+        return extractVariablesOfType(instructions, VariableType.WORK);
     }
 
     public static Map<Label, InstructionReference> extractLabeledInstructions(
@@ -70,7 +98,7 @@ public class Instructions {
         return instructionLabels;
     }
 
-    private static List<Variable> extractVariables(List<Instruction> instructions, VariableType variableType) {
+    private static List<Variable> extractVariablesOfType(List<Instruction> instructions, VariableType variableType) {
         // collect variables directly operated by instructions
         Set<Variable> operatedVars =
                 instructions.stream()
