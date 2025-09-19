@@ -44,12 +44,12 @@ public class ProgramExpander {
         List<Instruction> expandedInstructions = new ArrayList<>();
 
         for (int currentDegree = 1; currentDegree <= degree; currentDegree++){
-            List<ExpansionNode> nextLevelExpansionForest = new ArrayList<>();
+            List<ExpansionNode> expandedNodes = new ArrayList<>();
             expandedInstructions.clear();
 
             final int[] lineCounter = {0};
-            for(var expansionNode: expansionForest){
-                Instruction instruction = expansionNode.getInstructionRef().instruction();
+            for(ExpansionNode instructionNode: expansionForest){
+                Instruction instruction = instructionNode.getInstructionRef().instruction();
 
                 SymbolRegistry externalSymbols = new SymbolRegistry(
                         Instructions.extractUsedLabels(instruction),
@@ -58,25 +58,29 @@ public class ProgramExpander {
 
                 instruction.getExpansion().ifPresentOrElse(
                         expansion -> {
-                            var expansionWithoutCollisions =
+                            List<Instruction> expansionWithoutCollisions =
                                     resolveSymbolsCollisions(expansion.getInstructions(), externalSymbols);
 
                             expandedInstructions.addAll(
                                     expansionWithoutCollisions
                             );
 
-                            for (var inst: expansionWithoutCollisions){
-                                ExpansionNode child = expansionNode.addChild(
-                                        new InstructionReference(inst, lineCounter[0])
+                            // for each expanded instruction
+                            for (Instruction expandedInst: expansionWithoutCollisions){
+                                // add it as a child of current expansion node
+                                ExpansionNode childNode = instructionNode.addChild(
+                                        new InstructionReference(expandedInst, lineCounter[0])
                                 );
-                                nextLevelExpansionForest.add(child);
+                                // and add it to the next level expansion forest
+                                expandedNodes.add(childNode);
                                 lineCounter[0]++;
                             }
                         },
                         //or else
                         () -> {
+                            // no expansion so this instruction goes to next level as is
                             expandedInstructions.add(instruction);
-                            nextLevelExpansionForest.add(expansionNode);
+                            expandedNodes.add(instructionNode);
                             lineCounter[0]++;
                         }
                 );
@@ -85,12 +89,12 @@ public class ProgramExpander {
             // set current to new expanded program
             current = new StandardProgram(
                     program.getName() + "_exp" + currentDegree,
-                    List.copyOf(expandedInstructions)
+                    expandedInstructions
             );
 
             programSymbolRegistry = new SymbolRegistry(current.getUsedLabels(), current.getWorkVariables());
             symbolGenerator = new LabelVariableGenerator(current);
-            expansionForest = nextLevelExpansionForest;
+            expansionForest = expandedNodes;
         }
 
         return current;
@@ -105,8 +109,9 @@ public class ProgramExpander {
 
         List<InstructionReference> result = new ArrayList<>();
 
+        // we start from the most expanded instruction, going up to its parents
         var currentNode = expansionForest.get(lineNumber).getParent();
-        while(currentNode.isPresent()){
+        while(currentNode.isPresent()) {
             result.add(currentNode.get().getInstructionRef());
             currentNode = currentNode.get().getParent();
         }

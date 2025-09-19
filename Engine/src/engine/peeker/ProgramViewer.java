@@ -37,6 +37,7 @@ public class ProgramViewer {
                 );
             }
 
+            // add the instruction peek to the result list
             instructionPeeks.add(getInstructionPeek(
                     expandedProgram.getInstructions().get(lineId),
                     lineId,
