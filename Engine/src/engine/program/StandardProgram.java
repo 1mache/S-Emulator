@@ -5,6 +5,7 @@ import engine.instruction.utility.InstructionReference;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.instruction.utility.Instructions;
+import engine.loader.ArgumentLabelInfo;
 import engine.variable.Variable;
 
 import java.util.*;
@@ -43,10 +44,19 @@ public class StandardProgram implements Program {
 
     @Override
     public List<Label> getUsedLabels() {
-        return Instructions.extractUsedLabels(
-                labeledInstructions,
-                Instructions.getArgumentLabels(instructions)
+        List<Label> instructionLabels = new ArrayList<>(
+                labeledInstructions.keySet().stream()
+                        .sorted(Label.comparator())
+                        .toList()
         );
+
+        if(Instructions.getArgumentLabels(instructions).stream()
+                .map(ArgumentLabelInfo::label)
+                .anyMatch(label -> label.equals(FixedLabel.EXIT))
+          )
+            instructionLabels.add(FixedLabel.EXIT);
+
+        return instructionLabels;
     }
 
     @Override

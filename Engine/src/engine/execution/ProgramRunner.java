@@ -6,7 +6,6 @@ import engine.instruction.Instruction;
 import engine.label.Label;
 import engine.label.FixedLabel;
 import engine.program.Program;
-import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -16,7 +15,6 @@ import java.util.Optional;
 public class ProgramRunner {
     private final Program program;
     private VariableContext variableContext;
-    private final LabelVariableGenerator labelVariableGenerator;
 
     // instruction pointer
     private int pc = 0;
@@ -25,11 +23,9 @@ public class ProgramRunner {
     public ProgramRunner(Program program) {
         this.program = program;
         variableContext = new VariableTable();
-        labelVariableGenerator = new LabelVariableGenerator(program);
     }
 
     public void reset(){
-        labelVariableGenerator.reset();
         variableContext = new VariableTable();
         pc = 0;
         cycles = 0;

@@ -62,27 +62,6 @@ public class Instructions {
                 .toList();
     }
 
-    public static List<Label> extractUsedLabels(List<Instruction> instructions) {
-        return extractUsedLabels(extractLabeledInstructions(instructions), getArgumentLabels(instructions));
-    }
-
-    // overloading for when you have the results of the functions cached
-    public static List<Label> extractUsedLabels(
-            Map<Label, InstructionReference> labeledInstructions,
-            List<ArgumentLabelInfo> argumentLabels
-    ) {
-        List<Label> instructionLabels = new ArrayList<>(
-                labeledInstructions.keySet().stream()
-                .sorted(Label.comparator())
-                .toList()
-        );
-
-        if(exitIsUsed(argumentLabels))
-            instructionLabels.add(FixedLabel.EXIT);
-
-        return instructionLabels;
-    }
-
     public static List<Label> extractUsedLabels(Instruction instruction) {
         List<Label> labels = new ArrayList<>();
         if(instruction.getLabel() != FixedLabel.EMPTY)
@@ -124,12 +103,5 @@ public class Instructions {
         return allInputs.stream()
                 .sorted(Comparator.comparingInt(Variable::getNumber))
                 .toList();
-    }
-
-    private static boolean exitIsUsed(List<ArgumentLabelInfo> argumentLabels)
-    {
-        return argumentLabels.stream()
-                .map(ArgumentLabelInfo::label)
-                .anyMatch(label -> label.equals(FixedLabel.EXIT));
     }
 }
