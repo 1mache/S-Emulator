@@ -32,12 +32,7 @@ public class ProgramExpander {
         this.program = program;
         originalSymbolRegistry = new SymbolRegistry(program.getUsedLabels(), program.getWorkVariables());
 
-        expansionForest = new ArrayList<>();
-        int lineCount = 0;
-        for (var instruction: program.getInstructions()) {
-            expansionForest.add(new ExpansionNode(new InstructionReference(instruction, lineCount)));
-            lineCount++;
-        }
+        resetExpansionForest();
     }
 
     public Program expand(int degree){
@@ -51,6 +46,7 @@ public class ProgramExpander {
             return buildProgramFromExpansionNodes(expansionForest);
 
         Program current = program;
+        resetExpansionForest();
         SymbolRegistry usedSymbols = originalSymbolRegistry;
         LabelVariableGenerator symbolGenerator = new LabelVariableGenerator(program);
 
@@ -130,6 +126,15 @@ public class ProgramExpander {
     }
 
     // -------- private ---------
+
+    private void resetExpansionForest() {
+        expansionForest = new ArrayList<>();
+        int lineCount = 0;
+        for (var instruction: program.getInstructions()) {
+            expansionForest.add(new ExpansionNode(new InstructionReference(instruction, lineCount)));
+            lineCount++;
+        }
+    }
 
     private Program buildProgramFromExpansionNodes(List<ExpansionNode> nodes){
         return new StandardProgram(

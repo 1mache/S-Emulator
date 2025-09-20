@@ -18,6 +18,7 @@ import java.util.List;
 
 public class SLanguageEngine {
     private Program program;
+    private ProgramExpander programExpander;
     private List<ExecutionResult> previousExecutions;
 
     private SLanguageEngine(){}
@@ -34,6 +35,7 @@ public class SLanguageEngine {
         loader.loadXML(path, listener);
         loader.validateProgram();
         program = loader.getProgram();
+        programExpander = new ProgramExpander(program);
 
         previousExecutions = new ArrayList<>();
     }
@@ -59,7 +61,7 @@ public class SLanguageEngine {
             throw new SProgramNotLoadedException("Program is not loaded");
         }
 
-        return new ProgramViewer(program).getProgramPeek(expansionDegree);
+        return new ProgramViewer(program).getProgramPeek(expansionDegree, programExpander);
     }
 
     public ExecutionResult runProgram(List<Long> inputs, int expansionDegree, boolean specificInputs) {
@@ -72,7 +74,7 @@ public class SLanguageEngine {
                 throw new IllegalArgumentException("Input values must be non-negative");
         }
 
-        var expandedProgram = new ProgramExpander(program).expand(expansionDegree);
+        var expandedProgram = programExpander.expand(expansionDegree);
         var programRunner = new ProgramRunner(expandedProgram);
 
         if(specificInputs)

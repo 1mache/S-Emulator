@@ -18,14 +18,20 @@ public class ProgramViewer {
         this.program = program;
     }
 
-    public ProgramPeek getProgramPeek(int expansionDegree){
-        var expander = new ProgramExpander(program);
-        Program expandedProgram = expander.expand(expansionDegree);
+    public ProgramPeek getProgramPeek(int expansionDegree) {
+        return getProgramPeek(expansionDegree, null);
+    }
+
+    public ProgramPeek getProgramPeek(int expansionDegree, ProgramExpander programExpander) {
+        if(programExpander == null)
+            programExpander = new ProgramExpander(program);
+
+        Program expandedProgram = programExpander.expand(expansionDegree);
 
         List<InstructionPeek> instructionPeeks = new ArrayList<>();
 
         for (int lineId = 0; lineId < expandedProgram.getInstructions().size(); lineId++) {
-            List<InstructionReference> expansionChain = expander.getExpansionChainOf(lineId);
+            List<InstructionReference> expansionChain = programExpander.getExpansionChainOf(lineId);
 
             // construct the expandedFrom chain
             InstructionPeek expandedFrom = null;
