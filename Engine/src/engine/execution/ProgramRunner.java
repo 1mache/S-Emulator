@@ -78,6 +78,8 @@ public class ProgramRunner {
             variableContext.setVariableValue(Variable.createInputVariable(counter), input);
             counter++;
         }
+
+        variableContext.setVariableValue(Variable.RESULT, 0L);
     }
 
     public void initInputVariablesSpecific(List<Long> initInput) {
@@ -93,6 +95,8 @@ public class ProgramRunner {
         for(; i < inputVars.size(); i++) {
             variableContext.setVariableValue(inputVars.get(i), 0L);
         }
+
+        variableContext.setVariableValue(Variable.RESULT, 0L);
     }
 
     // ------------ private: ------------
