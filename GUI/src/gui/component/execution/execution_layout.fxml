@@ -2,12 +2,14 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
@@ -16,11 +18,19 @@
    <top>
       <VBox alignment="CENTER" prefHeight="100.0" prefWidth="400.0" BorderPane.alignment="CENTER">
          <children>
-            <Label text="Execution / Debug" />
-            <TilePane alignment="CENTER" prefHeight="200.0" prefWidth="200.0">
+            <HBox alignment="CENTER" spacing="10.0">
+               <children>
+                  <Button fx:id="newRunButton" mnemonicParsing="false" onAction="#onNewRunAction" text="New Run" />
+                  <ChoiceBox fx:id="modeChoiceBox" prefWidth="150.0" />
+               </children>
+            </HBox>
+            <TilePane alignment="CENTER" prefHeight="200.0" prefWidth="200.0" vgap="10.0">
                <children>
                   <Button fx:id="runProgramButton" mnemonicParsing="false" onAction="#runButtonAction" text="Run Program" />
-                  <Button fx:id="debugProgramButton" mnemonicParsing="false" onAction="#debugButtonAction" text="Debug Program" />
+                  <Button fx:id="stepOverButton" mnemonicParsing="false" onAction="#stepOverAction" text="Step Over" />
+                  <Button fx:id="stepBackButton" layoutX="210.0" layoutY="35.0" mnemonicParsing="false" onAction="#stepBackAction" text="Step Back" />
+                  <Button fx:id="stopDebugButton" layoutX="260.0" layoutY="35.0" mnemonicParsing="false" onAction="#stopDebugAction" text="Stop Debug" />
+                  <Button fx:id="continueButton" layoutX="300.0" layoutY="35.0" mnemonicParsing="false" onAction="#continueAction" text="Continue" />
                </children>
             </TilePane>
          </children>

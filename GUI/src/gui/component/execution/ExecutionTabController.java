@@ -8,16 +8,19 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.geometry.Insets;
+import javafx.util.StringConverter;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -33,16 +36,27 @@ public class ExecutionTabController implements Initializable {
     private GridPane inputVariableGrid;
 
     @FXML
-    private Button runProgramButton;
-
-    @FXML
-    private Button debugProgramButton;
-
-    @FXML
     private Label inputVarsLabel;
 
     @FXML
     private Label cyclesLabel;
+
+    @FXML
+    private ChoiceBox<RunMode> modeChoiceBox;
+
+    @FXML
+    private Button stepOverButton;
+
+    @FXML
+    private Button stepBackButton;
+
+    @FXML
+    private Button stopDebugButton;
+
+    @FXML
+    private Button continueButton;
+
+    private List<Button> debugControls;
 
     private final String DEFAULT_LABEL_TEXT = "Input Variables (positive integers)";
 
@@ -51,8 +65,11 @@ public class ExecutionTabController implements Initializable {
     private final BooleanProperty inputsValidProperty = new SimpleBooleanProperty(true);
     private final IntegerProperty expansionDegreeProperty = new SimpleIntegerProperty(0);
 
+    private RunMode runMode = RunMode.RUN; // Default
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        debugControls = List.of(stepOverButton, stepBackButton, stopDebugButton, continueButton);
         inputVariableGrid.getChildren().clear();
 
         inputsValidProperty.addListener(
@@ -68,6 +85,31 @@ public class ExecutionTabController implements Initializable {
                     }
                 }
         );
+
+        modeChoiceBox.setItems(FXCollections.observableArrayList(
+                RunMode.RUN,
+                RunMode.DEBUG
+        ));
+
+        modeChoiceBox.setConverter(new StringConverter<RunMode>() {
+            @Override
+            public String toString(RunMode option) {
+                return option == null ? "" : option.getName(); // use your getName()
+            }
+
+            @Override
+            public RunMode fromString(String s) {
+                return null; // not needed
+            }
+        });
+
+        modeChoiceBox.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    runMode = newValue;
+                    disableDebugControlsBasedOnMode(newValue);
+                }
+        );
+        modeChoiceBox.setValue(runMode);
     }
 
     public void setEngine(SLanguageEngine engine){
@@ -92,10 +134,32 @@ public class ExecutionTabController implements Initializable {
     }
 
     @FXML
-    public void debugButtonAction(ActionEvent event) {
-        validateInputs();
-        if(!inputsValidProperty.get()) return;
-        System.out.println("DEBUG NOT IMPLEMENTED YET");
+    public void onNewRunAction(ActionEvent event){
+        // clear variable table
+        variableTableController.clear();
+        // clear input text field
+        inputFields.values().forEach(textField ->  textField.setText("0"));
+        cyclesLabel.setText("Cycles: " + 0);
+    }
+
+    @FXML
+    public void stepOverAction(ActionEvent event) {
+        System.out.println("I am stepping over it");
+    }
+
+    @FXML
+    public void stepBackAction(ActionEvent event) {
+        System.out.println("I am stepping back");
+    }
+
+    @FXML
+    public void stopDebugAction(ActionEvent event) {
+        System.out.println("I am stopping it");
+    }
+
+    @FXML
+    public void continueAction(ActionEvent event) {
+        System.out.println("I am resuming it");
     }
 
     public IntegerProperty getExpansionDegreeProperty() {
@@ -137,6 +201,7 @@ public class ExecutionTabController implements Initializable {
         inputVariableGrid.getRowConstraints().add(rc);
     }
 
+    // --------- private: ------------
     private void validateInputs() {
         boolean allValid = true;
         for (TextField textField : inputFields.values()) {
@@ -155,5 +220,14 @@ public class ExecutionTabController implements Initializable {
             }
         }
         inputsValidProperty.set(allValid);
+    }
+
+    private void disableDebugControlsBasedOnMode(RunMode runMode) {
+        if(runMode == RunMode.DEBUG) {
+            debugControls.forEach(button -> button.setDisable(false));
+        }
+        else{
+            debugControls.forEach(button -> button.setDisable(true));
+        }
     }
 }
