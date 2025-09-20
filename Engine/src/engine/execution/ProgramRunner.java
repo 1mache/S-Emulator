@@ -13,11 +13,11 @@ import java.util.Map;
 import java.util.Optional;
 
 public class ProgramRunner {
-    private final Program program;
-    private VariableContext variableContext;
+    protected final Program program;
+    protected VariableContext variableContext;
 
     // instruction pointer
-    private int pc = 0;
+    protected int pc = 0;
     private long cycles = 0;
 
     public ProgramRunner(Program program) {
@@ -31,11 +31,14 @@ public class ProgramRunner {
         cycles = 0;
     }
 
+    // an execution that starts at pc
     public void run() {
         Optional<Instruction> currInstruction;
         Label jumpLabel = FixedLabel.EMPTY;
 
         do {
+            if(breakCheck(pc)) break; // check for break condition
+
             if (jumpLabel == FixedLabel.EMPTY) {
                 currInstruction = program.getInstructionByIndex(pc);
                 jumpLabel = executeInstruction(currInstruction.orElse(null));
@@ -95,8 +98,12 @@ public class ProgramRunner {
         variableContext.setVariableValue(Variable.RESULT, 0L);
     }
 
-    // ------------ private: ------------
-    private Label executeInstruction(Instruction instruction) {
+    // ------------ internal: ------------
+    protected boolean breakCheck(int pc) {
+        return false; // this is normal execution
+    }
+
+    protected Label executeInstruction(Instruction instruction) {
         pc++;
         Optional<Instruction> optionalInstruction = Optional.ofNullable(instruction);
         optionalInstruction.ifPresent(i -> cycles += i.cycles());

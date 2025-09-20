@@ -1,7 +1,9 @@
 package engine.api;
 
+import engine.api.dto.DebugHandle;
 import engine.api.dto.ExecutionResult;
 import engine.api.dto.ProgramPeek;
+import engine.debugger.ProgramDebugger;
 import engine.execution.ProgramRunner;
 import engine.execution.exception.SProgramNotLoadedException;
 import engine.expansion.ProgramExpander;
@@ -65,19 +67,19 @@ public class SLanguageEngine {
     }
 
     public ExecutionResult runProgram(List<Long> inputs, int expansionDegree, boolean specificInputs) {
-        if(expansionDegree > program.getMaxExpansionDegree())
+        if (expansionDegree > program.getMaxExpansionDegree())
             throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + program.getMaxExpansionDegree());
-        if(programNotLoaded())
+        if (programNotLoaded())
             throw new SProgramNotLoadedException("Program is not loaded");
-        for(var input : inputs){
-            if(input < 0)
+        for (var input : inputs) {
+            if (input < 0)
                 throw new IllegalArgumentException("Input values must be non-negative");
         }
 
         var expandedProgram = programExpander.expand(expansionDegree);
         var programRunner = new ProgramRunner(expandedProgram);
 
-        if(specificInputs)
+        if (specificInputs)
             programRunner.initInputVariablesSpecific(inputs);
         else
             programRunner.initInputVariables(inputs);
@@ -93,6 +95,10 @@ public class SLanguageEngine {
         );
         previousExecutions.add(executionResult);
         return executionResult;
+    }
+
+    public DebugHandle startDebug(){
+        return new DebugHandle(new ProgramDebugger(program));
     }
 
     public List<ExecutionResult> getExecutionHistory(){
