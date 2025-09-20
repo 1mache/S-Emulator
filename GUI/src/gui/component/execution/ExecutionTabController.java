@@ -41,6 +41,9 @@ public class ExecutionTabController implements Initializable {
     @FXML
     private Label inputVarsLabel;
 
+    @FXML
+    private Label cyclesLabel;
+
     private final String DEFAULT_LABEL_TEXT = "Input Variables (positive integers)";
 
     private SLanguageEngine engine;
@@ -85,6 +88,7 @@ public class ExecutionTabController implements Initializable {
         );
 
         variableTableController.setVariableEntries(result.variableMap());
+        cyclesLabel.setText("Cycles: " + result.cyclesUsed());
     }
 
     @FXML
