@@ -158,6 +158,7 @@ public class PrimaryController implements Initializable {
                     if (now){
                         mainInstructionTableController.setInstructions(engine.getProgramPeek().instructions());
 
+                        executionTabController.reset();
                         executionTabController.buildInputGrid();
                     }
                 }

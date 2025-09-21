@@ -25,7 +25,7 @@ public class ShowHistoryOption extends MenuPage {
                         i + 1,
                         execution.inputs(),
                         execution.expansionDegree(),
-                        execution.cyclesUsed(),
+                        execution.cycles(),
                         execution.outputValue()
                 );
             }

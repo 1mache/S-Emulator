@@ -31,13 +31,21 @@ public class ProgramRunner {
         cycles = 0;
     }
 
-    // an execution that starts at pc
-    public void run() {
+
+    public boolean run(){
+        return run(FixedLabel.EMPTY);
+    }
+    /*
+     an execution that starts at pc (or at init jump label)
+     returns whether the run reached the end of the program
+    */
+    protected boolean run(Label initJumpLabel) {
         Optional<Instruction> currInstruction;
-        Label jumpLabel = FixedLabel.EMPTY;
+        Label jumpLabel = initJumpLabel;
 
         do {
-            if(breakCheck(pc)) break; // check for break condition
+            if(breakCheck(pc))
+                return false; // early stop
 
             if (jumpLabel == FixedLabel.EMPTY) {
                 currInstruction = program.getInstructionByIndex(pc);
@@ -57,13 +65,15 @@ public class ProgramRunner {
             if(jumpLabel == FixedLabel.EXIT) break; // check for exit
         }
         while (currInstruction.isPresent());
+
+        return true;
     }
 
     public Long getRunOutput(){
         return variableContext.getVariableValue(Variable.RESULT);
     }
 
-    public Map<String, Long> getVariableEndValues() {
+    public Map<String, Long> getAllVariableValues() {
         return variableContext.getOrganizedVariableValues();
     }
 

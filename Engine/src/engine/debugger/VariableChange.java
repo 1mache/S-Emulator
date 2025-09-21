@@ -1,4 +1,4 @@
-package engine.api.dto;
+package engine.debugger;
 
 import engine.variable.Variable;
 

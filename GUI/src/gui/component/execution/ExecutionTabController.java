@@ -1,13 +1,13 @@
 package gui.component.execution;
 
 import engine.api.SLanguageEngine;
+import engine.api.dto.debug.DebugEndResult;
+import engine.api.dto.debug.DebugHandle;
 import engine.api.dto.ExecutionResult;
+import engine.api.dto.debug.VariableChangePeek;
 import gui.component.variable.table.VariableTableController;
 import gui.utility.CssClasses;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -58,14 +58,19 @@ public class ExecutionTabController implements Initializable {
 
     private List<Button> debugControls;
 
-    private final String DEFAULT_LABEL_TEXT = "Input Variables (positive integers)";
-
     private SLanguageEngine engine;
     private final Map<String, TextField> inputFields = new HashMap<>();
     private final BooleanProperty inputsValidProperty = new SimpleBooleanProperty(true);
     private final IntegerProperty expansionDegreeProperty = new SimpleIntegerProperty(0);
 
-    private RunMode runMode = RunMode.RUN; // Default
+    private RunMode runMode = RunMode.EXECUTION; // Default
+
+    private DebugHandle debugHandle;
+
+    private enum DebugState{
+        NOT_IN_DEBUG, ON_BREAKPOINT, END
+    }
+    private final ObjectProperty<DebugState> debugState = new SimpleObjectProperty<>(DebugState.NOT_IN_DEBUG);
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -73,25 +78,15 @@ public class ExecutionTabController implements Initializable {
         inputVariableGrid.getChildren().clear();
 
         inputsValidProperty.addListener(
-                (v, was, now) -> {
-                    if (now) {
-                        inputVarsLabel.setText(DEFAULT_LABEL_TEXT);
-                        inputVarsLabel.getStyleClass().remove(CssClasses.ERROR_FIELD);
-                    } else {
-                        inputVarsLabel.setText("Please correct invalid inputs");
-                        if (!inputVarsLabel.getStyleClass().contains(CssClasses.ERROR_FIELD)) {
-                            inputVarsLabel.getStyleClass().add(CssClasses.ERROR_FIELD);
-                        }
-                    }
-                }
+                (v, was, now) -> onInputsValidityChange(now)
         );
 
         modeChoiceBox.setItems(FXCollections.observableArrayList(
-                RunMode.RUN,
+                RunMode.EXECUTION,
                 RunMode.DEBUG
         ));
 
-        modeChoiceBox.setConverter(new StringConverter<RunMode>() {
+        modeChoiceBox.setConverter(new StringConverter<>() {
             @Override
             public String toString(RunMode option) {
                 return option == null ? "" : option.getName(); // use your getName()
@@ -103,13 +98,23 @@ public class ExecutionTabController implements Initializable {
             }
         });
 
+        // mode choice box:
         modeChoiceBox.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue, newValue) -> {
-                    runMode = newValue;
-                    disableDebugControlsBasedOnMode(newValue);
-                }
+                (observable, oldValue, newValue) ->
+                        runMode = newValue
         );
         modeChoiceBox.setValue(runMode);
+
+        // when debug finishes:
+        debugState.addListener(
+                (observable, oldValue, newValue) ->
+                        onDebugStateChange(newValue)
+        );
+
+        expansionDegreeProperty.addListener(
+                (observable, oldValue, newValue) ->
+                        debugState.set(DebugState.NOT_IN_DEBUG) // if we changed expansionDegree reset the debug
+        );
     }
 
     public void setEngine(SLanguageEngine engine){
@@ -123,15 +128,32 @@ public class ExecutionTabController implements Initializable {
     public void runButtonAction(ActionEvent event) {
         validateInputs();
         if(!inputsValidProperty.get()) return;
-        ExecutionResult result = engine.runProgram(
-                inputFields.values().stream().map(TextField::getText).map(Long::parseLong).toList(),
-                expansionDegreeProperty.get(),
-                true
-        );
 
-        variableTableController.setVariableEntries(result.variableMap());
-        cyclesLabel.setText("Cycles: " + result.cyclesUsed());
+        ExecutionResult result;
+        if(runMode == RunMode.EXECUTION){
+            result = engine.runProgram(
+                    inputFields.values().stream().map(TextField::getText).map(Long::parseLong).toList(),
+                    expansionDegreeProperty.get(),
+                    true
+            );
+            variableTableController.setVariableEntries(result.variableMap());
+            cyclesLabel.setText("Cycles: " + result.cycles());
+        }
+        else if(runMode == RunMode.DEBUG){
+            debugHandle = engine.debugProgram(
+                    inputFields.values().stream().map(TextField::getText).map(Long::parseLong).toList(),
+                    expansionDegreeProperty.get(),
+                    true
+            );
+
+            if(debugHandle.startDebug())
+                debugState.set(DebugState.END);
+            else
+                debugState.set(DebugState.ON_BREAKPOINT);
+        }
     }
+
+    // --------------- debug api ------------------
 
     @FXML
     public void onNewRunAction(ActionEvent event){
@@ -144,22 +166,45 @@ public class ExecutionTabController implements Initializable {
 
     @FXML
     public void stepOverAction(ActionEvent event) {
-        System.out.println("I am stepping over it");
+        // if debug finished this button will not be active so no check needed
+        VariableChangePeek delta = debugHandle.stepOver();
+        variableTableController.addVariableEntries(Map.of(delta.variable(), delta.newValue()));
     }
 
     @FXML
     public void stepBackAction(ActionEvent event) {
+        // if debug finished this button will not be active so no check needed
         System.out.println("I am stepping back");
     }
 
     @FXML
     public void stopDebugAction(ActionEvent event) {
-        System.out.println("I am stopping it");
+        debugHandle.stopDebug();
+        debugState.set(DebugState.END);
     }
 
     @FXML
     public void continueAction(ActionEvent event) {
-        System.out.println("I am resuming it");
+        if(debugHandle.resume())
+            debugState.set(DebugState.END);
+        else
+            debugState.set(DebugState.ON_BREAKPOINT);
+    }
+
+    public void addBreakPoint(int lineId){
+        debugHandle.addBreakpoint(lineId);
+    }
+
+    public void removeBreakPoint(int lineId){
+        debugHandle.removeBreakpoint(lineId);
+    }
+
+    // --------------- other controller communication ------------------
+    public void reset(){
+        runMode = RunMode.EXECUTION;
+        modeChoiceBox.setValue(runMode);
+        debugState.set(DebugState.NOT_IN_DEBUG);
+        variableTableController.clear();
     }
 
     public IntegerProperty getExpansionDegreeProperty() {
@@ -222,12 +267,33 @@ public class ExecutionTabController implements Initializable {
         inputsValidProperty.set(allValid);
     }
 
-    private void disableDebugControlsBasedOnMode(RunMode runMode) {
-        if(runMode == RunMode.DEBUG) {
-            debugControls.forEach(button -> button.setDisable(false));
+    private void onInputsValidityChange(Boolean now) {
+        if (now) {
+            String DEFAULT_LABEL_TEXT = "Input Variables (positive integers)";
+            inputVarsLabel.setText(DEFAULT_LABEL_TEXT);
+            inputVarsLabel.getStyleClass().remove(CssClasses.ERROR_FIELD);
+        } else {
+            inputVarsLabel.setText("Please correct invalid inputs");
+            if (!inputVarsLabel.getStyleClass().contains(CssClasses.ERROR_FIELD)) {
+                inputVarsLabel.getStyleClass().add(CssClasses.ERROR_FIELD);
+            }
         }
-        else{
-            debugControls.forEach(button -> button.setDisable(true));
+    }
+
+    private void onDebugStateChange(DebugState newValue) {
+        switch (newValue) {
+            case NOT_IN_DEBUG -> debugControls.forEach(control -> control.setDisable(true));
+            case ON_BREAKPOINT -> debugControls.forEach(control -> control.setDisable(false));
+            case END -> {
+                DebugEndResult result = debugHandle.getResult();
+                variableTableController.setVariableEntries(result.variableMap());
+                cyclesLabel.setText("Cycles: " + result.cycles());
+
+                debugControls.forEach(button -> button.setDisable(true));
+                debugState.set(DebugState.NOT_IN_DEBUG);
+            }
+            case null, default -> {
+            }
         }
     }
 }

@@ -11,8 +11,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
 import java.net.URL;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class VariableTableController implements Initializable {
     @FXML
@@ -23,6 +22,9 @@ public class VariableTableController implements Initializable {
 
     @FXML
     private TableView<VariableEntry> variableTable;
+
+    // to preserve put order
+    private final Map<String, Long> variableMap = new LinkedHashMap<>();
 
     private record VariableEntry(String name, Long value) {}
     private final ObservableList<VariableEntry> variableEntries = FXCollections.observableArrayList();
@@ -44,8 +46,22 @@ public class VariableTableController implements Initializable {
         variableTable.setItems(this.variableEntries);
     }
 
-    public void setVariableEntries(Map<String, Long> variableMap) {
-        this.variableEntries.clear();
+    public void setVariableEntries(Map<String, Long> variableValues) {
+        this.variableMap.clear();
+        addVariableEntries(variableValues);
+    }
+
+    public void addVariableEntries(Map<String, Long> variableValues) {
+        this.variableMap.putAll(variableValues);
+        setEntriesFromMap();
+    }
+
+    public void highlightLines(Collection<Integer> lineIds){
+        System.out.println("I am highlighting it");
+    }
+
+    private void setEntriesFromMap() {
+        variableEntries.clear();
         variableMap.forEach((name, value) -> this.variableEntries.add(new VariableEntry(name, value)));
         variableTable.setItems(this.variableEntries);
     }

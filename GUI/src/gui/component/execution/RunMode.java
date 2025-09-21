@@ -1,7 +1,7 @@
 package gui.component.execution;
 
 public enum RunMode {
-    RUN("Execution"),
+    EXECUTION("Execution"),
     DEBUG("Debug")
     ;
 

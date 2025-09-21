@@ -1,6 +1,5 @@
 package engine.debugger;
 
-import engine.api.dto.VariableChange;
 import engine.execution.ProgramRunner;
 import engine.instruction.Instruction;
 import engine.program.Program;
@@ -10,20 +9,46 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ProgramDebugger extends ProgramRunner {
-    private final Set<Integer> breakpoints = new HashSet<>();
+    private enum DebuggerState{
+        WAIT_FOR_START, ON_BREAKPOINT, END
+    }
+
+    private DebuggerState state = DebuggerState.WAIT_FOR_START;
     private Instruction pausedOn = null;
+
+    private final Set<Integer> breakpoints = new HashSet<>();;
 
     public ProgramDebugger(Program program) {
         super(program);
     }
 
-    public void stopDebug(){
-        breakpoints.clear();
+    @Override
+    public boolean run() {
+        if(state != DebuggerState.WAIT_FOR_START){
+            reset(); // if we're in the middle of the debug, stop the previous one
+        }
+
+        boolean reachedEnd = super.run();
+        if(reachedEnd)
+            state = DebuggerState.END;
+
+        return reachedEnd;
+    }
+
+    // aka stop debug
+    @Override
+    public void reset(){
+        if(state == DebuggerState.WAIT_FOR_START)
+            throw new IllegalStateException("Debugger not started");
+
         pausedOn = null;
-        reset();
+        state = DebuggerState.WAIT_FOR_START;
+        super.reset();
     }
 
     public VariableChange stepOver() {
+        validateBreakpointState();
+
         Variable variable = pausedOn.getVariable();
         Long oldValue = variableContext.getVariableValue(variable);
         executeInstruction(pausedOn);
@@ -36,20 +61,39 @@ public class ProgramDebugger extends ProgramRunner {
     }
 
     public VariableChange stepBack(){
+        validateBreakpointState();
         return new VariableChange(Variable.NO_VAR, 0L,0L); // NOT IMPLEMENTED
     }
 
-    public void resume(){
-        executeInstruction(pausedOn);
-        run();
+    public boolean resume(){
+        validateBreakpointState();
+
+        var jumpTo = executeInstruction(pausedOn);
+        return run(jumpTo);
     }
 
-    public void setBreakpoint(int lineNumber){
+    public void addBreakpoint(int lineNumber){
         breakpoints.add(lineNumber);
+    }
+
+    public void removeBreakpoint(int lineNumber){
+        breakpoints.remove(lineNumber);
     }
 
     @Override
     protected boolean breakCheck(int pc) {
-        return breakpoints.contains(pc);
+        boolean hitBreakPoint = breakpoints.contains(pc);
+        if(hitBreakPoint){
+            pausedOn = program.getInstructionByIndex(pc).orElse(null); // (should never actually be null)
+            state = DebuggerState.ON_BREAKPOINT;
+        }
+
+        return hitBreakPoint;
+    }
+
+    private void validateBreakpointState() {
+        if(state != DebuggerState.ON_BREAKPOINT){
+            throw new IllegalStateException("Debugger state is " + state);
+        }
     }
 }
