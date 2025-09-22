@@ -52,11 +52,7 @@ public class ProgramRunner {
                 jumpLabel = executeInstruction(currInstruction.orElse(null));
             }
             else {
-                // jump needs to happen
-                currInstruction = program.getInstructionByLabel(jumpLabel);
-                // set the pc to the relevant line
-                program.getLineNumberOfLabel(jumpLabel)
-                        .ifPresent(lineId -> pc = lineId);
+                currInstruction = jumpToLabel(jumpLabel);
 
                 if(currInstruction.isPresent())
                     jumpLabel = executeInstruction(currInstruction.get());
@@ -110,6 +106,17 @@ public class ProgramRunner {
     // ------------ internal: ------------
     protected boolean breakCheck(int pc) {
         return false; // this is normal execution
+    }
+
+    // Note: returns empty if label is EXIT
+    protected Optional<Instruction> jumpToLabel(Label jumpLabel) {
+        Optional<Instruction> jumpedTo;
+        // jump needs to happen
+        jumpedTo = program.getInstructionByLabel(jumpLabel);
+        // set the pc to the relevant line
+        program.getLineNumberOfLabel(jumpLabel)
+                .ifPresent(lineId -> pc = lineId);
+        return jumpedTo;
     }
 
     protected Label executeInstruction(Instruction instruction) {

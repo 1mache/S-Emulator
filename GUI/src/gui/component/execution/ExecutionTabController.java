@@ -4,12 +4,14 @@ import engine.api.SLanguageEngine;
 import engine.api.dto.debug.DebugEndResult;
 import engine.api.dto.debug.DebugHandle;
 import engine.api.dto.ExecutionResult;
-import engine.api.dto.debug.VariableChangePeek;
+import engine.api.dto.debug.DebugStepPeek;
+import gui.component.execution.event.DebugStopOnLine;
 import gui.component.variable.table.VariableTableController;
 import gui.utility.CssClasses;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -23,10 +25,7 @@ import javafx.geometry.Insets;
 import javafx.util.StringConverter;
 
 import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class ExecutionTabController implements Initializable {
     @FXML
@@ -67,54 +66,23 @@ public class ExecutionTabController implements Initializable {
 
     private DebugHandle debugHandle;
 
-    private enum DebugState{
-        NOT_IN_DEBUG, ON_BREAKPOINT, END
-    }
     private final ObjectProperty<DebugState> debugState = new SimpleObjectProperty<>(DebugState.NOT_IN_DEBUG);
+    private final Set<EventHandler<DebugStopOnLine>> debugLineChangeListeners = new HashSet<>();
+
+    private final Set<Integer> breakpoints = new HashSet<>();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        debugControls = List.of(stepOverButton, stepBackButton, stopDebugButton, continueButton);
         inputVariableGrid.getChildren().clear();
 
         inputsValidProperty.addListener(
-                (v, was, now) -> onInputsValidityChange(now)
+                (v, was, now) ->
+                        onInputsValidityChange(now)
         );
 
-        modeChoiceBox.setItems(FXCollections.observableArrayList(
-                RunMode.EXECUTION,
-                RunMode.DEBUG
-        ));
+        initializeModeChoiceBox();
 
-        modeChoiceBox.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(RunMode option) {
-                return option == null ? "" : option.getName(); // use your getName()
-            }
-
-            @Override
-            public RunMode fromString(String s) {
-                return null; // not needed
-            }
-        });
-
-        // mode choice box:
-        modeChoiceBox.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue, newValue) ->
-                        runMode = newValue
-        );
-        modeChoiceBox.setValue(runMode);
-
-        // when debug finishes:
-        debugState.addListener(
-                (observable, oldValue, newValue) ->
-                        onDebugStateChange(newValue)
-        );
-
-        expansionDegreeProperty.addListener(
-                (observable, oldValue, newValue) ->
-                        debugState.set(DebugState.NOT_IN_DEBUG) // if we changed expansionDegree reset the debug
-        );
+        initDebugRelated();
     }
 
     public void setEngine(SLanguageEngine engine){
@@ -128,6 +96,8 @@ public class ExecutionTabController implements Initializable {
     public void runButtonAction(ActionEvent event) {
         validateInputs();
         if(!inputsValidProperty.get()) return;
+
+        disableInputs(true);
 
         ExecutionResult result;
         if(runMode == RunMode.EXECUTION){
@@ -146,10 +116,15 @@ public class ExecutionTabController implements Initializable {
                     true
             );
 
+            breakpoints.forEach(
+                    lineId -> debugHandle.addBreakpoint(lineId)
+            );
+
+            debugState.set(DebugState.RUNNING);
             if(debugHandle.startDebug())
                 debugState.set(DebugState.END);
             else
-                debugState.set(DebugState.ON_BREAKPOINT);
+                debugState.set(DebugState.ON_INSTRUCTION);
         }
     }
 
@@ -157,18 +132,33 @@ public class ExecutionTabController implements Initializable {
 
     @FXML
     public void onNewRunAction(ActionEvent event){
+        // enable inputs
+        disableInputs(false);
         // clear variable table
         variableTableController.clear();
         // clear input text field
         inputFields.values().forEach(textField ->  textField.setText("0"));
         cyclesLabel.setText("Cycles: " + 0);
+
+        if(debugHandle != null){
+            debugHandle.stopDebug();
+            debugState.set(DebugState.NOT_IN_DEBUG);
+        }
     }
 
     @FXML
     public void stepOverAction(ActionEvent event) {
         // if debug finished this button will not be active so no check needed
-        VariableChangePeek delta = debugHandle.stepOver();
-        variableTableController.addVariableEntries(Map.of(delta.variable(), delta.newValue()));
+        DebugStepPeek delta = debugHandle.stepOver();
+        if(delta.variable().isPresent())
+            variableTableController.addVariableEntries(Map.of(delta.variable().get(), delta.newValue()));
+
+        debugHandle.whichLine()
+                .ifPresentOrElse(
+                        this::fireDebugStoppedOnLine,
+                        // if not present then we reached the end
+                        () -> debugState.set(DebugState.END)
+                );
     }
 
     @FXML
@@ -185,18 +175,27 @@ public class ExecutionTabController implements Initializable {
 
     @FXML
     public void continueAction(ActionEvent event) {
+        debugState.set(DebugState.RUNNING);
         if(debugHandle.resume())
             debugState.set(DebugState.END);
         else
-            debugState.set(DebugState.ON_BREAKPOINT);
+            debugState.set(DebugState.ON_INSTRUCTION);
+    }
+
+    public void addDebugLineChangeListener(EventHandler<DebugStopOnLine> listener){
+        debugLineChangeListeners.add(listener);
     }
 
     public void addBreakPoint(int lineId){
-        debugHandle.addBreakpoint(lineId);
+        breakpoints.add(lineId);
+        if(debugState.get() == DebugState.ON_INSTRUCTION)
+            debugHandle.addBreakpoint(lineId);
     }
 
     public void removeBreakPoint(int lineId){
-        debugHandle.removeBreakpoint(lineId);
+        breakpoints.remove(lineId);
+        if(debugState.get() == DebugState.ON_INSTRUCTION)
+            debugHandle.removeBreakpoint(lineId);
     }
 
     // --------------- other controller communication ------------------
@@ -205,6 +204,7 @@ public class ExecutionTabController implements Initializable {
         modeChoiceBox.setValue(runMode);
         debugState.set(DebugState.NOT_IN_DEBUG);
         variableTableController.clear();
+        disableInputs(false);
     }
 
     public IntegerProperty getExpansionDegreeProperty() {
@@ -247,6 +247,43 @@ public class ExecutionTabController implements Initializable {
     }
 
     // --------- private: ------------
+    private void initializeModeChoiceBox() {
+        modeChoiceBox.setItems(FXCollections.observableArrayList(
+                RunMode.EXECUTION,
+                RunMode.DEBUG
+        ));
+
+        modeChoiceBox.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(RunMode option) {
+                return option == null ? "" : option.getName(); // use your getName()
+            }
+
+            @Override
+            public RunMode fromString(String s) {
+                return null; // not needed
+            }
+        });
+
+        // mode choice box:
+        modeChoiceBox.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue, newValue) ->
+                        runMode = newValue
+        );
+        modeChoiceBox.setValue(runMode);
+    }
+
+    private void initDebugRelated() {
+        // define debug controls
+        debugControls = List.of(stepOverButton, stepBackButton, stopDebugButton, continueButton);
+
+        // when debug finishes:
+        debugState.addListener(
+                (observable, oldValue, newValue) ->
+                        onDebugStateChange(newValue)
+        );
+    }
+
     private void validateInputs() {
         boolean allValid = true;
         for (TextField textField : inputFields.values()) {
@@ -267,6 +304,10 @@ public class ExecutionTabController implements Initializable {
         inputsValidProperty.set(allValid);
     }
 
+    private void disableInputs(boolean disable) {
+        inputFields.values().forEach(inputField -> inputField.setDisable(disable));
+    }
+
     private void onInputsValidityChange(Boolean now) {
         if (now) {
             String DEFAULT_LABEL_TEXT = "Input Variables (positive integers)";
@@ -282,18 +323,29 @@ public class ExecutionTabController implements Initializable {
 
     private void onDebugStateChange(DebugState newValue) {
         switch (newValue) {
-            case NOT_IN_DEBUG -> debugControls.forEach(control -> control.setDisable(true));
-            case ON_BREAKPOINT -> debugControls.forEach(control -> control.setDisable(false));
+            case NOT_IN_DEBUG, RUNNING -> debugControls.forEach(control -> control.setDisable(true));
+            case ON_INSTRUCTION -> {
+                fireDebugStoppedOnLine(debugHandle.whichLine().orElseThrow());
+                debugControls.forEach(control -> control.setDisable(false));
+                variableTableController.setVariableEntries(debugHandle.getResult().variableMap());
+            }
             case END -> {
                 DebugEndResult result = debugHandle.getResult();
                 variableTableController.setVariableEntries(result.variableMap());
                 cyclesLabel.setText("Cycles: " + result.cycles());
 
-                debugControls.forEach(button -> button.setDisable(true));
                 debugState.set(DebugState.NOT_IN_DEBUG);
             }
             case null, default -> {
             }
         }
+    }
+
+    private void fireDebugStoppedOnLine(int breakpointLine) {
+        debugLineChangeListeners.forEach(
+                listener -> {
+                    listener.handle(new DebugStopOnLine(breakpointLine));
+                }
+        );
     }
 }

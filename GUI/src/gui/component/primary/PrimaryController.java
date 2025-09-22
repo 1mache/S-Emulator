@@ -69,26 +69,15 @@ public class PrimaryController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         playSoundTheme();
 
-        mainInstructionTableController.setPlaceholderMessage("No program loaded");
-        expansionTableController.setPlaceholderMessage("Pick instruction to see its source");
+        initInstructionTables();
 
-        // on row click, show expansion chain in the expansion table
-        mainInstructionTableController.addRowClickListener(rowClickAction ->
-                showExpansionChain(rowClickAction.getRowData())
+        initExpansionDegreeSelection();
+
+        // on debug state change
+        executionTabController.addDebugLineChangeListener(
+                debugLineChangeAction ->
+                        onDebugStoppedOnLine(debugLineChangeAction.getSource())
         );
-
-        // what happens on expansion degree change
-        expansionDegreeProperty.bind(expansionChoiceBox.getSelectionModel().selectedItemProperty());
-        expansionChoiceBox.getSelectionModel().selectedItemProperty().addListener(
-                (v, old, now) ->{
-                    mainInstructionTableController.setInstructions(
-                            engine.getExpandedProgramPeek(expansionDegreeProperty.get()).instructions());
-                    expansionTableController.clear();
-                }
-        );
-
-        // bind the expansion deg. property to execution tab controller
-        executionTabController.getExpansionDegreeProperty().bind(expansionDegreeProperty);
 
         bindToProgramLoaded();
     }
@@ -116,7 +105,48 @@ public class PrimaryController implements Initializable {
         executionTabController.setEngine(engine);
     }
 
-    // ===================== Private =======================
+    // ===================== private =======================
+    private void initExpansionDegreeSelection() {
+        // what happens on expansion degree change
+        expansionDegreeProperty.bind(expansionChoiceBox.getSelectionModel().selectedItemProperty());
+        expansionChoiceBox.getSelectionModel().selectedItemProperty().addListener(
+                (v, old, now) ->{
+                    mainInstructionTableController.setInstructions(
+                            engine.getExpandedProgramPeek(expansionDegreeProperty.get()).instructions());
+                    expansionTableController.clear();
+                }
+        );
+        // bind the expansion deg. property to execution tab controller
+        executionTabController.getExpansionDegreeProperty().bind(expansionDegreeProperty);
+    }
+
+    private void initInstructionTables() {
+        mainInstructionTableController.setPlaceholderMessage("No program loaded");
+        expansionTableController.setPlaceholderMessage("Pick instruction to see its source");
+
+        // on row click, show expansion chain in the expansion table
+        mainInstructionTableController.addRowClickListener(rowClickAction ->
+                showExpansionChain(rowClickAction.getRowData())
+        );
+
+        // breakpoints inside instruction table
+        mainInstructionTableController.disableBreakpoints(false);
+        mainInstructionTableController.addBreakpointChangeListener(
+                breakpointChangeAction -> {
+                    Integer lineId = breakpointChangeAction.getSource();
+
+                    if(breakpointChangeAction.isBreakpointSet())
+                        executionTabController.addBreakPoint(lineId);
+                    else
+                        executionTabController.removeBreakPoint(lineId);
+                }
+        );
+    }
+
+    private void onDebugStoppedOnLine(int lineId) {
+        // highlight the line the debugger stopped on
+        mainInstructionTableController.setDebugHighlight(lineId);
+    }
 
     private void bindToProgramLoaded(){
         // file name label

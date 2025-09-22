@@ -2,6 +2,8 @@ package engine.api.dto.debug;
 
 import engine.debugger.ProgramDebugger;
 
+import java.util.Optional;
+
 // handle to be passed to the caller
 public class DebugHandle{
     private final ProgramDebugger debugger;
@@ -16,12 +18,17 @@ public class DebugHandle{
         debugger.reset();
     }
 
-    public VariableChangePeek stepOver() {
-        return new VariableChangePeek(debugger.stepOver());
+    // on breakpoint this will return the line we stopped at
+    public Optional<Integer> whichLine(){
+        return debugger.whichLine();
     }
 
-    public VariableChangePeek stepBack(){
-        return new VariableChangePeek(debugger.stepBack());
+    public DebugStepPeek stepOver() {
+        return new DebugStepPeek(debugger.stepOver());
+    }
+
+    public DebugStepPeek stepBack(){
+        return new DebugStepPeek(debugger.stepBack());
     }
 
     public boolean resume(){
