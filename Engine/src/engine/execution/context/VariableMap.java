@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class VariableTable implements VariableContext {
+public class VariableMap implements VariableContext {
     Map<Variable, Long> variableMap = new HashMap<>();
 
     @Override

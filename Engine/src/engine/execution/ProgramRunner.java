@@ -1,7 +1,7 @@
 package engine.execution;
 
 import engine.execution.context.VariableContext;
-import engine.execution.context.VariableTable;
+import engine.execution.context.VariableMap;
 import engine.instruction.Instruction;
 import engine.label.Label;
 import engine.label.FixedLabel;
@@ -17,16 +17,16 @@ public class ProgramRunner {
     protected VariableContext variableContext;
 
     // instruction pointer
-    protected int pc = 0;
+    private int pc = 0;
     private long cycles = 0;
 
     public ProgramRunner(Program program) {
         this.program = program;
-        variableContext = new VariableTable();
+        variableContext = new VariableMap();
     }
 
     public void reset(){
-        variableContext = new VariableTable();
+        variableContext = new VariableMap();
         pc = 0;
         cycles = 0;
     }
@@ -52,7 +52,7 @@ public class ProgramRunner {
                 jumpLabel = executeInstruction(currInstruction.orElse(null));
             }
             else {
-                currInstruction = jumpToLabel(jumpLabel);
+                currInstruction = jumpToInstructionByLabel(jumpLabel);
 
                 if(currInstruction.isPresent())
                     jumpLabel = executeInstruction(currInstruction.get());
@@ -104,28 +104,41 @@ public class ProgramRunner {
     }
 
     // ------------ internal: ------------
+
+    protected int getPc(){
+        return pc;
+    }
+
+    // called before each instruction. override to implement debug modes
     protected boolean breakCheck(int pc) {
         return false; // this is normal execution
     }
 
     // Note: returns empty if label is EXIT
-    protected Optional<Instruction> jumpToLabel(Label jumpLabel) {
+    protected Optional<Instruction> jumpToInstructionByLabel(Label jumpLabel) {
         Optional<Instruction> jumpedTo;
         // jump needs to happen
         jumpedTo = program.getInstructionByLabel(jumpLabel);
-        // set the pc to the relevant line
-        program.getLineNumberOfLabel(jumpLabel)
-                .ifPresent(lineId -> pc = lineId);
         return jumpedTo;
     }
 
     protected Label executeInstruction(Instruction instruction) {
-        pc++;
         Optional<Instruction> optionalInstruction = Optional.ofNullable(instruction);
         optionalInstruction.ifPresent(i -> cycles += i.cycles());
 
-        return optionalInstruction
+        var jumpLabel = optionalInstruction
                 .map(ins -> ins.execute(variableContext))
                 .orElse(FixedLabel.EMPTY);
+
+        if(jumpLabel == FixedLabel.EXIT) {
+            pc = program.getInstructions().size() + 1; // end
+        } else if(jumpLabel == FixedLabel.EMPTY)
+            pc++;
+        else {
+            program.getLineNumberOfLabel(jumpLabel)
+                    .ifPresent(lineId -> pc = lineId);
+        }
+
+        return jumpLabel;
     }
 }

@@ -27,32 +27,27 @@ public class ProgramDebugger extends ProgramRunner {
 
     @Override
     public boolean run() {
-        if(state != DebuggerState.WAIT_FOR_START){
-            reset(); // if we're in the middle of the debug, stop the previous one
-        }
+        if(state != DebuggerState.WAIT_FOR_START) // should be impossible to reach here
+            throw new IllegalStateException("Previous debug run in progress");
 
         boolean reachedEnd = super.run();
         if(reachedEnd)
-            state = DebuggerState.END;
+            transitionToEnd();
 
         return reachedEnd;
     }
 
     // aka stop debug
     @Override
-    public void reset(){
-        if(state == DebuggerState.WAIT_FOR_START)
-            throw new IllegalStateException("Debugger not started");
-
-        pausedOn = null;
-        state = DebuggerState.WAIT_FOR_START;
+    public void reset() {
+        transitionToWaitForStart();
         super.reset();
     }
 
     // on breakpoint this will return the line we stopped at
     public Optional<Integer> whichLine(){
-        if(state == DebuggerState.ON_INSTRUCTION && pc < program.getInstructions().size())
-            return Optional.of(pc);
+        if(state == DebuggerState.ON_INSTRUCTION && getPc() < program.getInstructions().size())
+            return Optional.of(getPc());
 
         return Optional.empty();
     }
@@ -60,7 +55,7 @@ public class ProgramDebugger extends ProgramRunner {
     public DebugStep stepOver() {
         enforceOnInstructionState();
 
-        int pcBeforeExecution = pc;
+        int pcBeforeExecution = getPc();
         Variable variable = pausedOn.getVariable();
         Long oldValue = variableContext.getVariableValue(variable);
 
@@ -72,20 +67,20 @@ public class ProgramDebugger extends ProgramRunner {
             variable = Variable.NO_VAR; // the instruction did not change its variable, nothing to report
 
         if(jumpLabel != FixedLabel.EMPTY){
-            pausedOn = jumpToLabel(jumpLabel).orElse(null);
+            pausedOn = jumpToInstructionByLabel(jumpLabel).orElse(null);
         } else {
             // set the pc to the next line
-            pausedOn = program.getInstructionByIndex(pc).orElse(null);
+            pausedOn = program.getInstructionByIndex(getPc()).orElse(null);
         }
 
         if(pausedOn == null) // executed last instruction
-            state = DebuggerState.END;
+            transitionToEnd();
 
         return new DebugStep(variable, oldValue, newValue, pcBeforeExecution);
     }
 
     public DebugStep stepBack(){
-        int pcBeforeExecution = pc;
+        int pcBeforeExecution = getPc();
 
         enforceOnInstructionState();
         return new DebugStep(Variable.NO_VAR, 0L,0L, pcBeforeExecution); // NOT IMPLEMENTED
@@ -106,13 +101,14 @@ public class ProgramDebugger extends ProgramRunner {
         breakpoints.remove(lineNumber);
     }
 
+
+    // -------- internal: -------
     @Override
     protected boolean breakCheck(int pc) {
         boolean hitBreakPoint = breakpoints.contains(pc);
-        if(hitBreakPoint){
-            pausedOn = program.getInstructionByIndex(pc).orElse(null); // (should never actually be null here)
-            state = DebuggerState.ON_INSTRUCTION;
-        }
+        if(hitBreakPoint)
+            // (should never actually be null here))
+            transitionToOnInstruction(program.getInstructionByIndex(pc).orElse(null));
 
         return hitBreakPoint;
     }
@@ -122,4 +118,20 @@ public class ProgramDebugger extends ProgramRunner {
             throw new IllegalStateException("Debugger state is " + state);
         }
     }
+
+    private void transitionToOnInstruction(Instruction instruction) {
+        pausedOn = instruction;
+        state = DebuggerState.ON_INSTRUCTION;
+    }
+
+    private void transitionToEnd() {
+        pausedOn = null;
+        state = DebuggerState.END;
+    }
+
+    private void transitionToWaitForStart() {
+        pausedOn = null;
+        state = DebuggerState.WAIT_FOR_START;
+    }
+
 }

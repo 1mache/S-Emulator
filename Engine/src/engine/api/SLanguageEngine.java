@@ -67,54 +67,34 @@ public class SLanguageEngine {
     }
 
     public ExecutionResult runProgram(List<Long> inputs, int expansionDegree, boolean specificInputs) {
-        if (expansionDegree > program.getMaxExpansionDegree())
-            throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + program.getMaxExpansionDegree());
-        if (programNotLoaded())
-            throw new SProgramNotLoadedException("Program is not loaded");
-        for (var input : inputs) {
-            if (input < 0)
-                throw new IllegalArgumentException("Input values must be non-negative");
-        }
+        validateInputs(inputs);
 
-        var expandedProgram = programExpander.expand(expansionDegree);
-        var programRunner = new ProgramRunner(expandedProgram);
+        var expandedProgram = createExpandedProgram(expansionDegree);
+        var runner = new ProgramRunner(expandedProgram);
 
-        if (specificInputs)
-            programRunner.initInputVariablesSpecific(inputs);
-        else
-            programRunner.initInputVariables(inputs);
+        initializeInputs(runner, inputs, specificInputs);
 
-        programRunner.run();
+        runner.run();
 
         var executionResult = new ExecutionResult(
-                programRunner.getRunOutput(),
-                programRunner.getAllVariableValues(),
+                runner.getRunOutput(),
+                runner.getAllVariableValues(),
                 inputs,
                 expansionDegree,
-                programRunner.getCycles()
+                runner.getCycles()
         );
         previousExecutions.add(executionResult);
         return executionResult;
     }
 
     public DebugHandle debugProgram(List<Long> inputs, int expansionDegree, boolean specificInputs) {
-        if (expansionDegree > program.getMaxExpansionDegree())
-            throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + program.getMaxExpansionDegree());
-        if (programNotLoaded())
-            throw new SProgramNotLoadedException("Program is not loaded");
-        for (var input : inputs) {
-            if (input < 0)
-                throw new IllegalArgumentException("Input values must be non-negative");
-        }
+       validateInputs(inputs);
 
-        var expandedProgram = programExpander.expand(expansionDegree);
+        var expandedProgram = createExpandedProgram(expansionDegree);
         var debugger = new ProgramDebugger(expandedProgram);
-        if (specificInputs) {
-            debugger.initInputVariablesSpecific(inputs);
-        }
-        else {
-            debugger.initInputVariables(inputs);
-        }
+
+        initializeInputs(debugger, inputs, specificInputs);
+
         return new DebugHandle(debugger);
     }
 
@@ -123,5 +103,29 @@ public class SLanguageEngine {
             throw new SProgramNotLoadedException("Program is not loaded");
 
         return previousExecutions;
+    }
+
+    // =============== private ===============
+
+    private void validateInputs(List<Long> inputs) {
+        for (var input : inputs) {
+            if (input < 0)
+                throw new IllegalArgumentException("Input values must be non-negative");
+        }
+        if (programNotLoaded())
+            throw new SProgramNotLoadedException("Program is not loaded");
+    }
+
+    private Program createExpandedProgram(int expansionDegree) {
+        if (expansionDegree > program.getMaxExpansionDegree())
+            throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + program.getMaxExpansionDegree());
+        return programExpander.expand(expansionDegree);
+    }
+
+    private void initializeInputs(ProgramRunner runner, List<Long> inputs, boolean specificInputs) {
+        if (specificInputs)
+            runner.initInputVariablesSpecific(inputs);
+        else
+            runner.initInputVariables(inputs);
     }
 }
