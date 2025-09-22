@@ -95,7 +95,7 @@ public class ProgramDebugger extends ProgramRunner {
         enforceOnInstructionState();
 
         var jumpToLabel = executeInstruction(pausedOn);
-        return run(jumpToLabel);
+        return super.run(jumpToLabel);
     }
 
     public void addBreakpoint(int lineNumber){

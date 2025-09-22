@@ -97,6 +97,7 @@ public class InstructionTableController implements Initializable {
 
     public void resetDebugHighlight(){
         debugHighlightedLine = NO_LINE;
+        instructionTable.refresh(); // force re-render so CSS updates
     }
 
     // private:

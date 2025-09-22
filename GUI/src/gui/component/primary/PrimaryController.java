@@ -4,6 +4,7 @@ import engine.api.SLanguageEngine;
 import engine.api.dto.InstructionPeek;
 import engine.loader.exception.NotXMLException;
 import engine.loader.exception.UnknownLabelException;
+import gui.component.execution.DebugState;
 import gui.component.execution.ExecutionTabController;
 import gui.component.instruction.table.InstructionTableController;
 import gui.task.ProgramLoadTask;
@@ -73,11 +74,7 @@ public class PrimaryController implements Initializable {
 
         initExpansionDegreeSelection();
 
-        // on debug state change
-        executionTabController.addDebugLineChangeListener(
-                debugLineChangeAction ->
-                        onDebugStoppedOnLine(debugLineChangeAction.getSource())
-        );
+        initDebugRelated();
 
         bindToProgramLoaded();
     }
@@ -143,9 +140,17 @@ public class PrimaryController implements Initializable {
         );
     }
 
-    private void onDebugStoppedOnLine(int lineId) {
-        // highlight the line the debugger stopped on
-        mainInstructionTableController.setDebugHighlight(lineId);
+    private void initDebugRelated() {
+        // on debug state change
+        executionTabController.addDebugStateListener(
+                debugStateChange ->
+                        onDebugStateChange(debugStateChange.getSource())
+        );
+
+        executionTabController.addDebugLineChangeListener(
+                debugLineChangeAction ->
+                        onDebugStoppedOnLine(debugLineChangeAction.getSource())
+        );
     }
 
     private void bindToProgramLoaded(){
@@ -155,7 +160,6 @@ public class PrimaryController implements Initializable {
         );
 
         // expansion choice box
-        expansionChoiceBox.disableProperty().bind(Bindings.not(programLoadedProperty));
         expansionChoiceBox.itemsProperty().bind(
                 Bindings.createObjectBinding(
                         () -> {
@@ -173,6 +177,7 @@ public class PrimaryController implements Initializable {
         programLoadedProperty.addListener(
                 (v, was, now) -> {
                     if(now) {
+                        expansionChoiceBox.setDisable(false);
                         expansionChoiceBox.setValue(0); // reset to 0 when new program loaded
                     }
                 }
@@ -193,6 +198,20 @@ public class PrimaryController implements Initializable {
                     }
                 }
         );
+    }
+
+    private void onDebugStateChange(DebugState debugState) {
+        if(debugState != DebugState.NOT_IN_DEBUG)
+            expansionChoiceBox.setDisable(true); // we dont want to allow changing expansions while debugging
+        else{
+            expansionChoiceBox.setDisable(false);
+            mainInstructionTableController.resetDebugHighlight();
+        }
+    }
+
+    private void onDebugStoppedOnLine(int lineId) {
+        // highlight the line the debugger stopped on
+        mainInstructionTableController.setDebugHighlight(lineId);
     }
 
     private void loadProgram(File fileChosen) {

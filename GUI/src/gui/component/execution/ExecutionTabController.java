@@ -5,6 +5,7 @@ import engine.api.dto.debug.DebugEndResult;
 import engine.api.dto.debug.DebugHandle;
 import engine.api.dto.ExecutionResult;
 import engine.api.dto.debug.DebugStepPeek;
+import gui.component.execution.event.DebugStateChange;
 import gui.component.execution.event.DebugStopOnLine;
 import gui.component.variable.table.VariableTableController;
 import gui.utility.CssClasses;
@@ -67,6 +68,7 @@ public class ExecutionTabController implements Initializable {
     private DebugHandle debugHandle;
 
     private final ObjectProperty<DebugState> debugState = new SimpleObjectProperty<>(DebugState.NOT_IN_DEBUG);
+    private final Set<EventHandler<DebugStateChange>> debugStateListeners = new HashSet<>();
     private final Set<EventHandler<DebugStopOnLine>> debugLineChangeListeners = new HashSet<>();
 
     private final Set<Integer> breakpoints = new HashSet<>();
@@ -140,7 +142,7 @@ public class ExecutionTabController implements Initializable {
         inputFields.values().forEach(textField ->  textField.setText("0"));
         cyclesLabel.setText("Cycles: " + 0);
 
-        if(debugHandle != null){
+        if(debugHandle != null && debugState.get() == DebugState.ON_INSTRUCTION){
             debugHandle.stopDebug();
             debugState.set(DebugState.NOT_IN_DEBUG);
         }
@@ -184,6 +186,10 @@ public class ExecutionTabController implements Initializable {
 
     public void addDebugLineChangeListener(EventHandler<DebugStopOnLine> listener){
         debugLineChangeListeners.add(listener);
+    }
+
+    public void addDebugStateListener(EventHandler<DebugStateChange> listener){
+        debugStateListeners.add(listener);
     }
 
     public void addBreakPoint(int lineId){
@@ -322,6 +328,8 @@ public class ExecutionTabController implements Initializable {
     }
 
     private void onDebugStateChange(DebugState newValue) {
+        fireDebugStateChange();
+
         switch (newValue) {
             case NOT_IN_DEBUG, RUNNING -> debugControls.forEach(control -> control.setDisable(true));
             case ON_INSTRUCTION -> {
@@ -341,11 +349,16 @@ public class ExecutionTabController implements Initializable {
         }
     }
 
+    private void fireDebugStateChange() {
+        debugStateListeners.forEach(
+                listener ->
+                        listener.handle(new DebugStateChange(debugState.get()))
+        );
+    }
+
     private void fireDebugStoppedOnLine(int breakpointLine) {
         debugLineChangeListeners.forEach(
-                listener -> {
-                    listener.handle(new DebugStopOnLine(breakpointLine));
-                }
+                listener -> listener.handle(new DebugStopOnLine(breakpointLine))
         );
     }
 }
