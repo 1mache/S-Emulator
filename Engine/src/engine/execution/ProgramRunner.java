@@ -62,7 +62,6 @@ public class ProgramRunner {
                     jumpLabel = executeInstruction(currInstruction.get());
 
             }
-            if(jumpLabel == FixedLabel.EXIT) break; // check for exit
         }
         while (currInstruction.isPresent());
 

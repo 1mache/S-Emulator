@@ -66,7 +66,7 @@ public class StandardProgram implements Program {
 
     @Override
     public Optional<Instruction> getInstructionByLabel(Label label) {
-        if(label == FixedLabel.EMPTY)
+        if(label == FixedLabel.EMPTY || label == FixedLabel.EXIT)
             return Optional.empty();
         return Optional.ofNullable(labeledInstructions.get(label))
                 .map(InstructionReference::instruction);
@@ -74,7 +74,7 @@ public class StandardProgram implements Program {
 
     @Override
     public Optional<Integer> getLineNumberOfLabel(Label label) {
-        if(label == FixedLabel.EMPTY)
+        if(label == FixedLabel.EMPTY || label == FixedLabel.EXIT)
             return Optional.empty();
         return Optional.ofNullable(labeledInstructions.get(label))
                 .map(InstructionReference::lineId);
