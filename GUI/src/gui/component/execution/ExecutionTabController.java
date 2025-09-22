@@ -45,6 +45,9 @@ public class ExecutionTabController implements Initializable {
     private ChoiceBox<RunMode> modeChoiceBox;
 
     @FXML
+    private Button runProgramButton;
+
+    @FXML
     private Button stepOverButton;
 
     @FXML
@@ -331,16 +334,21 @@ public class ExecutionTabController implements Initializable {
         fireDebugStateChange();
 
         switch (newValue) {
-            case NOT_IN_DEBUG, RUNNING -> debugControls.forEach(control -> control.setDisable(true));
+            case NOT_IN_DEBUG, RUNNING -> {
+                debugControls.forEach(control -> control.setDisable(true));
+                runProgramButton.setDisable(false); // doesnt matter in RUNNING because we never long enough at this state
+            }
             case ON_INSTRUCTION -> {
                 fireDebugStoppedOnLine(debugHandle.whichLine().orElseThrow());
                 debugControls.forEach(control -> control.setDisable(false));
+                runProgramButton.setDisable(true);
                 variableTableController.setVariableEntries(debugHandle.getResult().variableMap());
             }
             case END -> {
                 DebugEndResult result = debugHandle.getResult();
                 variableTableController.setVariableEntries(result.variableMap());
                 cyclesLabel.setText("Cycles: " + result.cycles());
+                runProgramButton.setDisable(false);
 
                 debugState.set(DebugState.NOT_IN_DEBUG);
             }
