@@ -18,16 +18,16 @@ public enum InstructionData {
     JUMP_EQUAL_VARIABLE(2, true, List.of(ArgumentType.LABEL, ArgumentType.VARIABLE))
     ;
 
-    private final int cycles;
+    private final long cycles;
     private final boolean isSynthetic;
     private final List<ArgumentType> arguments;
-    InstructionData(int cycles, boolean isSynthetic, List<ArgumentType> arguments) {
+    InstructionData(long cycles, boolean isSynthetic, List<ArgumentType> arguments) {
         this.cycles = cycles;
         this.isSynthetic = isSynthetic;
         this.arguments = arguments;
     }
 
-    public int getCycles(){
+    public long getCycles(){
         return cycles;
     }
     public boolean isSynthetic(){return isSynthetic;}

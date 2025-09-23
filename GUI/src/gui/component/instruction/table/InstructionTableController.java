@@ -39,7 +39,7 @@ public class InstructionTableController implements Initializable {
     private TableColumn<InstructionPeek, String> instructionColumn;
 
     @FXML
-    private TableColumn<InstructionPeek, Integer> cyclesColumn;
+    private TableColumn<InstructionPeek, Long> cyclesColumn;
 
     private final ObservableList<InstructionPeek> instructions = FXCollections.observableArrayList();
     private final Set<EventHandler<RowClickAction>> rowClickListeners = new HashSet<>();

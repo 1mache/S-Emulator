@@ -47,7 +47,7 @@ public interface Instruction {
      *
      * @return the cycle cost of executing this instruction
      */
-    int cycles();
+    long cycles();
 
     /**
      * Returns the main variable associated with this instruction,

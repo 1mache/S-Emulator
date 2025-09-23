@@ -72,7 +72,7 @@ public class ProgramRunner {
         return variableContext.getOrganizedVariableValues();
     }
 
-    public Long getCycles() {
+    public long getCycles() {
         return cycles;
     }
 

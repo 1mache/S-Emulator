@@ -8,6 +8,6 @@ public record ExecutionResult(
         Map<String, Long> variableMap,
         List<Long> inputs,
         int expansionDegree,
-        Long cycles
+        long cycles
 ) {
 }
