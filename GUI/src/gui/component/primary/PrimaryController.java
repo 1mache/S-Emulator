@@ -201,12 +201,10 @@ public class PrimaryController implements Initializable {
     }
 
     private void onDebugStateChange(DebugState debugState) {
-        if(debugState != DebugState.NOT_IN_DEBUG)
-            expansionChoiceBox.setDisable(true); // we dont want to allow changing expansions while debugging
-        else{
-            expansionChoiceBox.setDisable(false);
+        expansionChoiceBox.setDisable(debugState != DebugState.NOT_IN_DEBUG); // we don't want to allow changing expansions while debugging
+
+        if(debugState == DebugState.END)
             mainInstructionTableController.resetDebugHighlight();
-        }
     }
 
     private void onDebugStoppedOnLine(int lineId) {

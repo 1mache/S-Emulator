@@ -66,13 +66,27 @@ public class ExecutionTabController implements Initializable {
     private final BooleanProperty inputsValidProperty = new SimpleBooleanProperty(true);
     private final IntegerProperty expansionDegreeProperty = new SimpleIntegerProperty(0);
 
+    private enum RunMode {
+        EXECUTION("Execution"),
+        DEBUG("Debug");
+
+        private final String name;
+
+        RunMode(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
     private RunMode runMode = RunMode.EXECUTION; // Default
 
     private DebugHandle debugHandle;
 
-    private final ObjectProperty<DebugState> debugState = new SimpleObjectProperty<>(DebugState.NOT_IN_DEBUG);
-    private final Set<EventHandler<DebugStateChange>> debugStateListeners = new HashSet<>();
     private final Set<EventHandler<DebugStopOnLine>> debugLineChangeListeners = new HashSet<>();
+    private final DebugStateMachine debugStateMachine = new DebugStateMachine();
 
     private final Set<Integer> breakpoints = new HashSet<>();
 
@@ -107,7 +121,7 @@ public class ExecutionTabController implements Initializable {
         ExecutionResult result;
         if(runMode == RunMode.EXECUTION){
             result = engine.runProgram(
-                    inputFields.values().stream().map(TextField::getText).map(Long::parseLong).toList(),
+                    getInputsFromTextFields(),
                     expansionDegreeProperty.get(),
                     true
             );
@@ -116,7 +130,7 @@ public class ExecutionTabController implements Initializable {
         }
         else if(runMode == RunMode.DEBUG){
             debugHandle = engine.debugProgram(
-                    inputFields.values().stream().map(TextField::getText).map(Long::parseLong).toList(),
+                    getInputsFromTextFields(),
                     expansionDegreeProperty.get(),
                     true
             );
@@ -125,11 +139,11 @@ public class ExecutionTabController implements Initializable {
                     lineId -> debugHandle.addBreakpoint(lineId)
             );
 
-            debugState.set(DebugState.RUNNING);
+            debugStateMachine.transitionTo(DebugState.RUNNING);
             if(debugHandle.startDebug())
-                debugState.set(DebugState.END);
-            else
-                debugState.set(DebugState.ON_INSTRUCTION);
+                debugStateMachine.transitionTo(DebugState.END);
+            else // execution was paused on breakpoint
+                debugStateMachine.transitionTo(DebugState.ON_INSTRUCTION);
         }
     }
 
@@ -145,10 +159,7 @@ public class ExecutionTabController implements Initializable {
         inputFields.values().forEach(textField ->  textField.setText("0"));
         cyclesLabel.setText("Cycles: " + 0);
 
-        if(debugHandle != null && debugState.get() == DebugState.ON_INSTRUCTION){
-            debugHandle.stopDebug();
-            debugState.set(DebugState.NOT_IN_DEBUG);
-        }
+        debugStateMachine.transitionTo(DebugState.NOT_IN_DEBUG);
     }
 
     @FXML
@@ -162,7 +173,7 @@ public class ExecutionTabController implements Initializable {
                 .ifPresentOrElse(
                         this::fireDebugStoppedOnLine,
                         // if not present then we reached the end
-                        () -> debugState.set(DebugState.END)
+                        () -> debugStateMachine.transitionTo(DebugState.END)
                 );
     }
 
@@ -175,16 +186,16 @@ public class ExecutionTabController implements Initializable {
     @FXML
     public void stopDebugAction(ActionEvent event) {
         debugHandle.stopDebug();
-        debugState.set(DebugState.END);
+        debugStateMachine.transitionTo(DebugState.END);
     }
 
     @FXML
     public void continueAction(ActionEvent event) {
-        debugState.set(DebugState.RUNNING);
+        debugStateMachine.transitionTo(DebugState.RUNNING);
         if(debugHandle.resume())
-            debugState.set(DebugState.END);
+            debugStateMachine.transitionTo(DebugState.END);
         else
-            debugState.set(DebugState.ON_INSTRUCTION);
+            debugStateMachine.transitionTo(DebugState.ON_INSTRUCTION);
     }
 
     public void addDebugLineChangeListener(EventHandler<DebugStopOnLine> listener){
@@ -192,26 +203,26 @@ public class ExecutionTabController implements Initializable {
     }
 
     public void addDebugStateListener(EventHandler<DebugStateChange> listener){
-        debugStateListeners.add(listener);
+        debugStateMachine.addListener(listener);
     }
 
     public void addBreakPoint(int lineId){
         breakpoints.add(lineId);
-        if(debugState.get() == DebugState.ON_INSTRUCTION)
-            debugHandle.addBreakpoint(lineId);
+        if(debugStateMachine.getCurrentState() == DebugState.ON_INSTRUCTION)
+            debugHandle.addBreakpoint(lineId); // adds breakpoint mid run
     }
 
     public void removeBreakPoint(int lineId){
         breakpoints.remove(lineId);
-        if(debugState.get() == DebugState.ON_INSTRUCTION)
-            debugHandle.removeBreakpoint(lineId);
+        if(debugStateMachine.getCurrentState() == DebugState.ON_INSTRUCTION)
+            debugHandle.removeBreakpoint(lineId); // adds breakpoint mid run
     }
 
     // --------------- other controller communication ------------------
     public void reset(){
         runMode = RunMode.EXECUTION;
         modeChoiceBox.setValue(runMode);
-        debugState.set(DebugState.NOT_IN_DEBUG);
+        debugStateMachine.transitionTo(DebugState.NOT_IN_DEBUG);
         variableTableController.clear();
         disableInputs(false);
     }
@@ -287,10 +298,14 @@ public class ExecutionTabController implements Initializable {
         debugControls = List.of(stepOverButton, stepBackButton, stopDebugButton, continueButton);
 
         // when debug finishes:
-        debugState.addListener(
-                (observable, oldValue, newValue) ->
-                        onDebugStateChange(newValue)
+        debugStateMachine.addListener(
+                newValue ->
+                        onDebugStateChange(newValue.getSource())
         );
+    }
+
+    private void setDebugControlsDisabled(boolean disabled) {
+        debugControls.forEach(control -> control.setDisable(disabled));
     }
 
     private void validateInputs() {
@@ -313,6 +328,10 @@ public class ExecutionTabController implements Initializable {
         inputsValidProperty.set(allValid);
     }
 
+    private List<Long> getInputsFromTextFields() {
+        return inputFields.values().stream().map(TextField::getText).map(Long::parseLong).toList();
+    }
+
     private void disableInputs(boolean disable) {
         inputFields.values().forEach(inputField -> inputField.setDisable(disable));
     }
@@ -331,16 +350,17 @@ public class ExecutionTabController implements Initializable {
     }
 
     private void onDebugStateChange(DebugState newValue) {
-        fireDebugStateChange();
-
         switch (newValue) {
-            case NOT_IN_DEBUG, RUNNING -> {
-                debugControls.forEach(control -> control.setDisable(true));
-                runProgramButton.setDisable(false); // doesnt matter in RUNNING because we never long enough at this state
+            case NOT_IN_DEBUG-> {
+                runProgramButton.setDisable(false);
+            }
+            case RUNNING -> {
+                setDebugControlsDisabled(true);
+                runProgramButton.setDisable(true);
             }
             case ON_INSTRUCTION -> {
                 fireDebugStoppedOnLine(debugHandle.whichLine().orElseThrow());
-                debugControls.forEach(control -> control.setDisable(false));
+                setDebugControlsDisabled(false);
                 runProgramButton.setDisable(true);
                 variableTableController.setVariableEntries(debugHandle.getResult().variableMap());
             }
@@ -348,20 +368,14 @@ public class ExecutionTabController implements Initializable {
                 DebugEndResult result = debugHandle.getResult();
                 variableTableController.setVariableEntries(result.variableMap());
                 cyclesLabel.setText("Cycles: " + result.cycles());
-                runProgramButton.setDisable(false);
 
-                debugState.set(DebugState.NOT_IN_DEBUG);
+                setDebugControlsDisabled(true);
+                runProgramButton.setDisable(true);
             }
             case null, default -> {
+                throw new IllegalArgumentException("Illegal state passed: " + newValue);
             }
         }
-    }
-
-    private void fireDebugStateChange() {
-        debugStateListeners.forEach(
-                listener ->
-                        listener.handle(new DebugStateChange(debugState.get()))
-        );
     }
 
     private void fireDebugStoppedOnLine(int breakpointLine) {
