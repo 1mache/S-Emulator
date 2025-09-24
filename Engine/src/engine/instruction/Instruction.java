@@ -1,6 +1,6 @@
 package engine.instruction;
 
-import engine.argument.Argument;
+import engine.instruction.argument.InstructionArgument;
 import engine.execution.context.VariableContext;
 import engine.label.Label;
 import engine.program.Program;
@@ -70,9 +70,9 @@ public interface Instruction {
     /**
      * Returns the list of arguments for this instruction.
      *
-     * @return a list of {@link Argument} objects, possibly empty
+     * @return a list of {@link InstructionArgument} objects, possibly empty
      */
-    List<Argument> getArguments();
+    List<InstructionArgument> getArguments();
 
     /**
      * Returns the program expansion for this instruction, if it exists.

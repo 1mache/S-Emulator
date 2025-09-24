@@ -1,6 +1,6 @@
 package engine.instruction.concrete;
 
-import engine.argument.Argument;
+import engine.instruction.argument.InstructionArgument;
 import engine.execution.context.VariableContext;
 import engine.instruction.InstructionData;
 import engine.instruction.AbstractJumpInstruction;
@@ -40,7 +40,7 @@ public class JumpNotZeroInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    public List<Argument> getArguments() {
+    public List<InstructionArgument> getArguments() {
         return List.of(getTargetLabel());
     }
 }

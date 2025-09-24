@@ -1,6 +1,6 @@
 package engine.instruction.concrete;
 
-import engine.argument.Argument;
+import engine.instruction.argument.InstructionArgument;
 import engine.execution.context.VariableContext;
 import engine.instruction.AbstractJumpInstruction;
 import engine.instruction.InstructionData;
@@ -9,7 +9,6 @@ import engine.label.Label;
 import engine.label.NumericLabel;
 import engine.program.Program;
 import engine.program.StandardProgram;
-import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -41,7 +40,7 @@ public class JumpVariableInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    public List<Argument> getArguments() {
+    public List<InstructionArgument> getArguments() {
         return List.of(getTargetLabel(), otherVariable);
     }
 

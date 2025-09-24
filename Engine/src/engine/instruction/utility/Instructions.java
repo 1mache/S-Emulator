@@ -1,6 +1,6 @@
 package engine.instruction.utility;
 
-import engine.argument.ArgumentType;
+import engine.instruction.argument.InstructionArgumentType;
 import engine.instruction.Instruction;
 import engine.loader.ArgumentLabelInfo;
 import engine.label.FixedLabel;
@@ -20,7 +20,7 @@ public class Instructions {
 
         variables.addAll(
                 instruction.getArguments().stream()
-                        .filter(arg -> arg.getArgumentType() == ArgumentType.VARIABLE)
+                        .filter(arg -> arg.getArgumentType() == InstructionArgumentType.VARIABLE)
                         .map(arg -> (Variable) arg)
                         .toList()
         );
@@ -56,7 +56,7 @@ public class Instructions {
     public static List<ArgumentLabelInfo> getArgumentLabels(List<Instruction> instructions) {
         return instructions.stream()
                 .flatMap(instr -> instr.getArguments().stream()
-                        .filter(arg -> arg.getArgumentType() == ArgumentType.LABEL)
+                        .filter(arg -> arg.getArgumentType() == InstructionArgumentType.LABEL)
                         .map(arg -> new ArgumentLabelInfo(instr.getName(), (Label) arg)))
                 .distinct()
                 .toList();
@@ -69,7 +69,7 @@ public class Instructions {
 
         labels.addAll(
                 instruction.getArguments().stream()
-                        .filter(arg -> arg.getArgumentType() == ArgumentType.LABEL)
+                        .filter(arg -> arg.getArgumentType() == InstructionArgumentType.LABEL)
                         .map(arg -> (Label) arg)
                         .toList()
         );
@@ -90,7 +90,7 @@ public class Instructions {
         Set<Variable> argumentVars =
                 instructions.stream()
                         .flatMap(instr -> instr.getArguments().stream())
-                        .filter(arg -> arg.getArgumentType() == ArgumentType.VARIABLE)
+                        .filter(arg -> arg.getArgumentType() == InstructionArgumentType.VARIABLE)
                         .map(arg -> (Variable) arg)
                         .filter(var -> var.getType() == variableType)
                         .collect(Collectors.toSet());

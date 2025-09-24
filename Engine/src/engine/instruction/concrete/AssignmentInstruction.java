@@ -1,6 +1,6 @@
 package engine.instruction.concrete;
 
-import engine.argument.Argument;
+import engine.instruction.argument.InstructionArgument;
 import engine.execution.context.VariableContext;
 import engine.instruction.AbstractInstruction;
 import engine.instruction.InstructionData;
@@ -37,7 +37,7 @@ public class AssignmentInstruction extends AbstractInstruction {
     }
 
     @Override
-    public List<Argument> getArguments() {
+    public List<InstructionArgument> getArguments() {
         return List.of(assignedVariable);
     }
 

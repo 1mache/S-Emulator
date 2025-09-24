@@ -1,12 +1,14 @@
 package engine.variable;
 
-import engine.argument.Argument;
-import engine.argument.ArgumentType;
+import engine.execution.context.VariableContext;
+import engine.function.parameter.FunctionParam;
+import engine.instruction.argument.InstructionArgument;
+import engine.instruction.argument.InstructionArgumentType;
 
 import java.util.Comparator;
 import java.util.Objects;
 
-public class Variable implements Argument {
+public class Variable implements InstructionArgument, FunctionParam {
     private final VariableType type;
     private final int number;
 
@@ -71,7 +73,12 @@ public class Variable implements Argument {
     }
 
     @Override
-    public ArgumentType getArgumentType() {
-        return ArgumentType.VARIABLE;
+    public InstructionArgumentType getArgumentType() {
+        return InstructionArgumentType.VARIABLE;
+    }
+
+    @Override
+    public Long eval(VariableContext context) {
+        return context.getVariableValue(this);
     }
 }

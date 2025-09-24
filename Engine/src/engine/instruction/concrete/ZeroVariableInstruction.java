@@ -1,6 +1,6 @@
 package engine.instruction.concrete;
 
-import engine.argument.Argument;
+import engine.instruction.argument.InstructionArgument;
 import engine.execution.context.VariableContext;
 import engine.instruction.AbstractInstruction;
 import engine.instruction.Instruction;
@@ -10,7 +10,6 @@ import engine.label.Label;
 import engine.label.NumericLabel;
 import engine.program.Program;
 import engine.program.StandardProgram;
-import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public class ZeroVariableInstruction extends AbstractInstruction {
     }
 
     @Override
-    public List<Argument> getArguments() {
+    public List<InstructionArgument> getArguments() {
         return List.of(); // no arguments
     }
 

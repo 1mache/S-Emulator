@@ -1,13 +1,15 @@
 package engine.loader;
 
-import engine.argument.Argument;
-import engine.argument.ArgumentType;
-import engine.argument.ConstantArgument;
+import engine.function.parameter.FunctionParamList;
+import engine.instruction.argument.InstructionArgument;
+import engine.instruction.argument.InstructionArgumentType;
+import engine.numeric.constant.NumericConstant;
 import engine.instruction.*;
 import engine.jaxb.generated.*;
 import engine.loader.event.LoadingListener;
 import engine.loader.exception.SProgramXMLException;
 import engine.label.*;
+import engine.program.FunctionProgram;
 import engine.program.Program;
 import engine.program.StandardProgram;
 
@@ -15,34 +17,44 @@ import engine.variable.Variable;
 import engine.variable.VariableType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class JaxbTranslator {
-    private static final Map<String, ArgumentType> argumentTypes = Map.ofEntries(
+    private static final Map<String, InstructionArgumentType> argumentTypes = Map.ofEntries(
             // JUMP_NOT_ZERO
-            Map.entry("JNZLabel", ArgumentType.LABEL),
+            Map.entry("JNZLabel", InstructionArgumentType.LABEL),
 
             // GOTO_LABEL
-            Map.entry("gotoLabel", ArgumentType.LABEL),
+            Map.entry("gotoLabel", InstructionArgumentType.LABEL),
 
             // ASSIGNMENT
-            Map.entry("assignedVariable", ArgumentType.VARIABLE),
+            Map.entry("assignedVariable", InstructionArgumentType.VARIABLE),
 
             // CONSTANT_ASSIGNMENT
-            Map.entry("constantValue", ArgumentType.CONSTANT),
+            Map.entry("constantValue", InstructionArgumentType.CONSTANT),
 
             // JUMP_ZERO
-            Map.entry("JZLabel", ArgumentType.LABEL),
+            Map.entry("JZLabel", InstructionArgumentType.LABEL),
 
             // JUMP_EQUAL_CONSTANT
-            Map.entry("JEConstantLabel", ArgumentType.LABEL),
+            Map.entry("JEConstantLabel", InstructionArgumentType.LABEL),
             // * there is also a constant value here like in const assignment. but it's the same
 
             // JUMP_EQUAL_VARIABLE
-            Map.entry("JEVariableLabel", ArgumentType.LABEL),
-            Map.entry("variableName", ArgumentType.VARIABLE)
+            Map.entry("JEVariableLabel", InstructionArgumentType.LABEL),
+            Map.entry("variableName", InstructionArgumentType.VARIABLE),
+
+            //QUOTE + JUMP_EQUAL_FUNCTION
+            Map.entry("functionName", InstructionArgumentType.FUNCTION),
+            Map.entry("functionArguments", InstructionArgumentType.FUNC_ARG_LIST),
+
+            // JUMP_EQUAL_FUNCTION
+            Map.entry("JEFunctionLabel", InstructionArgumentType.LABEL)
     );
+
+    private final Map<String, FunctionProgram> usedFunctions = new HashMap<>();
 
 
     public Program getProgram(SProgram sProgram, LoadingListener listener) {
@@ -51,12 +63,15 @@ public class JaxbTranslator {
         int totalInstructions = sInstructions.size();
         int currentInstruction = 0;
 
+        // TODO: load all the SFunctions using this recursively
+        // and add them to a map where you can look them up by name
+
         for (SInstruction sInstruction : sInstructions) {
             InstructionData instructionData = InstructionData.valueOf(sInstruction.getName());
             Variable variable = str2Variable(sInstruction.getSVariable());
             Label label = str2Label(sInstruction.getSLabel());
 
-            List<Argument> arguments = getArguments(sInstruction);
+            List<InstructionArgument> arguments = getArguments(sInstruction);
 
             Instruction instruction = InstructionFactory.
                     createInstruction(instructionData, variable, label, arguments);
@@ -110,15 +125,19 @@ public class JaxbTranslator {
             throw new SProgramXMLException("Unknown label format: " + str);
         int numberPart = Integer.parseInt(str.replaceAll("\\D", ""));
 
-        if(numberPart == 0) // negatives wont match at prec check anyways
+        if(numberPart == 0) // negatives won't match at prev check anyway
             throw new SProgramXMLException("Invalid label number: " + str);
 
         // take only the lineId part and construct a numeric label
         return new NumericLabel(numberPart);
     }
 
-    private List<Argument> getArguments(SInstruction sInstruction) {
-        List<Argument> res = new ArrayList<>();
+    private FunctionParamList parseParamsString(String value) {
+        return new FunctionParamList(List.of()); // TODO: implement this
+    }
+
+    private List<InstructionArgument> getArguments(SInstruction sInstruction) {
+        List<InstructionArgument> res = new ArrayList<>();
 
         var sArgsList = sInstruction.getSInstructionArguments();
         if (sArgsList == null) return res;
@@ -138,10 +157,21 @@ public class JaxbTranslator {
                     res.add(variable);
                     break;
                 case CONSTANT:
-                    ConstantArgument constant = new ConstantArgument(
+                    NumericConstant constant = new NumericConstant(
                             Long.valueOf(argument.getValue())
                     );
                     res.add(constant);
+                    break;
+
+                case FUNCTION:
+                    // TODO: look up function by name in the previously loaded functions map
+                    FunctionProgram program = usedFunctions.get(argument.getValue());
+                    res.add(program);
+                    break;
+
+                case FUNC_ARG_LIST:
+                    FunctionParamList paramList = parseParamsString(argument.getValue());
+                    res.add(paramList);
                     break;
             }
         }

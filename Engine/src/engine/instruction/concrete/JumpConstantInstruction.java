@@ -1,7 +1,7 @@
 package engine.instruction.concrete;
 
-import engine.argument.Argument;
-import engine.argument.ConstantArgument;
+import engine.instruction.argument.InstructionArgument;
+import engine.numeric.constant.NumericConstant;
 import engine.execution.context.VariableContext;
 import engine.instruction.AbstractJumpInstruction;
 import engine.instruction.Instruction;
@@ -11,20 +11,19 @@ import engine.label.Label;
 import engine.label.NumericLabel;
 import engine.program.Program;
 import engine.program.StandardProgram;
-import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class JumpConstantInstruction extends AbstractJumpInstruction {
-    private final ConstantArgument constant;
+    private final NumericConstant constant;
 
     public JumpConstantInstruction(
            Variable variable,
            Label label,
            Label tagetLabel,
-           ConstantArgument constant
+           NumericConstant constant
     ) {
         super(InstructionData.JUMP_EQUAL_CONSTANT, variable, label, tagetLabel);
         this.constant = constant;
@@ -42,7 +41,7 @@ public class JumpConstantInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    public List<Argument> getArguments() {
+    public List<InstructionArgument> getArguments() {
         return List.of(getTargetLabel(),constant);
     }
 
