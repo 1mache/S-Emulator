@@ -67,20 +67,6 @@ public abstract class AbstractInstruction implements Instruction {
 
     // -- for expansion --
 
-    protected Optional<Integer> getLabelNumber(){
-        if(label instanceof NumericLabel numLabel)
-            return Optional.of(numLabel.getNumber());
-
-        return Optional.empty();
-    }
-
-    protected Optional<Integer> getVariableNumber(){
-        if(variable != Variable.NO_VAR && variable != Variable.RESULT)
-            return Optional.of(variable.getNumber());
-
-        return Optional.empty();
-    }
-
     // gets the next available label number in the current instruction's context
     protected int getAvaliableLabelNumber(){
         final int[] lastUsedLabelNumber = {0};

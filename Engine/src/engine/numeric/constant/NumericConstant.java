@@ -1,6 +1,6 @@
 package engine.numeric.constant;
 
-import engine.execution.context.VariableContext;
+import engine.execution.context.RunContext;
 import engine.function.parameter.FunctionParam;
 import engine.instruction.argument.InstructionArgument;
 import engine.instruction.argument.InstructionArgumentType;
@@ -12,7 +12,12 @@ public record NumericConstant(Long value) implements InstructionArgument, Functi
     }
 
     @Override
-    public Long eval(VariableContext context) {
+    public Long eval(RunContext context) {
         return value;
+    }
+
+    @Override
+    public String stringRepresentation() {
+        return value.toString();
     }
 }

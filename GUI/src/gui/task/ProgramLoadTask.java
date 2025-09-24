@@ -3,6 +3,7 @@ package gui.task;
 import engine.api.SLanguageEngine;
 import engine.loader.event.LoadingListener;
 import engine.loader.exception.NotXMLException;
+import engine.loader.exception.UnknownFunctionException;
 import engine.loader.exception.UnknownLabelException;
 import javafx.concurrent.Task;
 
@@ -34,7 +35,8 @@ public class ProgramLoadTask extends Task<Void> {
     }
 
     @Override
-    protected Void call() throws NotXMLException, FileNotFoundException, UnknownLabelException {
+    protected Void call()
+            throws NotXMLException, FileNotFoundException, UnknownLabelException, UnknownFunctionException {
         engine.loadProgram(programPath, loadingListener);
         return null;
     }

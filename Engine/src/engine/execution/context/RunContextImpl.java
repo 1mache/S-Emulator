@@ -7,8 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class VariableMap implements VariableContext {
-    Map<Variable, Long> variableMap = new HashMap<>();
+public class RunContextImpl implements RunContext {
+    private final Map<Variable, Long> variableMap = new HashMap<>();
 
     @Override
     public Long getVariableValue(Variable variable) {

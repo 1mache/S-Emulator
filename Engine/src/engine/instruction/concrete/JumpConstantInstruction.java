@@ -2,7 +2,7 @@ package engine.instruction.concrete;
 
 import engine.instruction.argument.InstructionArgument;
 import engine.numeric.constant.NumericConstant;
-import engine.execution.context.VariableContext;
+import engine.execution.context.RunContext;
 import engine.instruction.AbstractJumpInstruction;
 import engine.instruction.Instruction;
 import engine.instruction.InstructionData;
@@ -30,7 +30,7 @@ public class JumpConstantInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected boolean isJump(VariableContext context) {
+    protected boolean isJump(RunContext context) {
         return context.getVariableValue(getVariable()).equals(constant.value());
     }
 

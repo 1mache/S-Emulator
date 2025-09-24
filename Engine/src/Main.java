@@ -2,13 +2,13 @@ import engine.api.dto.ProgramPeek;
 import engine.execution.ProgramRunner;
 import engine.loader.FromXMLProgramLoader;
 import engine.loader.exception.NotXMLException;
+import engine.loader.exception.UnknownFunctionException;
 import engine.loader.exception.UnknownLabelException;
 import engine.peeker.ProgramViewer;
 import engine.program.Program;
 
 import java.io.FileNotFoundException;
 import java.util.List;
-import java.util.Optional;
 
 public class Main {
     public static void main(String[] args) {
@@ -35,7 +35,7 @@ public class Main {
 
         } catch (FileNotFoundException e) {
             System.out.println("File not found: " + e.getMessage());
-        } catch (NotXMLException | UnknownLabelException e) {
+        } catch (NotXMLException | UnknownLabelException | UnknownFunctionException e) {
             System.out.println(e.getMessage());
         }
     }

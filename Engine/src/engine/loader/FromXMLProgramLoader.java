@@ -4,6 +4,7 @@ import engine.jaxb.generated.SProgram;
 import engine.loader.event.LoadingListener;
 import engine.loader.exception.NotXMLException;
 import engine.loader.exception.SProgramXMLException;
+import engine.loader.exception.UnknownFunctionException;
 import engine.loader.exception.UnknownLabelException;
 import engine.label.FixedLabel;
 import engine.program.Program;
@@ -17,27 +18,41 @@ public class FromXMLProgramLoader {
     private Program program; // if this is null, the program isn't loaded
     private boolean validated = false;
 
+    private JaxbTranslator translator;
+
     public void loadXML(String path, LoadingListener listener) throws FileNotFoundException, NotXMLException{
         if(!path.endsWith(".xml"))
             throw new NotXMLException(path + " is not an xml file");
         try {
             SProgram sProgram = JaxbLoader.loadProgramFromXML(path);
-            JaxbTranslator translator = new JaxbTranslator();
+            translator = new JaxbTranslator();
             program = translator.getProgram(sProgram, listener);
         } catch (JAXBException e) { // should never happen
             throw new SProgramXMLException("Failed to marshal XML.", e);
         }
     }
 
-    public void validateProgram() throws UnknownLabelException {
+    public void validateProgram() throws UnknownLabelException, UnknownFunctionException {
+        if(program == null)
+            throw new IllegalStateException("Program has not been loaded");
+        // the translator is initialized too at this point. see loadXML
+
         validated = false;
 
+        // check if all the labels used by the Instructions actually exist
         List<ArgumentLabelInfo> argumentLabels = Instructions.getArgumentLabels(program.getInstructions());
         for(var info : argumentLabels){
             if(info.label() != FixedLabel.EXIT && !program.hasLabel(info.label()))
-                 throw new UnknownLabelException("Error: Unknown label "
+                 throw new UnknownLabelException("Unknown label "
                         + info.label().stringRepresentation()
                         + " in Instruction: " + info.instructionName());
+        }
+
+        // check if all the function references were resolved
+        for(var functionRef: translator.getFunctionReferences()){
+            if(functionRef.getFunction() == null){
+                throw new UnknownFunctionException("Unknown function used: " + functionRef.getReferralName());
+            }
         }
 
         validated = true;

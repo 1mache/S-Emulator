@@ -1,5 +1,6 @@
 package engine.instruction;
 
+import engine.function.FunctionReference;
 import engine.function.parameter.FunctionParamList;
 import engine.instruction.argument.InstructionArgument;
 import engine.instruction.argument.InstructionArgumentType;
@@ -7,7 +8,6 @@ import engine.numeric.constant.NumericConstant;
 import engine.instruction.concrete.*;
 import engine.instruction.exception.InstructionArgumentsException;
 import engine.label.Label;
-import engine.program.FunctionProgram;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -58,15 +58,15 @@ public class InstructionFactory {
                 yield new JumpVariableInstruction(variable, instructionLabel, target, comparedVar);
             }
             case QUOTE -> {
-                FunctionProgram quoted = (FunctionProgram)arguments.getFirst();
+                FunctionReference quotedReference = (FunctionReference) arguments.getFirst();
                 FunctionParamList params = (FunctionParamList) arguments.get(1);
-                yield new QuoteInstruction(variable, instructionLabel, quoted, params);
+                yield new QuoteInstruction(variable, instructionLabel, quotedReference, params);
             }
             case JUMP_EQUAL_FUNC -> {
                 Label target = (Label) arguments.getFirst();
-                FunctionProgram quoted = (FunctionProgram)arguments.get(1);
-                FunctionParamList params = (FunctionParamList) arguments.get(2);
-                yield new QuoteInstruction(variable, instructionLabel, quoted, params); // TODO; change to JEF
+                FunctionReference funcReference = (FunctionReference) arguments.getFirst();
+                FunctionParamList params = (FunctionParamList) arguments.get(1);
+                yield new QuoteInstruction(variable, instructionLabel, funcReference, params); // TODO; change to JEF
             }
         };
     }

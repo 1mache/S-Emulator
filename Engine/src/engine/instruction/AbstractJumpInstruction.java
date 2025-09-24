@@ -1,6 +1,6 @@
 package engine.instruction;
 
-import engine.execution.context.VariableContext;
+import engine.execution.context.RunContext;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.variable.Variable;
@@ -21,10 +21,10 @@ public abstract class AbstractJumpInstruction extends AbstractInstruction {
     /**
      * @return condition on which we jump
      */
-    protected abstract boolean isJump(VariableContext context);
+    protected abstract boolean isJump(RunContext context);
 
     @Override
-    public Label execute(VariableContext context) {
+    public Label execute(RunContext context) {
         if(isJump(context))
             return tagetLabel;
 

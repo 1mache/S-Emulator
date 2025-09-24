@@ -1,7 +1,7 @@
 package engine.instruction.concrete;
 
 import engine.instruction.argument.InstructionArgument;
-import engine.execution.context.VariableContext;
+import engine.execution.context.RunContext;
 import engine.instruction.InstructionData;
 import engine.instruction.AbstractJumpInstruction;
 import engine.label.FixedLabel;
@@ -21,12 +21,12 @@ public class JumpNotZeroInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected boolean isJump(VariableContext context) {
+    protected boolean isJump(RunContext context) {
         return context.getVariableValue(getVariable()) != 0;
     }
 
     @Override
-    public Label execute(VariableContext context) {
+    public Label execute(RunContext context) {
         if(context.getVariableValue(getVariable()) > 0)
             return getTargetLabel();
 

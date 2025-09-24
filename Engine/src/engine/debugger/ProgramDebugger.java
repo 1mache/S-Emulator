@@ -57,11 +57,11 @@ public class ProgramDebugger extends ProgramRunner {
 
         int pcBeforeExecution = getPc();
         Variable variable = pausedOn.getVariable();
-        Long oldValue = variableContext.getVariableValue(variable);
+        Long oldValue = runContext.getVariableValue(variable);
 
         Label jumpLabel = executeInstruction(pausedOn);
 
-        Long newValue = variableContext.getVariableValue(variable);
+        Long newValue = runContext.getVariableValue(variable);
 
         if(oldValue.equals(newValue))
             variable = Variable.NO_VAR; // the instruction did not change its variable, nothing to report

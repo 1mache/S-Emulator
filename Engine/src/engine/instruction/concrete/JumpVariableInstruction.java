@@ -1,7 +1,7 @@
 package engine.instruction.concrete;
 
 import engine.instruction.argument.InstructionArgument;
-import engine.execution.context.VariableContext;
+import engine.execution.context.RunContext;
 import engine.instruction.AbstractJumpInstruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
@@ -27,7 +27,7 @@ public class JumpVariableInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected boolean isJump(VariableContext context) {
+    protected boolean isJump(RunContext context) {
         return context.getVariableValue(getVariable())
                 .equals(context.getVariableValue(otherVariable));
     }

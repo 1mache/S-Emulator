@@ -1,7 +1,7 @@
 package engine.instruction;
 
 import engine.instruction.argument.InstructionArgument;
-import engine.execution.context.VariableContext;
+import engine.execution.context.RunContext;
 import engine.label.Label;
 import engine.program.Program;
 import engine.variable.Variable;
@@ -14,11 +14,11 @@ public interface Instruction {
     /**
      * Executes this instruction in the given variable context.
      *
-     * @param context the current {@link VariableContext} holding variable states
+     * @param context the current {@link RunContext} holding variable states
      * @return the {@link Label} to which execution should jump next,
      *         or empty label if there shouldn't be a jump
      */
-    Label execute(VariableContext context);
+    Label execute(RunContext context);
 
     /**
      * Returns the name of this instruction.

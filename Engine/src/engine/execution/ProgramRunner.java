@@ -1,7 +1,7 @@
 package engine.execution;
 
-import engine.execution.context.VariableContext;
-import engine.execution.context.VariableMap;
+import engine.execution.context.RunContext;
+import engine.execution.context.RunContextImpl;
 import engine.instruction.Instruction;
 import engine.label.Label;
 import engine.label.FixedLabel;
@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public class ProgramRunner {
     protected final Program program;
-    protected VariableContext variableContext;
+    protected RunContext runContext;
 
     // instruction pointer
     private int pc = 0;
@@ -22,15 +22,13 @@ public class ProgramRunner {
 
     public ProgramRunner(Program program) {
         this.program = program;
-        variableContext = new VariableMap();
     }
 
     public void reset(){
-        variableContext = new VariableMap();
+        runContext = new RunContextImpl();
         pc = 0;
         cycles = 0;
     }
-
 
     public boolean run(){
         return run(FixedLabel.EMPTY);
@@ -65,11 +63,11 @@ public class ProgramRunner {
     }
 
     public Long getRunOutput(){
-        return variableContext.getVariableValue(Variable.RESULT);
+        return runContext.getVariableValue(Variable.RESULT);
     }
 
     public Map<String, Long> getAllVariableValues() {
-        return variableContext.getOrganizedVariableValues();
+        return runContext.getOrganizedVariableValues();
     }
 
     public long getCycles() {
@@ -79,11 +77,11 @@ public class ProgramRunner {
     public void initInputVariables(List<Long> initInput) {
         int counter = 1;
         for(Long input : initInput) {
-            variableContext.setVariableValue(Variable.createInputVariable(counter), input);
+            runContext.setVariableValue(Variable.createInputVariable(counter), input);
             counter++;
         }
 
-        variableContext.setVariableValue(Variable.RESULT, 0L);
+        runContext.setVariableValue(Variable.RESULT, 0L);
     }
 
     public void initInputVariablesSpecific(List<Long> initInput) {
@@ -94,13 +92,13 @@ public class ProgramRunner {
         int minSize = Math.min(initInput.size(), inputVars.size());
         int i;
         for(i = 0; i < minSize; i++) {
-            variableContext.setVariableValue(inputVars.get(i), initInput.get(i));
+            runContext.setVariableValue(inputVars.get(i), initInput.get(i));
         }
         for(; i < inputVars.size(); i++) {
-            variableContext.setVariableValue(inputVars.get(i), 0L);
+            runContext.setVariableValue(inputVars.get(i), 0L);
         }
 
-        variableContext.setVariableValue(Variable.RESULT, 0L);
+        runContext.setVariableValue(Variable.RESULT, 0L);
     }
 
     // ------------ internal: ------------
@@ -124,14 +122,16 @@ public class ProgramRunner {
 
     protected Label executeInstruction(Instruction instruction) {
         Optional<Instruction> optionalInstruction = Optional.ofNullable(instruction);
-        optionalInstruction.ifPresent(i -> cycles += i.cycles());
 
         var jumpLabel = optionalInstruction
-                .map(ins -> ins.execute(variableContext))
+                .map(ins -> ins.execute(runContext))
                 .orElse(FixedLabel.EMPTY);
 
+        optionalInstruction.ifPresent(i -> cycles += i.cycles());
+
         if(jumpLabel == FixedLabel.EXIT) {
-            pc = program.getInstructions().size() + 1; // end
+            // the end, will not crash if we call getInstructionByIndex with this pc.
+            pc = program.getInstructions().size() + 1;
         } else if(jumpLabel == FixedLabel.EMPTY)
             pc++;
         else {

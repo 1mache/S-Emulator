@@ -18,8 +18,8 @@ public enum InstructionData {
     JUMP_EQUAL_VARIABLE(2, true, List.of(InstructionArgumentType.LABEL, InstructionArgumentType.VARIABLE)),
 
     // advanced:
-    QUOTE              (5, true, List.of(InstructionArgumentType.FUNCTION, InstructionArgumentType.FUNC_ARG_LIST)),
-    JUMP_EQUAL_FUNC    (6, true, List.of(InstructionArgumentType.LABEL, InstructionArgumentType.FUNCTION, InstructionArgumentType.FUNC_ARG_LIST)),
+    QUOTE              (5, true, List.of(InstructionArgumentType.FUNCTION_REF, InstructionArgumentType.FUNC_PARAM_LIST)),
+    JUMP_EQUAL_FUNC    (6, true, List.of(InstructionArgumentType.LABEL, InstructionArgumentType.FUNCTION_REF, InstructionArgumentType.FUNC_PARAM_LIST)),
     ;
 
     private final long cycles;

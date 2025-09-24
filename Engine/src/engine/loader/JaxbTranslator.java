@@ -1,5 +1,7 @@
 package engine.loader;
 
+import engine.function.FunctionReference;
+import engine.function.parameter.FunctionParam;
 import engine.function.parameter.FunctionParamList;
 import engine.instruction.argument.InstructionArgument;
 import engine.instruction.argument.InstructionArgumentType;
@@ -9,17 +11,15 @@ import engine.jaxb.generated.*;
 import engine.loader.event.LoadingListener;
 import engine.loader.exception.SProgramXMLException;
 import engine.label.*;
-import engine.program.FunctionProgram;
+import engine.function.Function;
 import engine.program.Program;
 import engine.program.StandardProgram;
 
 import engine.variable.Variable;
 import engine.variable.VariableType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiConsumer;
 
 public class JaxbTranslator {
     private static final Map<String, InstructionArgumentType> argumentTypes = Map.ofEntries(
@@ -47,24 +47,65 @@ public class JaxbTranslator {
             Map.entry("variableName", InstructionArgumentType.VARIABLE),
 
             //QUOTE + JUMP_EQUAL_FUNCTION
-            Map.entry("functionName", InstructionArgumentType.FUNCTION),
-            Map.entry("functionArguments", InstructionArgumentType.FUNC_ARG_LIST),
+            Map.entry("functionName", InstructionArgumentType.FUNCTION_REF),
+            Map.entry("functionArguments", InstructionArgumentType.FUNC_PARAM_LIST),
 
             // JUMP_EQUAL_FUNCTION
             Map.entry("JEFunctionLabel", InstructionArgumentType.LABEL)
     );
 
-    private final Map<String, FunctionProgram> usedFunctions = new HashMap<>();
+    private final static BiConsumer<Integer, Integer> DO_NOTHING = (a,b) -> {};
+    // what functions we have in the file
+    private final Map<String,Function> name2Function = new HashMap<>();
 
+    // keeps references for functions by name until we processed them
+    private final Set<FunctionReference> toBeResolved = new HashSet<>();
 
     public Program getProgram(SProgram sProgram, LoadingListener listener) {
-        List<Instruction> instructions = new ArrayList<>();
         List<SInstruction> sInstructions = sProgram.getSInstructions().getSInstruction();
+
+
+        var sFunctions = sProgram.getSFunctions();
+        if(sFunctions != null){
+            for (SFunction sFunction: sFunctions.getSFunction()){
+                Function function = translateFunction(sFunction);
+                name2Function.put(function.getName(),function);
+            }
+        }
+
+        List<Instruction> instructions = translateInstructions(
+                sInstructions,
+                (currentInstruction, totalInstructions) -> {
+                    if(listener != null)
+                        listener.onInstructionProcessed(currentInstruction, totalInstructions);
+                }
+        );
+
+        // resolve all the function references, because now we processed all of them
+        toBeResolved.forEach(
+                functionReference -> functionReference.resolveFunction(
+                        name2Function.get(functionReference.getReferralName())
+                )
+        );
+        // Note: some of them may be null here, this will be checked in the validation process
+
+        if(listener != null) {
+            listener.onLoadingCompleted();
+        }
+
+        return new StandardProgram(sProgram.getName(), instructions);
+    }
+
+    public Set<FunctionReference> getFunctionReferences() {
+        return toBeResolved;
+    }
+
+    private List<Instruction> translateInstructions(List<SInstruction> sInstructions,
+                                                    BiConsumer<Integer, Integer> onInstructionProcessed) {
+        List<Instruction> instructions = new ArrayList<>();
+
         int totalInstructions = sInstructions.size();
         int currentInstruction = 0;
-
-        // TODO: load all the SFunctions using this recursively
-        // and add them to a map where you can look them up by name
 
         for (SInstruction sInstruction : sInstructions) {
             InstructionData instructionData = InstructionData.valueOf(sInstruction.getName());
@@ -79,17 +120,19 @@ public class JaxbTranslator {
             instructions.add(instruction);
             currentInstruction++;
 
-            if(listener != null) {
-                listener.onInstructionProcessed(currentInstruction, totalInstructions);
-            }
+            onInstructionProcessed.accept(currentInstruction, totalInstructions);
         }
-
-        if(listener != null) {
-            listener.onLoadingCompleted();
-        }
-
-        return new StandardProgram(sProgram.getName(), instructions);
+        return instructions;
     }
+
+    private Function translateFunction(SFunction sFunction){
+        return new Function(
+                sFunction.getName(),
+                sFunction.getUserString(),
+                translateInstructions(sFunction.getSInstructions().getSInstruction(), DO_NOTHING)
+        );
+    }
+
 
     private Variable str2Variable(String str) {
         str = str.toLowerCase();
@@ -133,7 +176,34 @@ public class JaxbTranslator {
     }
 
     private FunctionParamList parseParamsString(String value) {
-        return new FunctionParamList(List.of()); // TODO: implement this
+        if (value == null || value.isEmpty()) {
+            return new FunctionParamList(List.of());
+        }
+
+        // remove surrounding parentheses if present
+        String trimmed = value;
+        if (value.startsWith("(") && value.endsWith(")")) {
+            trimmed = value.substring(1, value.length() - 1);
+        }
+
+        String[] parts = trimmed.split(",");
+
+        List<FunctionParam> params = new ArrayList<>();
+
+        for (String part : parts) {
+            if (part.isEmpty()) continue;
+
+            try {
+                // Try parsing as number
+                Long number = Long.parseLong(part);
+                params.add(new NumericConstant(number));
+            } catch (NumberFormatException e) {
+                // Not a number, treat as variable name
+                params.add(str2Variable(part));
+            }
+        }
+
+        return new FunctionParamList(params);
     }
 
     private List<InstructionArgument> getArguments(SInstruction sInstruction) {
@@ -163,13 +233,13 @@ public class JaxbTranslator {
                     res.add(constant);
                     break;
 
-                case FUNCTION:
-                    // TODO: look up function by name in the previously loaded functions map
-                    FunctionProgram program = usedFunctions.get(argument.getValue());
-                    res.add(program);
+                case FUNCTION_REF:
+                    FunctionReference functionRef = new FunctionReference(argument.getValue());
+                    toBeResolved.add(functionRef);
+                    res.add(functionRef);
                     break;
 
-                case FUNC_ARG_LIST:
+                case FUNC_PARAM_LIST:
                     FunctionParamList paramList = parseParamsString(argument.getValue());
                     res.add(paramList);
                     break;

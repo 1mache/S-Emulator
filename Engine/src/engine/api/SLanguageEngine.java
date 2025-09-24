@@ -10,6 +10,7 @@ import engine.expansion.ProgramExpander;
 import engine.loader.FromXMLProgramLoader;
 import engine.loader.event.LoadingListener;
 import engine.loader.exception.NotXMLException;
+import engine.loader.exception.UnknownFunctionException;
 import engine.loader.exception.UnknownLabelException;
 import engine.peeker.ProgramViewer;
 import engine.program.Program;
@@ -32,7 +33,7 @@ public class SLanguageEngine {
     }
 
     public void loadProgram(String path, LoadingListener listener)
-            throws NotXMLException, FileNotFoundException, UnknownLabelException {
+            throws NotXMLException, FileNotFoundException, UnknownLabelException, UnknownFunctionException {
         FromXMLProgramLoader loader = new FromXMLProgramLoader();
         loader.loadXML(path, listener);
         loader.validateProgram();

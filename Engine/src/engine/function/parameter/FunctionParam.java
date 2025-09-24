@@ -1,10 +1,12 @@
 package engine.function.parameter;
 
-import engine.execution.context.VariableContext;
+import engine.execution.context.RunContext;
 
 public interface FunctionParam {
     /**
      * @return what the parameter evaluates to when a function is called with it
      */
-    Long eval(VariableContext context);
+    Long eval(RunContext context);
+
+    String stringRepresentation();
 }

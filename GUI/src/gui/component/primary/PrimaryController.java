@@ -307,7 +307,8 @@ public class PrimaryController implements Initializable {
     }
 
     private void showError(String s) {
-        filenameLabel.setText(s); //TODO:fix this
+        System.out.println(s);
+        //filenameLabel.setText(s); //TODO:fix this
     }
 
     private void playSoundTheme() {

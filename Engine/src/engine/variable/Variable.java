@@ -1,6 +1,6 @@
 package engine.variable;
 
-import engine.execution.context.VariableContext;
+import engine.execution.context.RunContext;
 import engine.function.parameter.FunctionParam;
 import engine.instruction.argument.InstructionArgument;
 import engine.instruction.argument.InstructionArgumentType;
@@ -78,7 +78,7 @@ public class Variable implements InstructionArgument, FunctionParam {
     }
 
     @Override
-    public Long eval(VariableContext context) {
+    public Long eval(RunContext context) {
         return context.getVariableValue(this);
     }
 }
