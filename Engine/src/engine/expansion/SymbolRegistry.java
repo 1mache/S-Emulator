@@ -12,13 +12,16 @@ public class SymbolRegistry {
     private final Set<Label> labelsUsed = new HashSet<>();
     private final Set<Variable> variablesUsed = new HashSet<>();
 
+    public SymbolRegistry() {
+    }
+
     public SymbolRegistry(Collection<Label> usedLabels, Collection<Variable> usedVariables){
         usedLabels.forEach(this::registerLabel);
         usedVariables.forEach(this::registerVariable);
     }
 
     public void registerLabel(Label label) {
-        if(label == FixedLabel.EMPTY || label == FixedLabel.EXIT)
+        if(label == FixedLabel.EMPTY)
             return;
 
         labelsUsed.add(label);
@@ -29,7 +32,7 @@ public class SymbolRegistry {
     }
 
     public void registerVariable(Variable variable) {
-        if(variable == Variable.NO_VAR || variable == Variable.RESULT)
+        if(variable == Variable.NO_VAR)
             return;
 
         variablesUsed.add(variable);

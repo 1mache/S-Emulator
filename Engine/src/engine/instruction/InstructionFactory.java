@@ -85,26 +85,4 @@ public class InstructionFactory {
             throw new InstructionArgumentsException("Argument types mismatch in instruction: " +
                                                         instructionData.name());
     }
-
-    public static Instruction replaceSymbols(
-            Instruction instruction,
-            Map<Variable, Variable> variableResolutionMap,
-            Map<Label, Label> labelResolutionMap
-    ) {
-        Variable newVar = variableResolutionMap.getOrDefault(instruction.getVariable(), instruction.getVariable());
-        Label newLabel = labelResolutionMap.getOrDefault(instruction.getLabel(), instruction.getLabel());
-
-        return createInstruction(instruction.getData(), newVar, newLabel,
-                instruction.getArguments().stream()
-                        .map(argument ->
-                        switch (argument.getArgumentType()){
-                                    case VARIABLE -> variableResolutionMap.getOrDefault((Variable) argument, (Variable) argument);
-                                    case LABEL -> labelResolutionMap.getOrDefault((Label) argument, (Label) argument);
-                                    case CONSTANT -> argument;
-                                    default -> throw new InstructionArgumentsException("Unknown argument type");
-                                }
-                        )
-                        .toList()
-        );
-    }
 }

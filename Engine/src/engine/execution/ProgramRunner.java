@@ -22,6 +22,7 @@ public class ProgramRunner {
 
     public ProgramRunner(Program program) {
         this.program = program;
+        runContext = new RunContextImpl();
     }
 
     public void reset(){

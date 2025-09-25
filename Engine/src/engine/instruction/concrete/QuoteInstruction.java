@@ -1,19 +1,32 @@
 package engine.instruction.concrete;
 
 import engine.execution.ProgramRunner;
+import engine.expansion.ProgramExpander;
+import engine.expansion.SymbolRegistry;
 import engine.function.FunctionReference;
 import engine.function.parameter.FunctionParamList;
+import engine.instruction.Instruction;
 import engine.instruction.argument.InstructionArgument;
 import engine.execution.context.RunContext;
 import engine.instruction.AbstractInstruction;
 import engine.instruction.InstructionData;
+import engine.instruction.utility.Instructions;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.function.Function;
+import engine.label.NumericLabel;
 import engine.program.Program;
+import engine.program.StandardProgram;
+import engine.program.generator.LabelVariableGenerator;
+import engine.resolver.ResolutionContext;
+import engine.resolver.SymbolResolver;
 import engine.variable.Variable;
+import engine.variable.VariableType;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -80,6 +93,66 @@ import java.util.stream.Stream;
 
         @Override
         protected Program getSyntheticExpansion() {
-            return super.getSyntheticExpansion();
+            var quotedFunc = quotedFuncReference.getFunction();
+            int avaliableWorkVarNumber = getAvaliableWorkVarNumber();
+            int avaliableLabelNumber = getAvaliableLabelNumber();
+            final Label emptyLabel = FixedLabel.EMPTY; // just to not type it :)
+
+            SymbolRegistry usedSymbols = new SymbolRegistry();
+
+            List<Instruction> instructions = new ArrayList<>();
+            // first instruction is a NOOP with a label of this instruction
+            instructions.add(new NeutralInstruction(Variable.RESULT, getLabel()));
+
+            List<Variable> usedWorkVariables = new ArrayList<>();
+            if(getVariable().getType() == VariableType.WORK) usedWorkVariables.add(getVariable());
+
+            // z_i <- x_i for all inputs x_i of the quoted function
+            Map<Variable,Variable> inputSubstitutions = new HashMap<>();
+            for (Variable xi: quotedFunc.getInputVariables()) {
+                Variable zi = Variable.createWorkVariable(avaliableWorkVarNumber++);
+                instructions.add(new AssignmentInstruction(zi, emptyLabel, xi));
+
+                inputSubstitutions.put(xi, zi);
+                usedSymbols.registerVariable(zi);
+                usedWorkVariables.add(zi);
+            }
+            // result variable substitution
+            Variable zy = Variable.createWorkVariable(avaliableWorkVarNumber++);
+            usedSymbols.registerVariable(zy);
+            usedWorkVariables.add(zy);
+            // EXIT label substitution
+            Label exitSubstitution = new NumericLabel(avaliableLabelNumber++);
+            usedSymbols.registerLabel(exitSubstitution);
+
+            var usedLabels = Instructions.extractUsedLabels(this);
+
+            SymbolRegistry ignoredSymbols = new SymbolRegistry(
+                    usedLabels,
+                    Instructions.extractVariables(this)
+            );
+
+            ResolutionContext resolutionContext = new ResolutionContext(
+                usedSymbols,
+                ignoredSymbols,
+                new LabelVariableGenerator(
+                        usedLabels,
+                        usedWorkVariables
+                )
+            );
+
+            instructions.addAll(
+                    new SymbolResolver(resolutionContext).resolveFunctionSymbolsCollisions(
+                            quotedFunc.getInstructions(),
+                            exitSubstitution,
+                            zy,
+                            inputSubstitutions
+                    )
+            );
+
+            // z_y <- result of the quoted function
+            instructions.add(new AssignmentInstruction(getVariable(), exitSubstitution, zy));
+
+            return new StandardProgram(getName() + "_EXP",instructions);
         }
     }

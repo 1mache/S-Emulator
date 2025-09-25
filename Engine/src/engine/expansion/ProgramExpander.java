@@ -2,31 +2,24 @@ package engine.expansion;
 
 import engine.expansion.tree.ExpansionNode;
 import engine.instruction.Instruction;
-import engine.instruction.InstructionFactory;
 import engine.instruction.utility.InstructionReference;
 import engine.instruction.utility.Instructions;
-import engine.label.Label;
+import engine.label.FixedLabel;
 import engine.program.Program;
 import engine.program.StandardProgram;
 import engine.program.generator.LabelVariableGenerator;
+import engine.resolver.ResolutionContext;
+import engine.resolver.SymbolResolver;
 import engine.variable.Variable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ProgramExpander {
     private final Program program;
     private int lastExpansionDegree = 0;
     private List<ExpansionNode> expansionForest; // every instruction is a tree root so forest
     private final SymbolRegistry originalSymbolRegistry;
-
-    private record ExpansionContext(
-            SymbolRegistry usedSymbols,
-            SymbolRegistry ignoredSymbols,
-            LabelVariableGenerator symbolGenerator
-    ){}
 
     public ProgramExpander(Program program) {
         this.program = program;
@@ -57,20 +50,28 @@ public class ProgramExpander {
             for(ExpansionNode instructionNode: expansionForest){
                 Instruction instruction = instructionNode.getInstructionRef().instruction();
 
-                SymbolRegistry externalSymbols = new SymbolRegistry(
+                // symbols that come from the instruction rather than from it's expansion
+                SymbolRegistry ignoredSymbols = new SymbolRegistry(
                         Instructions.extractUsedLabels(instruction),
                         Instructions.extractVariables(instruction)
                 );
-                ExpansionContext expansionContext = new ExpansionContext(
+
+                // we do not want to replace those or do anything with them
+                ignoredSymbols.registerLabel(FixedLabel.EXIT);
+                ignoredSymbols.registerVariable(Variable.RESULT);
+
+                ResolutionContext resolutionContext = new ResolutionContext(
                         usedSymbols,
-                        externalSymbols,
+                        ignoredSymbols,
                         symbolGenerator
                 );
+
+                var symbolsResolver = new SymbolResolver(resolutionContext);
 
                 instruction.getExpansion().ifPresentOrElse(
                         expansion -> {
                             List<Instruction> expansionWithoutCollisions =
-                                    resolveSymbolsCollisions(expansion.getInstructions(),expansionContext);
+                                    symbolsResolver.resolveExpansionSymbolsCollisions(expansion.getInstructions());
 
                             // for each expanded instruction
                             for (Instruction expandedInst: expansionWithoutCollisions){
@@ -144,69 +145,5 @@ public class ProgramExpander {
                         .map(InstructionReference::instruction)
                         .toList()
         );
-    }
-
-    private List<Instruction> resolveSymbolsCollisions(List<Instruction> instructions,
-                                                       ExpansionContext expansionContext) {
-        List<Instruction> resolved = new ArrayList<>();
-
-        Map<Variable, Variable> variableResolutionMap = new HashMap<>();
-        Map<Label, Label> labelResolutionMap = new HashMap<>();
-
-        for(Instruction instruction : instructions){
-            Instructions.extractVariables(instruction).forEach(
-                    variable -> resolveVariable(variable, variableResolutionMap, expansionContext)
-            );
-
-            Instructions.extractUsedLabels(instruction).forEach(
-                    label -> resolveLabel(label, labelResolutionMap, expansionContext)
-            );
-
-            Instruction newInstruction = InstructionFactory.replaceSymbols(
-                    instruction,variableResolutionMap, labelResolutionMap
-            );
-            resolved.add(newInstruction);
-        }
-        return resolved;
-    }
-
-    private void resolveLabel(Label label,
-                              Map<Label, Label> labelResolutionMap,
-                              ExpansionContext expansionContext) {
-
-        if(expansionContext.ignoredSymbols.isLabelRegistered(label))
-            return;
-
-        var usedSymbols = expansionContext.usedSymbols;
-
-        if(!usedSymbols.isLabelRegistered(label)){
-            usedSymbols.registerLabel(label);
-            labelResolutionMap.put(label, label);
-        }
-        else if(!labelResolutionMap.containsKey(label)){
-            Label replacement = expansionContext.symbolGenerator.getNextLabel();
-            usedSymbols.registerLabel(replacement);
-            labelResolutionMap.put(label, replacement);
-        }
-    }
-
-    private void resolveVariable(Variable variable,
-                                 Map<Variable, Variable> variableResolutionMap,
-                                 ExpansionContext expansionContext) {
-
-        if(expansionContext.ignoredSymbols.isVariableRegistered(variable))
-            return;
-
-        var usedSymbols = expansionContext.usedSymbols;
-
-        if(!usedSymbols.isVariableRegistered(variable)){
-            usedSymbols.registerVariable(variable);
-            variableResolutionMap.put(variable, variable);
-        }
-        else if(!variableResolutionMap.containsKey(variable)){
-            Variable replacement = expansionContext.symbolGenerator.getNextWorkVariable();
-            usedSymbols.registerVariable(replacement);
-            variableResolutionMap.put(variable, replacement);
-        }
     }
 }

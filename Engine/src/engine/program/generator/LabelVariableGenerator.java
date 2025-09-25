@@ -15,25 +15,26 @@ public class LabelVariableGenerator {
     private int labelCounter;
     private int variableCounter;
 
-    public LabelVariableGenerator(Program contextProgram) {
-        List<Label> labels = contextProgram.getUsedLabels();
-        List<Variable> workVariables = contextProgram.getWorkVariables();
-
+    public LabelVariableGenerator(List<Label> usedLabels, List<Variable> usedWorkVariables){
         // take the first label and variable lineId available
-        if(labels.isEmpty() || labels.equals(List.of(FixedLabel.EXIT)))
+        if(usedLabels.isEmpty() || usedLabels.equals(List.of(FixedLabel.EXIT)))
             initLabelCounter = 1;
-        else if(labels.getLast().equals(FixedLabel.EXIT))
+        else if(usedLabels.getLast().equals(FixedLabel.EXIT))
             // we know that EXIT is last if present
-            initLabelCounter = ((NumericLabel)labels.get(labels.size()-2)).getNumber() + 1;
+            initLabelCounter = ((NumericLabel)usedLabels.get(usedLabels.size()-2)).getNumber() + 1;
         else
-            initLabelCounter = ((NumericLabel)labels.getLast()).getNumber() + 1;
+            initLabelCounter = ((NumericLabel)usedLabels.getLast()).getNumber() + 1;
 
-        if(workVariables.isEmpty())
+        if(usedWorkVariables.isEmpty())
             initVariableCounter = 1;
         else
-            initVariableCounter = workVariables.getLast().getNumber() + 1;
+            initVariableCounter = usedWorkVariables.getLast().getNumber() + 1;
 
         reset();
+    }
+
+    public LabelVariableGenerator(Program contextProgram) {
+        this(contextProgram.getUsedLabels(), contextProgram.getWorkVariables());
     }
 
     public void reset(){

@@ -1,5 +1,6 @@
 package engine.instruction.utility;
 
+import engine.function.parameter.FunctionParamList;
 import engine.instruction.argument.InstructionArgumentType;
 import engine.instruction.Instruction;
 import engine.loader.ArgumentLabelInfo;
@@ -14,17 +15,29 @@ import java.util.stream.Collectors;
 public class Instructions {
 
     public static List<Variable> extractVariables(Instruction instruction) {
-        List<Variable> variables = new ArrayList<>();
+        Set<Variable> variables = new HashSet<>();
         if(instruction.getVariable() != Variable.NO_VAR)
             variables.add(instruction.getVariable());
 
+        var instructionArguments = instruction.getArguments();
         variables.addAll(
-                instruction.getArguments().stream()
+                instructionArguments.stream()
                         .filter(arg -> arg.getArgumentType() == InstructionArgumentType.VARIABLE)
                         .map(arg -> (Variable) arg)
                         .toList()
         );
-        return variables;
+
+        // if the Instruction quotes a function go through the arguments and extract the variable ones
+        variables.addAll(
+                instructionArguments.stream()
+                        .filter(arg -> arg.getArgumentType() == InstructionArgumentType.FUNC_PARAM_LIST)
+                        .flatMap(arg -> ((FunctionParamList) arg).params().stream())
+                        .filter(param -> param instanceof Variable)
+                        .map(param -> (Variable) param)
+                        .toList()
+        );
+
+        return variables.stream().toList();
     }
 
     public static List<Variable> extractInputVariables(List<Instruction> instructions) {
