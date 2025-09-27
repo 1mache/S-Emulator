@@ -2,6 +2,7 @@ package engine.expansion;
 
 import engine.label.FixedLabel;
 import engine.label.Label;
+import engine.program.Program;
 import engine.variable.Variable;
 
 import java.util.Collection;
@@ -13,6 +14,11 @@ public class SymbolRegistry {
     private final Set<Variable> variablesUsed = new HashSet<>();
 
     public SymbolRegistry() {
+    }
+
+    public SymbolRegistry(SymbolRegistry other) {
+        this.labelsUsed.addAll(other.labelsUsed);
+        this.variablesUsed.addAll(other.variablesUsed);
     }
 
     public SymbolRegistry(Collection<Label> usedLabels, Collection<Variable> usedVariables){

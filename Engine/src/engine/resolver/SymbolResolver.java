@@ -22,10 +22,11 @@ public class SymbolResolver {
     }
 
     public List<Instruction> resolveExpansionSymbolsCollisions(List<Instruction> instructions) {
-        Map<Variable, Variable> variableResolutionMap = new HashMap<>();
-        Map<Label, Label> labelResolutionMap = new HashMap<>();
+        // we do not want to replace those or do anything with them
+        resolutionContext.ignoredSymbols().registerLabel(FixedLabel.EXIT);
+        resolutionContext.ignoredSymbols().registerVariable(Variable.RESULT);
 
-        return resolveSymbolsCollisions(instructions, variableResolutionMap, labelResolutionMap);
+        return resolveSymbolsCollisions(instructions, new HashMap<>(), new HashMap<>());
     }
 
     public List<Instruction> resolveFunctionSymbolsCollisions(
@@ -76,6 +77,8 @@ public class SymbolResolver {
     private void resolveLabel(Label label,
                               Map<Label, Label> labelResolutionMap) {
 
+        if(labelResolutionMap.containsKey(label))
+            return;
         if(resolutionContext.ignoredSymbols().isLabelRegistered(label))
             return;
 

@@ -108,6 +108,18 @@ public class Instructions {
                         .filter(var -> var.getType() == variableType)
                         .collect(Collectors.toSet());
 
+        // if the Instruction quotes a function go through the arguments and extract the variable ones
+        argumentVars.addAll(
+                instructions.stream()
+                        .flatMap(instr -> instr.getArguments().stream())
+                        .filter(arg -> arg.getArgumentType() == InstructionArgumentType.FUNC_PARAM_LIST)
+                        .flatMap(arg -> ((FunctionParamList) arg).params().stream())
+                        .filter(param -> param instanceof Variable)
+                        .map(param -> (Variable) param)
+                        .filter(var -> var.getType() == variableType)
+                        .toList()
+        );
+
         // unite the two sets
         Set<Variable> allInputs = new HashSet<>(operatedVars);
         allInputs.addAll(argumentVars);

@@ -180,13 +180,7 @@ public class JaxbTranslator {
             return new FunctionParamList(List.of());
         }
 
-        // remove surrounding parentheses if present
-        String trimmed = value;
-        if (value.startsWith("(") && value.endsWith(")")) {
-            trimmed = value.substring(1, value.length() - 1);
-        }
-
-        String[] parts = trimmed.split(",");
+        String[] parts = value.split(",");
 
         List<FunctionParam> params = new ArrayList<>();
 

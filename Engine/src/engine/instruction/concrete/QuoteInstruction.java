@@ -101,17 +101,24 @@ import java.util.stream.Stream;
             final Label emptyLabel = FixedLabel.EMPTY; // just to not type it :)
 
             SymbolRegistry usedSymbols = new SymbolRegistry();
+            List<Variable> usedWorkVariables = new ArrayList<>();
+            // add all the used labels and variables to the usedSymbols registry
+            Instructions.extractVariables(this).stream()
+                    .filter(variable -> variable.getType() == VariableType.WORK)
+                    .forEach(variable -> {
+                        usedSymbols.registerVariable(variable);
+                        usedWorkVariables.add(variable);
+                    });
 
             List<Instruction> instructions = new ArrayList<>();
             // first instruction is a NOOP with a label of this instruction
             instructions.add(new NeutralInstruction(Variable.RESULT, getLabel()));
 
-            List<Variable> usedWorkVariables = new ArrayList<>();
             if(getVariable().getType() == VariableType.WORK) usedWorkVariables.add(getVariable());
 
             // z_i <- x_i for all inputs x_i of the quoted function
             Map<Variable,Variable> inputSubstitutions = new HashMap<>();
-
+            List<Variable> usedInputVariables = Instructions.extractInputVariables(quotedFunc.getInstructions());
             for (int i = 0; i < functionParams.params().size(); i++) {
                 // param that "x_i" of the function gets
                 var paramXi = functionParams.params().get(i);
@@ -120,8 +127,9 @@ import java.util.stream.Stream;
 
                 instructions.add(getAssignmentForParam(zi, emptyLabel ,paramXi));
 
-                var xi = Variable.createInputVariable(i+1);
+                var xi = usedInputVariables.get(i);
                 inputSubstitutions.put(xi, zi);
+                usedSymbols.registerVariable(xi);
                 usedSymbols.registerVariable(zi);
                 usedWorkVariables.add(zi);
             }
@@ -134,15 +142,11 @@ import java.util.stream.Stream;
             usedSymbols.registerLabel(exitSubstitution);
 
             var usedLabels = Instructions.extractUsedLabels(this);
-
-            SymbolRegistry ignoredSymbols = new SymbolRegistry(
-                    usedLabels,
-                    Instructions.extractVariables(this)
-            );
+            usedLabels.add(exitSubstitution);
 
             ResolutionContext resolutionContext = new ResolutionContext(
                 usedSymbols,
-                ignoredSymbols,
+                new SymbolRegistry(), // nothing is ignored
                 new LabelVariableGenerator(
                         usedLabels,
                         usedWorkVariables

@@ -40,7 +40,7 @@ public class ProgramExpander {
 
         Program current = program;
         resetExpansionForest();
-        SymbolRegistry usedSymbols = originalSymbolRegistry;
+        SymbolRegistry usedSymbols = new SymbolRegistry(originalSymbolRegistry); // copy
         LabelVariableGenerator symbolGenerator = new LabelVariableGenerator(program);
 
         for (int currentDegree = 1; currentDegree <= degree; currentDegree++){
@@ -55,10 +55,6 @@ public class ProgramExpander {
                         Instructions.extractUsedLabels(instruction),
                         Instructions.extractVariables(instruction)
                 );
-
-                // we do not want to replace those or do anything with them
-                ignoredSymbols.registerLabel(FixedLabel.EXIT);
-                ignoredSymbols.registerVariable(Variable.RESULT);
 
                 ResolutionContext resolutionContext = new ResolutionContext(
                         usedSymbols,

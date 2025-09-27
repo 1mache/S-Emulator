@@ -16,19 +16,20 @@ public class LabelVariableGenerator {
     private int variableCounter;
 
     public LabelVariableGenerator(List<Label> usedLabels, List<Variable> usedWorkVariables){
-        // take the first label and variable lineId available
-        if(usedLabels.isEmpty() || usedLabels.equals(List.of(FixedLabel.EXIT)))
-            initLabelCounter = 1;
-        else if(usedLabels.getLast().equals(FixedLabel.EXIT))
-            // we know that EXIT is last if present
-            initLabelCounter = ((NumericLabel)usedLabels.get(usedLabels.size()-2)).getNumber() + 1;
-        else
-            initLabelCounter = ((NumericLabel)usedLabels.getLast()).getNumber() + 1;
+        // calculate the initial label counter as one more than the largest NumericLabel number present
+        int maxLabelNum = usedLabels.stream()
+                .filter(l -> l instanceof NumericLabel)
+                .mapToInt(l -> ((NumericLabel) l).getNumber())
+                .max()
+                .orElse(0); // default to 0 if no NumericLabels found
+        initLabelCounter = maxLabelNum + 1;
 
-        if(usedWorkVariables.isEmpty())
-            initVariableCounter = 1;
-        else
-            initVariableCounter = usedWorkVariables.getLast().getNumber() + 1;
+        // calculate the initial variable counter as one more than the largest Variable number present
+        int maxVarNum = usedWorkVariables.stream()
+                .mapToInt(Variable::getNumber)
+                .max()
+                .orElse(0); // default to 0 if none
+        initVariableCounter = maxVarNum + 1;
 
         reset();
     }
