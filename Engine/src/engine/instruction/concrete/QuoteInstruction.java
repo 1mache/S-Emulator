@@ -4,6 +4,7 @@ import engine.execution.ProgramRunner;
 import engine.expansion.ProgramExpander;
 import engine.expansion.SymbolRegistry;
 import engine.function.FunctionReference;
+import engine.function.parameter.FunctionParam;
 import engine.function.parameter.FunctionParamList;
 import engine.instruction.Instruction;
 import engine.instruction.argument.InstructionArgument;
@@ -15,6 +16,7 @@ import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.function.Function;
 import engine.label.NumericLabel;
+import engine.numeric.constant.NumericConstant;
 import engine.program.Program;
 import engine.program.StandardProgram;
 import engine.program.generator.LabelVariableGenerator;
@@ -109,10 +111,16 @@ import java.util.stream.Stream;
 
             // z_i <- x_i for all inputs x_i of the quoted function
             Map<Variable,Variable> inputSubstitutions = new HashMap<>();
-            for (Variable xi: quotedFunc.getInputVariables()) {
-                Variable zi = Variable.createWorkVariable(avaliableWorkVarNumber++);
-                instructions.add(new AssignmentInstruction(zi, emptyLabel, xi));
 
+            for (int i = 0; i < functionParams.params().size(); i++) {
+                // param that "x_i" of the function gets
+                var paramXi = functionParams.params().get(i);
+
+                Variable zi = Variable.createWorkVariable(avaliableWorkVarNumber++);
+
+                instructions.add(getAssignmentForParam(zi, emptyLabel ,paramXi));
+
+                var xi = Variable.createInputVariable(i+1);
                 inputSubstitutions.put(xi, zi);
                 usedSymbols.registerVariable(zi);
                 usedWorkVariables.add(zi);
@@ -154,5 +162,14 @@ import java.util.stream.Stream;
             instructions.add(new AssignmentInstruction(getVariable(), exitSubstitution, zy));
 
             return new StandardProgram(getName() + "_EXP",instructions);
+        }
+
+        private Instruction getAssignmentForParam(Variable into, Label label, FunctionParam param) {
+            if(param instanceof Variable v)
+                return new AssignmentInstruction(into, label, v);
+            else if (param instanceof NumericConstant c)
+                return new ConstantAssignmentInstruction(into, label, c);
+
+            throw new IllegalArgumentException("Unknown param type");
         }
     }
