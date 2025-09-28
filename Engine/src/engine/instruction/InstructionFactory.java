@@ -11,7 +11,6 @@ import engine.label.Label;
 import engine.variable.Variable;
 
 import java.util.List;
-import java.util.Map;
 
 public class InstructionFactory {
     public static Instruction createInstruction(
@@ -62,11 +61,11 @@ public class InstructionFactory {
                 FunctionParamList params = (FunctionParamList) arguments.get(1);
                 yield new QuoteInstruction(variable, instructionLabel, quotedReference, params);
             }
-            case JUMP_EQUAL_FUNC -> {
+            case JUMP_EQUAL_FUNCTION -> {
                 Label target = (Label) arguments.getFirst();
-                FunctionReference funcReference = (FunctionReference) arguments.getFirst();
-                FunctionParamList params = (FunctionParamList) arguments.get(1);
-                yield new QuoteInstruction(variable, instructionLabel, funcReference, params); // TODO; change to JEF
+                FunctionReference funcReference = (FunctionReference) arguments.get(1);
+                FunctionParamList params = (FunctionParamList) arguments.get(2);
+                yield new JumpFunctionInstruction(variable, instructionLabel, target, funcReference, params);
             }
         };
     }

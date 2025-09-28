@@ -19,7 +19,7 @@ public enum InstructionData {
 
     // advanced:
     QUOTE              (5, true, List.of(InstructionArgumentType.FUNCTION_REF, InstructionArgumentType.FUNC_PARAM_LIST)),
-    JUMP_EQUAL_FUNC    (6, true, List.of(InstructionArgumentType.LABEL, InstructionArgumentType.FUNCTION_REF, InstructionArgumentType.FUNC_PARAM_LIST)),
+    JUMP_EQUAL_FUNCTION(6, true, List.of(InstructionArgumentType.LABEL, InstructionArgumentType.FUNCTION_REF, InstructionArgumentType.FUNC_PARAM_LIST)),
     ;
 
     private final long cycles;
