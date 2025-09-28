@@ -1,60 +1,111 @@
 package engine.resolver;
 
+import engine.expansion.SymbolRegistry;
+import engine.function.Function;
 import engine.function.parameter.FunctionParamList;
 import engine.instruction.Instruction;
 import engine.instruction.InstructionFactory;
 import engine.instruction.utility.Instructions;
 import engine.label.FixedLabel;
 import engine.label.Label;
+import engine.label.NumericLabel;
 import engine.numeric.constant.NumericConstant;
+import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
+import engine.variable.VariableType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+// for now a one time use object
 public class SymbolResolver {
+    private record ResolutionContext(
+            SymbolRegistry usedSymbols,
+            SymbolRegistry ignoredSymbols,
+            LabelVariableGenerator symbolGenerator
+    ){}
+
     private final ResolutionContext resolutionContext;
+    private final Map<Variable, Variable> variableResolutionMap;
+    private final Map<Label, Label> labelResolutionMap;
 
-    public SymbolResolver(ResolutionContext resolutionContext) {
+    private SymbolResolver(ResolutionContext resolutionContext){
+        this(resolutionContext, new HashMap<>(), new HashMap<>());
+    }
+
+    private SymbolResolver(ResolutionContext resolutionContext,
+                          Map<Variable, Variable> variableResolutionMap,
+                          Map<Label, Label> labelResolutionMap) {
         this.resolutionContext = resolutionContext;
+        this.variableResolutionMap = variableResolutionMap;
+        this.labelResolutionMap = labelResolutionMap;
     }
 
-    public List<Instruction> resolveExpansionSymbolsCollisions(List<Instruction> instructions) {
-        // we do not want to replace those or do anything with them
-        resolutionContext.ignoredSymbols().registerLabel(FixedLabel.EXIT);
-        resolutionContext.ignoredSymbols().registerVariable(Variable.RESULT);
+    public static SymbolResolver forInstructionExpansion(
+            Instruction expanded,
+            SymbolRegistry programUsedSymbols
+    ){
+        SymbolRegistry ignoredSymbols = new SymbolRegistry(
+                Instructions.extractUsedLabels(expanded),
+                Instructions.extractVariables(expanded)
+        );
 
-        return resolveSymbolsCollisions(instructions, new HashMap<>(), new HashMap<>());
+        // we dont want those touched
+        ignoredSymbols.registerVariable(Variable.RESULT);
+        ignoredSymbols.registerLabel(FixedLabel.EXIT);
+
+        var symbolGenerator = new LabelVariableGenerator(
+                programUsedSymbols.getLabelsUsed(),
+                programUsedSymbols.getVariablesUsed().stream()
+                        .filter(variable -> variable.getType() == VariableType.WORK)
+                        .toList()
+        );
+
+        return new SymbolResolver(new ResolutionContext(programUsedSymbols, ignoredSymbols, symbolGenerator));
     }
 
-    public List<Instruction> resolveFunctionSymbolsCollisions(
-            List<Instruction> instructions,
-            Label exitLabelSubstitution,
+    public static SymbolResolver forFunctionExpansion(
+            Function quotedFunc,
+            SymbolRegistry additionalUsedSymbols,
+            List<Variable> inputSubstitutions,
             Variable resultSubstitution,
-            Map<Variable, Variable> inputsSubstitutions){
+            Label exitSubstitution
+    ){
+        SymbolRegistry usedSymbols = new SymbolRegistry(additionalUsedSymbols); // copy, we will add to it
+        SymbolRegistry ignoredSymbols = new SymbolRegistry(); // nothing ignored
 
-        Map<Variable, Variable> variableResolutionMap = new HashMap<>();
-        Map<Label, Label> labelResolutionMap = new HashMap<>();
+        usedSymbols.registerVariable(Variable.RESULT);
+        usedSymbols.registerLabel(FixedLabel.EXIT);
+        usedSymbols.registerVariable(resultSubstitution);
+        usedSymbols.registerLabel(exitSubstitution);
 
-        // those are used by the function (even if not, we have substitutions for them in case)
-        resolutionContext.usedSymbols().registerLabel(FixedLabel.EXIT);
-        resolutionContext.usedSymbols().registerVariable(Variable.RESULT);
+        Map<Variable, Variable> variableMappings = new HashMap<>();
+        variableMappings.put(Variable.RESULT, resultSubstitution);
+        Map<Label, Label> labelMappings = new HashMap<>();
+        labelMappings.put(FixedLabel.EXIT, exitSubstitution);
 
-        variableResolutionMap.put(Variable.RESULT, resultSubstitution);
-        variableResolutionMap.putAll(inputsSubstitutions);
+        var quotedFuncInputs = quotedFunc.getInputVariables();
 
-        labelResolutionMap.put(FixedLabel.EXIT, exitLabelSubstitution);
+        // map inputs to substitutions
+        for (int i = 0; i < inputSubstitutions.size(); i++) {
+            var xi = quotedFuncInputs.get(i);
+            var zi = inputSubstitutions.get(i);
 
-        return resolveSymbolsCollisions(instructions, variableResolutionMap, labelResolutionMap);
+            usedSymbols.registerVariable(xi);
+            usedSymbols.registerVariable(zi);
+
+            variableMappings.put(xi, zi);
+        }
+
+        var symbolGenerator = new LabelVariableGenerator(usedSymbols.getLabelsUsed(), usedSymbols.getVariablesUsed());
+
+        return new SymbolResolver(
+                new ResolutionContext(usedSymbols, ignoredSymbols, symbolGenerator),
+                variableMappings,
+                labelMappings
+        );
     }
 
-    // ------------ private: ---------------
-
-    private List<Instruction> resolveSymbolsCollisions(List<Instruction> instructions,
-                                                       Map<Variable, Variable> variableResolutionMap,
-                                                       Map<Label, Label> labelResolutionMap) {
+    public List<Instruction> resolveSymbolsCollisions(List<Instruction> instructions) {
         List<Instruction> resolved = new ArrayList<>();
 
         for(Instruction instruction : instructions){
@@ -74,6 +125,8 @@ public class SymbolResolver {
         return resolved;
     }
 
+    // ------------ private: ---------------
+
     private void resolveLabel(Label label,
                               Map<Label, Label> labelResolutionMap) {
 
@@ -91,6 +144,9 @@ public class SymbolResolver {
         } // used and this is the first time we see it, so find replacement
         else if(!labelResolutionMap.containsKey(label)){
             Label replacement = resolutionContext.symbolGenerator().getNextLabel();
+            while(usedSymbols.isLabelRegistered(replacement))
+                replacement = resolutionContext.symbolGenerator().getNextLabel();
+
             usedSymbols.registerLabel(replacement);
             labelResolutionMap.put(label, replacement);
         }
@@ -110,6 +166,9 @@ public class SymbolResolver {
         }
         else if(!variableResolutionMap.containsKey(variable)){
             Variable replacement = resolutionContext.symbolGenerator().getNextWorkVariable();
+            while(usedSymbols.isVariableRegistered(replacement))
+                replacement = resolutionContext.symbolGenerator().getNextWorkVariable();
+
             usedSymbols.registerVariable(replacement);
             variableResolutionMap.put(variable, replacement);
         }

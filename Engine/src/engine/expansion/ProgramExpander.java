@@ -3,14 +3,9 @@ package engine.expansion;
 import engine.expansion.tree.ExpansionNode;
 import engine.instruction.Instruction;
 import engine.instruction.utility.InstructionReference;
-import engine.instruction.utility.Instructions;
-import engine.label.FixedLabel;
 import engine.program.Program;
 import engine.program.StandardProgram;
-import engine.program.generator.LabelVariableGenerator;
-import engine.resolver.ResolutionContext;
 import engine.resolver.SymbolResolver;
-import engine.variable.Variable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +36,6 @@ public class ProgramExpander {
         Program current = program;
         resetExpansionForest();
         SymbolRegistry usedSymbols = new SymbolRegistry(originalSymbolRegistry); // copy
-        LabelVariableGenerator symbolGenerator = new LabelVariableGenerator(program);
 
         for (int currentDegree = 1; currentDegree <= degree; currentDegree++){
             List<ExpansionNode> expandedNodes = new ArrayList<>();
@@ -50,24 +44,12 @@ public class ProgramExpander {
             for(ExpansionNode instructionNode: expansionForest){
                 Instruction instruction = instructionNode.getInstructionRef().instruction();
 
-                // symbols that come from the instruction rather than from it's expansion
-                SymbolRegistry ignoredSymbols = new SymbolRegistry(
-                        Instructions.extractUsedLabels(instruction),
-                        Instructions.extractVariables(instruction)
-                );
-
-                ResolutionContext resolutionContext = new ResolutionContext(
-                        usedSymbols,
-                        ignoredSymbols,
-                        symbolGenerator
-                );
-
-                var symbolsResolver = new SymbolResolver(resolutionContext);
-
+                SymbolRegistry finalUsedSymbols = usedSymbols; // lambda needs effectively final variables
                 instruction.getExpansion().ifPresentOrElse(
                         expansion -> {
+                            var symbolsResolver = SymbolResolver.forInstructionExpansion(instruction, finalUsedSymbols);
                             List<Instruction> expansionWithoutCollisions =
-                                    symbolsResolver.resolveExpansionSymbolsCollisions(expansion.getInstructions());
+                                    symbolsResolver.resolveSymbolsCollisions(expansion.getInstructions());
 
                             // for each expanded instruction
                             for (Instruction expandedInst: expansionWithoutCollisions){
@@ -93,7 +75,6 @@ public class ProgramExpander {
             current = buildProgramFromExpansionNodes(expandedNodes);
 
             usedSymbols = new SymbolRegistry(current.getUsedLabels(), current.getWorkVariables());
-            symbolGenerator = new LabelVariableGenerator(current);
             expansionForest = expandedNodes;
         }
 

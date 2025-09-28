@@ -6,6 +6,7 @@ import engine.label.NumericLabel;
 import engine.program.Program;
 import engine.variable.Variable;
 
+import java.util.Collection;
 import java.util.List;
 
 public class LabelVariableGenerator {
@@ -15,7 +16,7 @@ public class LabelVariableGenerator {
     private int labelCounter;
     private int variableCounter;
 
-    public LabelVariableGenerator(List<Label> usedLabels, List<Variable> usedWorkVariables){
+    public LabelVariableGenerator(Collection<Label> usedLabels, Collection<Variable> usedWorkVariables){
         // calculate the initial label counter as one more than the largest NumericLabel number present
         int maxLabelNum = usedLabels.stream()
                 .filter(l -> l instanceof NumericLabel)

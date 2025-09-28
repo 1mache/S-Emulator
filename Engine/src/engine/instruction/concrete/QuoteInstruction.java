@@ -1,7 +1,6 @@
 package engine.instruction.concrete;
 
 import engine.execution.ProgramRunner;
-import engine.expansion.ProgramExpander;
 import engine.expansion.SymbolRegistry;
 import engine.function.FunctionReference;
 import engine.function.parameter.FunctionParam;
@@ -19,16 +18,11 @@ import engine.label.NumericLabel;
 import engine.numeric.constant.NumericConstant;
 import engine.program.Program;
 import engine.program.StandardProgram;
-import engine.program.generator.LabelVariableGenerator;
-import engine.resolver.ResolutionContext;
 import engine.resolver.SymbolResolver;
 import engine.variable.Variable;
-import engine.variable.VariableType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -62,6 +56,8 @@ import java.util.stream.Stream;
                             map(param -> param.eval(context))
                             .toList()
             );
+            runner.run();
+            // set the variable to the result of the run
             context.setVariableValue(getVariable(), runner.getRunOutput());
             lastExecutionCycles = runner.getCycles();
             return FixedLabel.EMPTY;
@@ -101,78 +97,55 @@ import java.util.stream.Stream;
             final Label emptyLabel = FixedLabel.EMPTY; // just to not type it :)
 
             SymbolRegistry usedSymbols = new SymbolRegistry();
-            List<Variable> usedWorkVariables = new ArrayList<>();
             // add all the used labels and variables to the usedSymbols registry
-            Instructions.extractVariables(this).stream()
-                    .filter(variable -> variable.getType() == VariableType.WORK)
-                    .forEach(variable -> {
-                        usedSymbols.registerVariable(variable);
-                        usedWorkVariables.add(variable);
-                    });
+            Instructions.extractWorkVariables(List.of(this)).forEach(usedSymbols::registerVariable);
+            usedSymbols.registerLabel(this.getLabel());
 
             List<Instruction> instructions = new ArrayList<>();
             // first instruction is a NOOP with a label of this instruction
             instructions.add(new NeutralInstruction(Variable.RESULT, getLabel()));
 
-            if(getVariable().getType() == VariableType.WORK) usedWorkVariables.add(getVariable());
-
+            // work variables to substitute input variables IN ORDER
+            List<Variable> inputSubstitutions = new ArrayList<>();
             // z_i <- x_i for all inputs x_i of the quoted function
-            Map<Variable,Variable> inputSubstitutions = new HashMap<>();
-            List<Variable> usedInputVariables = Instructions.extractInputVariables(quotedFunc.getInstructions());
             for (int i = 0; i < functionParams.params().size(); i++) {
                 // param that "x_i" of the function gets
                 var paramXi = functionParams.params().get(i);
 
                 Variable zi = Variable.createWorkVariable(avaliableWorkVarNumber++);
 
-                instructions.add(getAssignmentForParam(zi, emptyLabel ,paramXi));
+                instructions.add(getAssignmentInstructionForParam(zi, emptyLabel ,paramXi));
 
-                var xi = usedInputVariables.get(i);
-                inputSubstitutions.put(xi, zi);
-                usedSymbols.registerVariable(xi);
-                usedSymbols.registerVariable(zi);
-                usedWorkVariables.add(zi);
+                inputSubstitutions.add(zi);
             }
             // result variable substitution
-            Variable zy = Variable.createWorkVariable(avaliableWorkVarNumber++);
-            usedSymbols.registerVariable(zy);
-            usedWorkVariables.add(zy);
+            Variable resultSubstitution = Variable.createWorkVariable(avaliableWorkVarNumber++);
             // EXIT label substitution
             Label exitSubstitution = new NumericLabel(avaliableLabelNumber++);
-            usedSymbols.registerLabel(exitSubstitution);
-
-            var usedLabels = Instructions.extractUsedLabels(this);
-            usedLabels.add(exitSubstitution);
-
-            ResolutionContext resolutionContext = new ResolutionContext(
-                usedSymbols,
-                new SymbolRegistry(), // nothing is ignored
-                new LabelVariableGenerator(
-                        usedLabels,
-                        usedWorkVariables
-                )
-            );
 
             instructions.addAll(
-                    new SymbolResolver(resolutionContext).resolveFunctionSymbolsCollisions(
-                            quotedFunc.getInstructions(),
-                            exitSubstitution,
-                            zy,
-                            inputSubstitutions
-                    )
+                    SymbolResolver.forFunctionExpansion(
+                            quotedFunc,
+                            usedSymbols,
+                            inputSubstitutions,
+                            resultSubstitution,
+                            exitSubstitution
+                    ).resolveSymbolsCollisions(quotedFunc.getInstructions())
             );
 
             // z_y <- result of the quoted function
-            instructions.add(new AssignmentInstruction(getVariable(), exitSubstitution, zy));
+            instructions.add(new AssignmentInstruction(getVariable(), exitSubstitution, resultSubstitution));
 
             return new StandardProgram(getName() + "_EXP",instructions);
         }
 
-        private Instruction getAssignmentForParam(Variable into, Label label, FunctionParam param) {
+        private Instruction getAssignmentInstructionForParam(Variable into, Label label, FunctionParam param) {
             if(param instanceof Variable v)
                 return new AssignmentInstruction(into, label, v);
             else if (param instanceof NumericConstant c)
                 return new ConstantAssignmentInstruction(into, label, c);
+
+            // TODO: Quote for composition
 
             throw new IllegalArgumentException("Unknown param type");
         }

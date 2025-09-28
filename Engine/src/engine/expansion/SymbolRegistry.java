@@ -26,6 +26,14 @@ public class SymbolRegistry {
         usedVariables.forEach(this::registerVariable);
     }
 
+    public Set<Label> getLabelsUsed() {
+        return labelsUsed;
+    }
+
+    public Set<Variable> getVariablesUsed() {
+        return variablesUsed;
+    }
+
     public void registerLabel(Label label) {
         if(label == FixedLabel.EMPTY)
             return;

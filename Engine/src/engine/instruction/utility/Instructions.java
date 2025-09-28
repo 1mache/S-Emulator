@@ -11,6 +11,7 @@ import engine.variable.VariableType;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Instructions {
 
@@ -19,23 +20,7 @@ public class Instructions {
         if(instruction.getVariable() != Variable.NO_VAR)
             variables.add(instruction.getVariable());
 
-        var instructionArguments = instruction.getArguments();
-        variables.addAll(
-                instructionArguments.stream()
-                        .filter(arg -> arg.getArgumentType() == InstructionArgumentType.VARIABLE)
-                        .map(arg -> (Variable) arg)
-                        .toList()
-        );
-
-        // if the Instruction quotes a function go through the arguments and extract the variable ones
-        variables.addAll(
-                instructionArguments.stream()
-                        .filter(arg -> arg.getArgumentType() == InstructionArgumentType.FUNC_PARAM_LIST)
-                        .flatMap(arg -> ((FunctionParamList) arg).params().stream())
-                        .filter(param -> param instanceof Variable)
-                        .map(param -> (Variable) param)
-                        .toList()
-        );
+        variables.addAll(extractVariablesFromArguments(List.of(instruction), VariableType.NONE));
 
         return variables.stream().toList();
     }
@@ -99,26 +84,7 @@ public class Instructions {
                         .filter(var -> var.getType() == variableType)
                         .collect(Collectors.toSet());
 
-        // collect all input variables that are arguments in the instructions
-        Set<Variable> argumentVars =
-                instructions.stream()
-                        .flatMap(instr -> instr.getArguments().stream())
-                        .filter(arg -> arg.getArgumentType() == InstructionArgumentType.VARIABLE)
-                        .map(arg -> (Variable) arg)
-                        .filter(var -> var.getType() == variableType)
-                        .collect(Collectors.toSet());
-
-        // if the Instruction quotes a function go through the arguments and extract the variable ones
-        argumentVars.addAll(
-                instructions.stream()
-                        .flatMap(instr -> instr.getArguments().stream())
-                        .filter(arg -> arg.getArgumentType() == InstructionArgumentType.FUNC_PARAM_LIST)
-                        .flatMap(arg -> ((FunctionParamList) arg).params().stream())
-                        .filter(param -> param instanceof Variable)
-                        .map(param -> (Variable) param)
-                        .filter(var -> var.getType() == variableType)
-                        .toList()
-        );
+        var argumentVars = extractVariablesFromArguments(instructions, variableType);
 
         // unite the two sets
         Set<Variable> allInputs = new HashSet<>(operatedVars);
@@ -128,5 +94,28 @@ public class Instructions {
         return allInputs.stream()
                 .sorted(Comparator.comparingInt(Variable::getNumber))
                 .toList();
+    }
+
+    private static Set<Variable> extractVariablesFromArguments(List<Instruction> instructions, VariableType variableType) {
+        return Stream.concat(
+                        // variables directly from instruction arguments
+                        instructions.stream()
+                                .flatMap(instr -> instr.getArguments().stream())
+                                .filter(arg -> arg.getArgumentType() == InstructionArgumentType.VARIABLE)
+                                .map(arg -> (Variable) arg),
+
+                        // variables inside function param lists of instruction arguments (if exists)
+                        instructions.stream()
+                                .flatMap(instr -> instr.getArguments().stream())
+                                .filter(arg -> arg.getArgumentType() == InstructionArgumentType.FUNC_PARAM_LIST)
+                                .flatMap(arg -> ((FunctionParamList) arg).params().stream())
+                                .filter(param -> param instanceof Variable)
+                                .map(param -> (Variable) param)
+
+                        // TODO: composition params here later
+                )
+                // if NONE type was passed return everything
+                .filter(var -> (variableType == VariableType.NONE) || (var.getType() == variableType))
+                .collect(Collectors.toSet());
     }
 }
