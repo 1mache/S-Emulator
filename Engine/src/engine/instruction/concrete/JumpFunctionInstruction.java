@@ -3,13 +3,14 @@ package engine.instruction.concrete;
 import engine.execution.ProgramRunner;
 import engine.execution.context.RunContext;
 import engine.function.Function;
-import engine.function.FunctionReference;
+import engine.function.FunctionCall;
 import engine.function.parameter.FunctionParamList;
 import engine.instruction.AbstractJumpInstruction;
 import engine.instruction.InstructionData;
 import engine.instruction.argument.InstructionArgument;
 import engine.label.FixedLabel;
 import engine.label.Label;
+import engine.loader.exception.SProgramXMLException;
 import engine.program.Program;
 import engine.program.StandardProgram;
 import engine.variable.Variable;
@@ -19,19 +20,20 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JumpFunctionInstruction extends AbstractJumpInstruction {
-    private final FunctionReference quotedFuncReference;
-    private final FunctionParamList functionParams;
+    private final FunctionCall quotedFuncReference;
 
     private long lastExecutionCycles;
 
     public JumpFunctionInstruction(Variable variable,
                                    Label label,
                                    Label tagetLabel,
-                                   FunctionReference quotedFuncReference,
-                                   FunctionParamList functionParams) {
+                                   FunctionCall quotedFuncReference,
+                                   FunctionParamList paramList) {
         super(InstructionData.JUMP_EQUAL_FUNCTION, variable, label, tagetLabel);
+        if(paramList == null)
+            throw new SProgramXMLException("No param list provided for " + quotedFuncReference.getReferralName());
         this.quotedFuncReference = quotedFuncReference;
-        this.functionParams = functionParams;
+        quotedFuncReference.setParamList(paramList);
     }
 
     @Override
@@ -39,7 +41,7 @@ public class JumpFunctionInstruction extends AbstractJumpInstruction {
         Function quotedFunc = quotedFuncReference.getFunction();
         var runner = new ProgramRunner(quotedFunc);
         runner.initInputVariablesSpecific(
-                functionParams.params().stream().
+                quotedFuncReference.getParamList().params().stream().
                         map(param -> param.eval(context))
                         .toList()
         );
@@ -57,6 +59,7 @@ public class JumpFunctionInstruction extends AbstractJumpInstruction {
     public String stringRepresentation() {
         Function quotedFunc = quotedFuncReference.getFunction();
         StringBuilder sb = new StringBuilder();
+        var functionParams = quotedFuncReference.getParamList();
 
         sb.append("IF ").append(getVariable().stringRepresentation()).append(" = ");
 
@@ -77,7 +80,7 @@ public class JumpFunctionInstruction extends AbstractJumpInstruction {
 
     @Override
     public List<InstructionArgument> getArguments() {
-        return List.of(getTargetLabel(), quotedFuncReference, functionParams);
+        return List.of(getTargetLabel(), quotedFuncReference);
     }
 
     @Override
@@ -88,7 +91,7 @@ public class JumpFunctionInstruction extends AbstractJumpInstruction {
         return new StandardProgram(
                 getName() + "_EXP",
                 List.of(
-                        new QuoteInstruction(z1, getLabel(), quotedFuncReference, functionParams),
+                        new QuoteInstruction(z1, getLabel(), quotedFuncReference, quotedFuncReference.getParamList()),
                         new JumpVariableInstruction(getVariable(), FixedLabel.EMPTY, getTargetLabel(), z1)
                 )
         );

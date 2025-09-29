@@ -2,7 +2,7 @@ package engine.instruction.concrete;
 
 import engine.execution.ProgramRunner;
 import engine.expansion.SymbolRegistry;
-import engine.function.FunctionReference;
+import engine.function.FunctionCall;
 import engine.function.parameter.FunctionParam;
 import engine.function.parameter.FunctionParamList;
 import engine.instruction.Instruction;
@@ -15,6 +15,7 @@ import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.function.Function;
 import engine.label.NumericLabel;
+import engine.loader.exception.SProgramXMLException;
 import engine.numeric.constant.NumericConstant;
 import engine.program.Program;
 import engine.program.StandardProgram;
@@ -27,18 +28,20 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
     public class QuoteInstruction extends AbstractInstruction {
-        private final FunctionReference quotedFuncReference;
-        private final FunctionParamList functionParams;
+        private final FunctionCall quotedFuncReference;
 
         private long lastExecutionCycles = 0;
 
         public QuoteInstruction(Variable variable,
                                 Label label,
-                                FunctionReference quotedFuncReference,
-                                FunctionParamList functionParams) {
+                                FunctionCall quotedFuncReference,
+                                FunctionParamList paramList) {
             super(InstructionData.QUOTE, variable, label);
+            if(paramList == null)
+                throw new SProgramXMLException("No param list provided for " + quotedFuncReference.getReferralName());
+
             this.quotedFuncReference = quotedFuncReference;
-            this.functionParams = functionParams;
+            quotedFuncReference.setParamList(paramList);
         }
 
         @Override
@@ -52,7 +55,7 @@ import java.util.stream.Stream;
             Function quotedFunc = quotedFuncReference.getFunction();
             var runner = new ProgramRunner(quotedFunc);
             runner.initInputVariablesSpecific(
-                    functionParams.params().stream().
+                    quotedFuncReference.getParamList().params().stream().
                             map(param -> param.eval(context))
                             .toList()
             );
@@ -71,13 +74,13 @@ import java.util.stream.Stream;
             sb.append(" <- ");
 
             var funcUserString = quotedFunc.getUserString();
-            if(functionParams.params().isEmpty()){
+            if(quotedFuncReference.getParamList().params().isEmpty()){
                 sb.append(String.format("(%s)", funcUserString));
             }
             else {
                 sb.append(
-                        Stream.of(funcUserString, functionParams.stringRepresentation())
-                        .collect(Collectors.joining(", ", "(", ")"))
+                        Stream.of(funcUserString, quotedFuncReference.getParamList().stringRepresentation())
+                        .collect(Collectors.joining(",", "(", ")"))
                 );
             }
 
@@ -86,7 +89,7 @@ import java.util.stream.Stream;
 
         @Override
         public List<InstructionArgument> getArguments() {
-            return List.of(quotedFuncReference, functionParams);
+            return List.of(quotedFuncReference, quotedFuncReference.getParamList());
         }
 
         @Override
@@ -108,9 +111,9 @@ import java.util.stream.Stream;
             // work variables to substitute input variables IN ORDER
             List<Variable> inputSubstitutions = new ArrayList<>();
             // z_i <- x_i for all inputs x_i of the quoted function
-            for (int i = 0; i < functionParams.params().size(); i++) {
+            for (int i = 0; i < quotedFuncReference.getParamList().params().size(); i++) {
                 // param that "x_i" of the function gets
-                var paramXi = functionParams.params().get(i);
+                var paramXi = quotedFuncReference.getParamList().params().get(i);
 
                 Variable zi = Variable.createWorkVariable(avaliableWorkVarNumber++);
 

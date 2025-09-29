@@ -1,6 +1,6 @@
 package engine.loader;
 
-import engine.function.FunctionReference;
+import engine.function.FunctionCall;
 import engine.function.parameter.FunctionParam;
 import engine.function.parameter.FunctionParamList;
 import engine.instruction.argument.InstructionArgument;
@@ -59,7 +59,7 @@ public class JaxbTranslator {
     private final Map<String,Function> name2Function = new HashMap<>();
 
     // keeps references for functions by name until we processed them
-    private final Set<FunctionReference> toBeResolved = new HashSet<>();
+    private final Set<FunctionCall> toBeResolved = new HashSet<>();
 
     public Program getProgram(SProgram sProgram, LoadingListener listener) {
         List<SInstruction> sInstructions = sProgram.getSInstructions().getSInstruction();
@@ -83,8 +83,8 @@ public class JaxbTranslator {
 
         // resolve all the function references, because now we processed all of them
         toBeResolved.forEach(
-                functionReference -> functionReference.resolveFunction(
-                        name2Function.get(functionReference.getReferralName())
+                functionCall -> functionCall.resolveFunction(
+                        name2Function.get(functionCall.getReferralName())
                 )
         );
         // Note: some of them may be null here, this will be checked in the validation process
@@ -96,7 +96,7 @@ public class JaxbTranslator {
         return new StandardProgram(sProgram.getName(), instructions);
     }
 
-    public Set<FunctionReference> getFunctionReferences() {
+    public Set<FunctionCall> getFunctionReferences() {
         return toBeResolved;
     }
 
@@ -228,9 +228,9 @@ public class JaxbTranslator {
                     break;
 
                 case FUNCTION_REF:
-                    FunctionReference functionRef = new FunctionReference(argument.getValue());
-                    toBeResolved.add(functionRef);
-                    res.add(functionRef);
+                    FunctionCall functionCall = new FunctionCall(argument.getValue());
+                    toBeResolved.add(functionCall);
+                    res.add(functionCall);
                     break;
 
                 case FUNC_PARAM_LIST:
