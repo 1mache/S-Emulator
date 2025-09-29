@@ -1,6 +1,8 @@
 package engine.instruction.utility;
 
+import engine.function.FunctionCall;
 import engine.function.parameter.FunctionParamList;
+import engine.instruction.argument.InstructionArgument;
 import engine.instruction.argument.InstructionArgumentType;
 import engine.instruction.Instruction;
 import engine.loader.ArgumentLabelInfo;
@@ -97,25 +99,35 @@ public class Instructions {
     }
 
     private static Set<Variable> extractVariablesFromArguments(List<Instruction> instructions, VariableType variableType) {
-        return Stream.concat(
-                        // variables directly from instruction arguments
-                        instructions.stream()
-                                .flatMap(instr -> instr.getArguments().stream())
-                                .filter(arg -> arg.getArgumentType() == InstructionArgumentType.VARIABLE)
-                                .map(arg -> (Variable) arg),
-
-                        // variables inside function param lists of instruction arguments (if exists)
-                        instructions.stream()
-                                .flatMap(instr -> instr.getArguments().stream())
-                                .filter(arg -> arg.getArgumentType() == InstructionArgumentType.FUNC_PARAM_LIST)
-                                .flatMap(arg -> ((FunctionParamList) arg).params().stream())
-                                .filter(param -> param instanceof Variable)
-                                .map(param -> (Variable) param)
-
-                        // TODO: composition params here later
-                )
-                // if NONE type was passed return everything
-                .filter(var -> (variableType == VariableType.NONE) || (var.getType() == variableType))
+        return instructions.stream()
+                .flatMap(instr -> instr.getArguments().stream())
+                .flatMap(arg -> extractVariablesRecursive(arg, variableType))
                 .collect(Collectors.toSet());
+    }
+
+    private static Stream<Variable> extractVariablesRecursive(InstructionArgument arg, VariableType variableType) {
+        switch (arg.getArgumentType()) {
+            case VARIABLE:
+                Variable v = (Variable) arg;
+                if (variableType == VariableType.NONE || v.getType() == variableType) {
+                    return Stream.of(v);
+                } else {
+                    return Stream.empty();
+                }
+            case FUNC_PARAM_LIST:
+                // Recursively extract from param list
+                return ((FunctionParamList) arg).params().stream()
+                        .filter(param -> param instanceof InstructionArgument)
+                        .map(param -> (InstructionArgument)param)
+                        .flatMap(param -> extractVariablesRecursive(param, variableType));
+            case FUNCTION_REF:
+                // Recursively extract from function call arguments
+                return ((FunctionCall) arg).getParamList().params().stream()
+                        .filter(param -> param instanceof InstructionArgument)
+                        .map(param -> (InstructionArgument)param)
+                        .flatMap(param -> extractVariablesRecursive(param, variableType));
+            default:
+                return Stream.empty();
+        }
     }
 }

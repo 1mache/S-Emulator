@@ -2,6 +2,7 @@ package engine.resolver;
 
 import engine.expansion.SymbolRegistry;
 import engine.function.Function;
+import engine.function.FunctionCall;
 import engine.function.parameter.FunctionParamList;
 import engine.instruction.Instruction;
 import engine.instruction.InstructionFactory;
@@ -82,6 +83,9 @@ public class SymbolResolver {
         variableMappings.put(Variable.RESULT, resultSubstitution);
         Map<Label, Label> labelMappings = new HashMap<>();
         labelMappings.put(FixedLabel.EXIT, exitSubstitution);
+
+        if(quotedFunc.getUserString().equals("<="))
+            System.out.println("STAWWP");
 
         var quotedFuncInputs = quotedFunc.getInputVariables();
 
@@ -188,7 +192,12 @@ public class SymbolResolver {
                                 switch (argument.getArgumentType()){
                                     case VARIABLE -> replaceVariable((Variable) argument, variableResolutionMap);
                                     case LABEL -> labelResolutionMap.getOrDefault((Label) argument, (Label) argument);
-                                    case CONSTANT, FUNCTION_REF -> argument;
+                                    case CONSTANT -> argument;
+                                    case FUNCTION_REF -> {
+                                        FunctionCall funcCall = (FunctionCall) argument;
+                                        FunctionParamList replacedParamList = replaceParams(funcCall.getParamList(), variableResolutionMap);
+                                        yield new FunctionCall(funcCall.getFunction(), funcCall.getReferralName(), replacedParamList);
+                                    }
                                     case FUNC_PARAM_LIST -> replaceParams((FunctionParamList) argument, variableResolutionMap);
                                 }
                         )
@@ -204,11 +213,16 @@ public class SymbolResolver {
         return new FunctionParamList(list.params().stream()
                 .map(
                         param -> {
-                            if(param instanceof NumericConstant)
+                            if (param instanceof NumericConstant)
                                 return param;
-                            else if(param instanceof Variable v)
+                            else if (param instanceof Variable v)
                                 return replaceVariable(v, variableResolutionMap);
-                            throw new IllegalArgumentException("Unknown param type while replacing symbols");
+                            else if (param instanceof FunctionCall funcCall) {
+                                // recursively replace params inside the FunctionCall, and create a new FunctionCall with replaced params
+                                FunctionParamList replacedParamList = replaceParams(funcCall.getParamList(), variableResolutionMap);
+                                return new FunctionCall(funcCall.getFunction(), funcCall.getReferralName(), replacedParamList);
+                            }
+                            throw new IllegalArgumentException("Unknown param type while replacing symbols.");
                         }
                 )
                 .toList());

@@ -175,12 +175,12 @@ public class JaxbTranslator {
         return new NumericLabel(numberPart);
     }
 
-    private FunctionParamList parseParamsString(String value) {
-        if (value == null || value.isEmpty()) {
+    private FunctionParamList parseParamsString(String paramsString) {
+        if (paramsString == null || paramsString.isEmpty()) {
             return new FunctionParamList(List.of());
         }
 
-        String[] parts = value.split(",");
+        List<String> parts = splitTopLevelParams(paramsString);
 
         List<FunctionParam> params = new ArrayList<>();
 
@@ -188,17 +188,64 @@ public class JaxbTranslator {
             if (part.isEmpty()) continue;
 
             try {
-                // Try parsing as number
+                // try parsing as number
                 Long number = Long.parseLong(part);
                 params.add(new NumericConstant(number));
             } catch (NumberFormatException e) {
-                // Not a number, treat as variable name
-                params.add(str2Variable(part));
+                if(part.startsWith("("))
+                    params.add(parseCompositionCall(part));
+                else
+                    params.add(str2Variable(part));
             }
         }
 
         return new FunctionParamList(params);
     }
+
+    private List<String> splitTopLevelParams(String input) {
+        List<String> params = new ArrayList<>();
+        int depth = 0, last = 0;
+        for(int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if(c == '(') depth++;
+            else if(c == ')') depth--;
+            else if(c == ',' && depth == 0) {
+                params.add(input.substring(last, i).trim());  // Only split at depth 0
+                last = i + 1;
+            }
+        }
+        params.add(input.substring(last).trim());
+        return params;
+    }
+
+    private FunctionCall parseCompositionCall(String callString) {
+        if (callString == null || !callString.startsWith("(") || !callString.endsWith(")")) {
+            throw new IllegalArgumentException("Invalid call string: " + callString + " while parsing composition call");
+        }
+
+        // remove parentheses
+        String innerString = callString.substring(1, callString.length() - 1);
+
+        // split on first comma if any
+        int firstComma = innerString.indexOf(',');
+        String referralName;
+        FunctionParamList paramList;
+
+        if (firstComma == -1) {
+            // only referralName, no params
+            referralName = innerString;
+            paramList = new FunctionParamList(List.of());
+        } else {
+            referralName = innerString.substring(0, firstComma);
+            String paramsString = innerString.substring(firstComma + 1);
+            paramList = parseParamsString(paramsString);
+        }
+
+        var functionCall = new FunctionCall(referralName, paramList);
+        toBeResolved.add(functionCall);
+        return functionCall;
+    }
+
 
     private List<InstructionArgument> getArguments(SInstruction sInstruction) {
         List<InstructionArgument> res = new ArrayList<>();
