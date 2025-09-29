@@ -151,6 +151,10 @@ public class ExecutionTabController implements Initializable {
 
     @FXML
     public void onNewRunAction(ActionEvent event){
+        if(debugStateMachine.getCurrentState() == DebugState.ON_INSTRUCTION){
+            stopDebugAction(event);
+        }
+
         // enable inputs
         disableInputs(false);
         // clear variable table
