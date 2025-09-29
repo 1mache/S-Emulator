@@ -2,7 +2,6 @@ package engine.expansion;
 
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.Program;
 import engine.variable.Variable;
 
 import java.util.Collection;

@@ -9,7 +9,6 @@ import engine.instruction.InstructionFactory;
 import engine.instruction.utility.Instructions;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.label.NumericLabel;
 import engine.numeric.constant.NumericConstant;
 import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
