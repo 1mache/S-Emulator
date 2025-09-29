@@ -84,9 +84,6 @@ public class SymbolResolver {
         Map<Label, Label> labelMappings = new HashMap<>();
         labelMappings.put(FixedLabel.EXIT, exitSubstitution);
 
-        if(quotedFunc.getUserString().equals("<="))
-            System.out.println("STAWWP");
-
         var quotedFuncInputs = quotedFunc.getInputVariables();
 
         // map inputs to substitutions
