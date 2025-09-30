@@ -1,7 +1,7 @@
 package console.menu.option;
 
 import engine.api.SLanguageEngine;
-import engine.api.dto.ExecutionResult;
+import engine.api.dto.ProgramExecutionResult;
 import engine.execution.exception.SProgramNotLoadedException;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public class ShowHistoryOption extends MenuPage {
     @Override
     public void execute(SLanguageEngine engine) {
         try {
-            List<ExecutionResult> history = engine.getExecutionHistory();
+            List<ProgramExecutionResult> history = engine.getExecutionHistory();
             if(history.isEmpty()){
                 System.out.println("No executions found for " + engine.getProgramPeek().name() + " yet.");
             }

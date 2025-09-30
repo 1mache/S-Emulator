@@ -1,5 +1,6 @@
 package engine.instruction;
 
+import engine.execution.InstructionExecutionResult;
 import engine.instruction.argument.InstructionArgument;
 import engine.execution.context.RunContext;
 import engine.label.Label;
@@ -18,7 +19,7 @@ public interface Instruction {
      * @return the {@link Label} to which execution should jump next,
      *         or empty label if there shouldn't be a jump
      */
-    Label execute(RunContext context);
+    InstructionExecutionResult execute(RunContext context);
 
     /**
      * Returns the name of this instruction.
@@ -46,8 +47,9 @@ public interface Instruction {
      * Returns the number of cycles this instruction requires for execution.
      *
      * @return the cycle cost of executing this instruction
+     * (Note: for quote this is the cycles without the quoted function cost)
      */
-    long cycles();
+    long staticCycles();
 
     /**
      * Returns the main variable associated with this instruction,

@@ -1,7 +1,7 @@
 package engine.api;
 
 import engine.api.dto.debug.DebugHandle;
-import engine.api.dto.ExecutionResult;
+import engine.api.dto.ProgramExecutionResult;
 import engine.api.dto.ProgramPeek;
 import engine.debugger.ProgramDebugger;
 import engine.execution.ProgramRunner;
@@ -22,7 +22,7 @@ import java.util.List;
 public class SLanguageEngine {
     private Program program;
     private ProgramExpander programExpander;
-    private List<ExecutionResult> previousExecutions;
+    private List<ProgramExecutionResult> previousExecutions;
 
     private SLanguageEngine(){}
     // Singleton
@@ -67,7 +67,7 @@ public class SLanguageEngine {
         return new ProgramViewer(program).getProgramPeek(expansionDegree, programExpander);
     }
 
-    public ExecutionResult runProgram(List<Long> inputs, int expansionDegree, boolean specificInputs) {
+    public ProgramExecutionResult runProgram(List<Long> inputs, int expansionDegree, boolean specificInputs) {
         validateInputs(inputs);
 
         var expandedProgram = createExpandedProgram(expansionDegree);
@@ -77,7 +77,7 @@ public class SLanguageEngine {
 
         runner.run();
 
-        var executionResult = new ExecutionResult(
+        var executionResult = new ProgramExecutionResult(
                 runner.getRunOutput(),
                 runner.getAllVariableValues(),
                 inputs,
@@ -99,7 +99,7 @@ public class SLanguageEngine {
         return new DebugHandle(debugger);
     }
 
-    public List<ExecutionResult> getExecutionHistory(){
+    public List<ProgramExecutionResult> getExecutionHistory(){
         if(programNotLoaded())
             throw new SProgramNotLoadedException("Program is not loaded");
 

@@ -125,10 +125,13 @@ public class ProgramRunner {
         Optional<Instruction> optionalInstruction = Optional.ofNullable(instruction);
 
         var jumpLabel = optionalInstruction
-                .map(ins -> ins.execute(runContext))
+                .map(ins -> {
+                    InstructionExecutionResult result = ins.execute(runContext);
+                    cycles += result.cycles(); // add cycles cost
+                    return result.jumpTo();
+                })
                 .orElse(FixedLabel.EMPTY);
 
-        optionalInstruction.ifPresent(i -> cycles += i.cycles());
 
         if(jumpLabel == FixedLabel.EXIT) {
             // the end, will not crash if we call getInstructionByIndex with this pc.

@@ -3,7 +3,7 @@ package gui.component.execution;
 import engine.api.SLanguageEngine;
 import engine.api.dto.debug.DebugEndResult;
 import engine.api.dto.debug.DebugHandle;
-import engine.api.dto.ExecutionResult;
+import engine.api.dto.ProgramExecutionResult;
 import engine.api.dto.debug.DebugStepPeek;
 import gui.component.execution.event.DebugStateChange;
 import gui.component.execution.event.DebugStopOnLine;
@@ -118,7 +118,7 @@ public class ExecutionTabController implements Initializable {
 
         disableInputs(true);
 
-        ExecutionResult result;
+        ProgramExecutionResult result;
         if(runMode == RunMode.EXECUTION){
             result = engine.runProgram(
                     getInputsFromTextFields(),

@@ -1,5 +1,6 @@
 package engine.instruction.concrete;
 
+import engine.execution.InstructionExecutionResult;
 import engine.instruction.argument.InstructionArgument;
 import engine.execution.context.RunContext;
 import engine.instruction.AbstractInstruction;
@@ -20,8 +21,8 @@ public class NeutralInstruction extends AbstractInstruction {
     }
 
     @Override
-    public Label execute(RunContext context){
-        return FixedLabel.EMPTY;
+    public InstructionExecutionResult execute(RunContext context){
+        return new InstructionExecutionResult(FixedLabel.EMPTY, staticCycles());
     }
 
     @Override

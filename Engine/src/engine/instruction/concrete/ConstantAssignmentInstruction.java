@@ -1,5 +1,6 @@
 package engine.instruction.concrete;
 
+import engine.execution.InstructionExecutionResult;
 import engine.instruction.argument.InstructionArgument;
 import engine.numeric.constant.NumericConstant;
 import engine.execution.context.RunContext;
@@ -28,9 +29,9 @@ public class ConstantAssignmentInstruction extends AbstractInstruction {
     }
 
     @Override
-    public Label execute(RunContext context) {
+    public InstructionExecutionResult execute(RunContext context) {
         context.setVariableValue(getVariable(), constant.value());
-        return FixedLabel.EMPTY;
+        return new InstructionExecutionResult(FixedLabel.EMPTY, staticCycles());
     }
 
     @Override

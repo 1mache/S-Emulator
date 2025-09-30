@@ -65,7 +65,7 @@ public class ProgramViewer {
                 instruction.stringRepresentation(),
                 instruction.getLabel().stringRepresentation(),
                 instruction.isSynthetic(),
-                instruction.cycles(),
+                instruction.staticCycles(),
                 expandedFrom,
                 lineId
         );

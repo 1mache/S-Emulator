@@ -1,5 +1,6 @@
 package engine.instruction.concrete;
 
+import engine.execution.InstructionExecutionResult;
 import engine.instruction.argument.InstructionArgument;
 import engine.execution.context.RunContext;
 import engine.instruction.AbstractInstruction;
@@ -26,9 +27,9 @@ public class AssignmentInstruction extends AbstractInstruction {
     }
 
     @Override
-    public Label execute(RunContext context) {
+    public InstructionExecutionResult execute(RunContext context) {
         context.setVariableValue(getVariable(), context.getVariableValue(assignedVariable));
-        return FixedLabel.EMPTY;
+        return new InstructionExecutionResult(FixedLabel.EMPTY, staticCycles());
     }
 
     @Override

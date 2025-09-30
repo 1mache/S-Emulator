@@ -1,5 +1,6 @@
 package engine.instruction;
 
+import engine.execution.InstructionExecutionResult;
 import engine.execution.context.RunContext;
 import engine.label.FixedLabel;
 import engine.label.Label;
@@ -18,17 +19,25 @@ public abstract class AbstractJumpInstruction extends AbstractInstruction {
         this.tagetLabel = tagetLabel;
     }
 
+
+    // sometimes calculating whether we jump or not is not something that's done in a constant number of cycles
+    public record IsJumpResult(boolean jumped, long cyclesCost){}
+
     /**
-     * @return condition on which we jump
+     * @return condition on which we jump + how many cycles does the calculation (execution) take
      */
-    protected abstract boolean isJump(RunContext context);
+    protected abstract IsJumpResult isJump(RunContext context);
 
     @Override
-    public Label execute(RunContext context) {
-        if(isJump(context))
-            return tagetLabel;
+    public InstructionExecutionResult execute(RunContext context) {
+        var isJumpResult = isJump(context);
+        Label resultLabel;
 
-        return FixedLabel.EMPTY;
+        if(isJumpResult.jumped)
+            resultLabel = tagetLabel;
+        else resultLabel = FixedLabel.EMPTY;
+
+        return new InstructionExecutionResult(resultLabel, isJumpResult.cyclesCost);
     }
 
     protected Label getTargetLabel(){

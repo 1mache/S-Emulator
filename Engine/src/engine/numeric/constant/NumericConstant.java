@@ -12,8 +12,8 @@ public record NumericConstant(Long value) implements InstructionArgument, Functi
     }
 
     @Override
-    public Long eval(RunContext context) {
-        return value;
+    public EvaluationResult eval(RunContext context) {
+        return new EvaluationResult(value, 0);
     }
 
     @Override

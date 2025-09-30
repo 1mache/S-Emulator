@@ -30,8 +30,11 @@ public class JumpConstantInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected boolean isJump(RunContext context) {
-        return context.getVariableValue(getVariable()).equals(constant.value());
+    protected IsJumpResult isJump(RunContext context) {
+        return new IsJumpResult(
+                context.getVariableValue(getVariable()).equals(constant.value()),
+                staticCycles()
+                );
     }
 
     @Override

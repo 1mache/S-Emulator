@@ -23,13 +23,8 @@ public class GotoLabelInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected boolean isJump(RunContext context) {
-        return true;
-    }
-
-    @Override
-    public Label execute(RunContext context) {
-        return getTargetLabel();
+    protected IsJumpResult isJump(RunContext context) {
+        return new IsJumpResult(true, staticCycles());
     }
 
     @Override

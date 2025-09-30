@@ -27,7 +27,7 @@ public abstract class AbstractInstruction implements Instruction {
     }
 
     @Override
-    public long cycles() {
+    public long staticCycles() {
         return data.getCycles();
     }
 

@@ -27,9 +27,11 @@ public class JumpVariableInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected boolean isJump(RunContext context) {
-        return context.getVariableValue(getVariable())
-                .equals(context.getVariableValue(otherVariable));
+    protected IsJumpResult isJump(RunContext context) {
+        return new IsJumpResult(
+                context.getVariableValue(getVariable()).equals(context.getVariableValue(otherVariable)),
+                staticCycles()
+        );
     }
 
     @Override

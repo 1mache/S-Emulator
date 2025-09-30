@@ -62,16 +62,22 @@ public class FunctionCall implements InstructionArgument, FunctionParam {
     }
 
     @Override
-    public Long eval(RunContext context) {
+    public EvaluationResult eval(RunContext context) {
         var runner = new ProgramRunner(function);
+        final long[] cycles = {0};
         runner.initInputVariablesSpecific(
-                paramList.params().stream().
-                        map(param -> param.eval(context))
+                paramList.params().stream()
+                        .map(param -> {
+                            EvaluationResult result = param.eval(context);
+                            cycles[0] += result.calculationCyclesCost();
+                            return result.value();
+                        })
                         .toList()
         );
         runner.run();
+        cycles[0] += runner.getCycles();
 
-        return runner.getRunOutput();
+        return new EvaluationResult(runner.getRunOutput(), cycles[0]);
     }
 
     @Override

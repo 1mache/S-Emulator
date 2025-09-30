@@ -78,7 +78,7 @@ public class Variable implements InstructionArgument, FunctionParam {
     }
 
     @Override
-    public Long eval(RunContext context) {
-        return context.getVariableValue(this);
+    public EvaluationResult eval(RunContext context) {
+        return new EvaluationResult(context.getVariableValue(this),0);
     }
 }

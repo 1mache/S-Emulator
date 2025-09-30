@@ -24,8 +24,8 @@ public class JumpZeroInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected boolean isJump(RunContext context) {
-        return context.getVariableValue(getVariable()) == 0;
+    protected IsJumpResult isJump(RunContext context) {
+        return new IsJumpResult(context.getVariableValue(getVariable()) == 0, staticCycles());
     }
 
     @Override

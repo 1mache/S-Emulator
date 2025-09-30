@@ -1,5 +1,6 @@
 package engine.instruction.concrete;
 
+import engine.execution.InstructionExecutionResult;
 import engine.instruction.argument.InstructionArgument;
 import engine.execution.context.RunContext;
 import engine.instruction.AbstractInstruction;
@@ -17,11 +18,11 @@ public class DecreaseInstruction extends AbstractInstruction {
     }
 
     @Override
-    public Label execute(RunContext context) {
+    public InstructionExecutionResult execute(RunContext context) {
         var curValue = context.getVariableValue(getVariable());
         if(curValue>0) // only decreases to a minimum of 0
             context.setVariableValue(getVariable(), curValue-1);
-        return FixedLabel.EMPTY;
+        return new InstructionExecutionResult(FixedLabel.EMPTY, staticCycles());
     }
 
     @Override

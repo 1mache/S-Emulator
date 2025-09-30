@@ -20,46 +20,35 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JumpFunctionInstruction extends AbstractJumpInstruction {
-    private final FunctionCall quotedFuncReference;
-
-    private long lastExecutionCycles;
+    private final FunctionCall quotedFunctionCall;
 
     public JumpFunctionInstruction(Variable variable,
                                    Label label,
                                    Label tagetLabel,
-                                   FunctionCall quotedFuncReference,
+                                   FunctionCall quotedFunctionCall,
                                    FunctionParamList paramList) {
         super(InstructionData.JUMP_EQUAL_FUNCTION, variable, label, tagetLabel);
         if(paramList == null)
-            throw new SProgramXMLException("No param list provided for " + quotedFuncReference.getReferralName());
-        this.quotedFuncReference = quotedFuncReference;
-        quotedFuncReference.setParamList(paramList);
+            throw new SProgramXMLException("No param list provided for " + quotedFunctionCall.getReferralName());
+        this.quotedFunctionCall = quotedFunctionCall;
+        quotedFunctionCall.setParamList(paramList);
     }
 
     @Override
-    protected boolean isJump(RunContext context) {
-        Function quotedFunc = quotedFuncReference.getFunction();
-        var runner = new ProgramRunner(quotedFunc);
-        runner.initInputVariablesSpecific(
-                quotedFuncReference.getParamList().params().stream().
-                        map(param -> param.eval(context))
-                        .toList()
+    protected IsJumpResult isJump(RunContext context) {
+        var evalResult = quotedFunctionCall.eval(context);
+
+        return new IsJumpResult(
+                context.getVariableValue(getVariable()).equals(evalResult.value()),
+                evalResult.calculationCyclesCost() + staticCycles()
         );
-        runner.run();
-        lastExecutionCycles = runner.getCycles();
-        return context.getVariableValue(getVariable()).equals(runner.getRunOutput());
-    }
-
-    @Override
-    public long cycles() {
-        return super.cycles() + lastExecutionCycles;
     }
 
     @Override
     public String stringRepresentation() {
-        Function quotedFunc = quotedFuncReference.getFunction();
+        Function quotedFunc = quotedFunctionCall.getFunction();
         StringBuilder sb = new StringBuilder();
-        var functionParams = quotedFuncReference.getParamList();
+        var functionParams = quotedFunctionCall.getParamList();
 
         sb.append("IF ").append(getVariable().stringRepresentation()).append(" = ");
 
@@ -80,7 +69,7 @@ public class JumpFunctionInstruction extends AbstractJumpInstruction {
 
     @Override
     public List<InstructionArgument> getArguments() {
-        return List.of(getTargetLabel(), quotedFuncReference);
+        return List.of(getTargetLabel(), quotedFunctionCall);
     }
 
     @Override
@@ -91,7 +80,7 @@ public class JumpFunctionInstruction extends AbstractJumpInstruction {
         return new StandardProgram(
                 getName() + "_EXP",
                 List.of(
-                        new QuoteInstruction(z1, getLabel(), quotedFuncReference, quotedFuncReference.getParamList()),
+                        new QuoteInstruction(z1, getLabel(), quotedFunctionCall, quotedFunctionCall.getParamList()),
                         new JumpVariableInstruction(getVariable(), FixedLabel.EMPTY, getTargetLabel(), z1)
                 )
         );

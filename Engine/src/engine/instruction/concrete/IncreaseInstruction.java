@@ -1,5 +1,6 @@
 package engine.instruction.concrete;
 
+import engine.execution.InstructionExecutionResult;
 import engine.instruction.argument.InstructionArgument;
 import engine.execution.context.RunContext;
 import engine.instruction.AbstractInstruction;
@@ -17,10 +18,10 @@ public class IncreaseInstruction extends AbstractInstruction {
     }
 
     @Override
-    public Label execute(RunContext context) {
+    public InstructionExecutionResult execute(RunContext context) {
         var curValue = context.getVariableValue(getVariable());
         context.setVariableValue(getVariable(), curValue+1);
-        return FixedLabel.EMPTY;
+        return new InstructionExecutionResult(FixedLabel.EMPTY, staticCycles());
     }
 
     @Override

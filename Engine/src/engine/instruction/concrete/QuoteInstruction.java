@@ -1,5 +1,7 @@
 package engine.instruction.concrete;
 
+import engine.execution.InstructionExecutionResult;
+import engine.execution.ProgramRunner;
 import engine.expansion.SymbolRegistry;
 import engine.function.FunctionCall;
 import engine.function.parameter.FunctionParam;
@@ -24,47 +26,43 @@ import java.util.ArrayList;
 import java.util.List;
 
     public class QuoteInstruction extends AbstractInstruction {
-        private final FunctionCall quotedFuncReference;
-
-        private long lastExecutionCycles = 0;
+        private final FunctionCall quotedFunctionCall;
 
         public QuoteInstruction(Variable variable,
                                 Label label,
-                                FunctionCall quotedFuncReference,
+                                FunctionCall quotedFunctionCall,
                                 FunctionParamList paramList) {
             super(InstructionData.QUOTE, variable, label);
             if(paramList == null)
-                throw new SProgramXMLException("No param list provided for " + quotedFuncReference.getReferralName());
+                throw new SProgramXMLException("No param list provided for " + quotedFunctionCall.getReferralName());
 
-            this.quotedFuncReference = quotedFuncReference;
-            quotedFuncReference.setParamList(paramList);
+            this.quotedFunctionCall = quotedFunctionCall;
+            quotedFunctionCall.setParamList(paramList);
         }
 
         @Override
-        public long cycles() {
-            // TODO: maybe return it from execute??
-            return super.cycles() + lastExecutionCycles /* however many cycles the quoted function took*/;
-        }
-
-        @Override
-        public Label execute(RunContext context) {
-            context.setVariableValue(getVariable(), quotedFuncReference.eval(context));
-            return FixedLabel.EMPTY;
+        public InstructionExecutionResult execute(RunContext context) {
+            var evalResult = quotedFunctionCall.eval(context);
+            context.setVariableValue(getVariable(), evalResult.value());
+            return new InstructionExecutionResult(
+                    FixedLabel.EMPTY,
+                    evalResult.calculationCyclesCost() + staticCycles()
+            );
         }
 
         @Override
         public String stringRepresentation() {
-            return getVariable().stringRepresentation() + " <- " + quotedFuncReference.stringRepresentation();
+            return getVariable().stringRepresentation() + " <- " + quotedFunctionCall.stringRepresentation();
         }
 
         @Override
         public List<InstructionArgument> getArguments() {
-            return List.of(quotedFuncReference, quotedFuncReference.getParamList());
+            return List.of(quotedFunctionCall, quotedFunctionCall.getParamList());
         }
 
         @Override
         protected Program getSyntheticExpansion() {
-            var quotedFunc = quotedFuncReference.getFunction();
+            var quotedFunc = quotedFunctionCall.getFunction();
             int avaliableWorkVarNumber = getAvaliableWorkVarNumber();
             int avaliableLabelNumber = getAvaliableLabelNumber();
             final Label emptyLabel = FixedLabel.EMPTY; // just to not type it :)
@@ -81,9 +79,9 @@ import java.util.List;
             // work variables to substitute input variables IN ORDER
             List<Variable> inputSubstitutions = new ArrayList<>();
             // z_i <- x_i for all inputs x_i of the quoted function
-            for (int i = 0; i < quotedFuncReference.getParamList().params().size(); i++) {
+            for (int i = 0; i < quotedFunctionCall.getParamList().params().size(); i++) {
                 // param that "x_i" of the function gets
-                var paramXi = quotedFuncReference.getParamList().params().get(i);
+                var paramXi = quotedFunctionCall.getParamList().params().get(i);
 
                 Variable zi = Variable.createWorkVariable(avaliableWorkVarNumber++);
 
