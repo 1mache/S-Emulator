@@ -33,7 +33,7 @@ public class DebugStateMachine {
             case NOT_IN_DEBUG -> newState == DebugState.RUNNING;
             case RUNNING -> newState == DebugState.ON_INSTRUCTION || newState == DebugState.END;
             case ON_INSTRUCTION -> newState == DebugState.RUNNING || newState == DebugState.END;
-            case END ->  newState == DebugState.NOT_IN_DEBUG;
+            case END ->  newState == DebugState.NOT_IN_DEBUG || newState == DebugState.RUNNING;
         };
     }
 

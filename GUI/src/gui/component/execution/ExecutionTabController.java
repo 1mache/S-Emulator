@@ -45,16 +45,13 @@ public class ExecutionTabController implements Initializable {
     private ChoiceBox<RunMode> modeChoiceBox;
 
     @FXML
-    private Button runProgramButton;
+    private Button mainActionButton;
 
     @FXML
     private Button stepOverButton;
 
     @FXML
     private Button stepBackButton;
-
-    @FXML
-    private Button stopDebugButton;
 
     @FXML
     private Button continueButton;
@@ -111,11 +108,11 @@ public class ExecutionTabController implements Initializable {
         this.engine = engine;
     }
 
-    @FXML
-    public void runButtonAction(ActionEvent event) {
+    public void runProgramAction() {
         validateInputs();
         if(!inputsValidProperty.get()) return;
 
+        resetCyclesTextField();
         disableInputs(true);
 
         ProgramExecutionResult result;
@@ -147,12 +144,29 @@ public class ExecutionTabController implements Initializable {
         }
     }
 
+    public void stopDebugAction() {
+        debugHandle.stopDebug();
+        debugStateMachine.transitionTo(DebugState.END);
+    }
+
     // --------------- debug api ------------------
+
+    @FXML
+    public void onMainAction(ActionEvent event){
+        DebugState state = debugStateMachine.getCurrentState();
+        if (state == DebugState.NOT_IN_DEBUG || state == DebugState.END) {
+            // run program or start debug
+            runProgramAction();
+        } else if (state == DebugState.RUNNING || state == DebugState.ON_INSTRUCTION) {
+            // stop debug
+            stopDebugAction();
+        }
+    }
 
     @FXML
     public void onNewRunAction(ActionEvent event){
         if(debugStateMachine.getCurrentState() == DebugState.ON_INSTRUCTION){
-            stopDebugAction(event);
+            stopDebugAction();
         }
 
         // enable inputs
@@ -161,7 +175,7 @@ public class ExecutionTabController implements Initializable {
         variableTableController.clear();
         // clear input text field
         inputFields.values().forEach(textField ->  textField.setText("0"));
-        cyclesLabel.setText("Cycles: " + 0);
+        resetCyclesTextField();
 
         debugStateMachine.transitionTo(DebugState.NOT_IN_DEBUG);
     }
@@ -185,12 +199,6 @@ public class ExecutionTabController implements Initializable {
     public void stepBackAction(ActionEvent event) {
         // if debug finished this button will not be active so no check needed
         System.out.println("I am stepping back");
-    }
-
-    @FXML
-    public void stopDebugAction(ActionEvent event) {
-        debugHandle.stopDebug();
-        debugStateMachine.transitionTo(DebugState.END);
     }
 
     @FXML
@@ -299,13 +307,17 @@ public class ExecutionTabController implements Initializable {
 
     private void initDebugRelated() {
         // define debug controls
-        debugControls = List.of(stepOverButton, stepBackButton, stopDebugButton, continueButton);
+        debugControls = List.of(stepOverButton, stepBackButton, continueButton);
 
         // when debug finishes:
         debugStateMachine.addListener(
                 newValue ->
                         onDebugStateChange(newValue.getSource())
         );
+    }
+
+    private void resetCyclesTextField() {
+        cyclesLabel.setText("Cycles: " + 0);
     }
 
     private void setDebugControlsDisabled(boolean disabled) {
@@ -354,18 +366,20 @@ public class ExecutionTabController implements Initializable {
     }
 
     private void onDebugStateChange(DebugState newValue) {
+        String RUN_PROGRAM_BUTTON_TEXT = "Start Run";
+        String STOP_DEBUG_BUTTON_TEXT = "Stop Debug";
+
         switch (newValue) {
-            case NOT_IN_DEBUG-> {
-                runProgramButton.setDisable(false);
-            }
+            case NOT_IN_DEBUG-> mainActionButton.setText(RUN_PROGRAM_BUTTON_TEXT);
             case RUNNING -> {
                 setDebugControlsDisabled(true);
-                runProgramButton.setDisable(true);
+                mainActionButton.setText(STOP_DEBUG_BUTTON_TEXT);
+
             }
             case ON_INSTRUCTION -> {
                 fireDebugStoppedOnLine(debugHandle.whichLine().orElseThrow());
                 setDebugControlsDisabled(false);
-                runProgramButton.setDisable(true);
+                mainActionButton.setText(STOP_DEBUG_BUTTON_TEXT);
                 variableTableController.setVariableEntries(debugHandle.getResult().variableMap());
             }
             case END -> {
@@ -374,7 +388,7 @@ public class ExecutionTabController implements Initializable {
                 cyclesLabel.setText("Cycles: " + result.cycles());
 
                 setDebugControlsDisabled(true);
-                runProgramButton.setDisable(true);
+                mainActionButton.setText(RUN_PROGRAM_BUTTON_TEXT);
             }
             case null, default -> {
                 throw new IllegalArgumentException("Illegal state passed: " + newValue);
