@@ -18,19 +18,29 @@
          </BorderPane.margin>
          <children>
             <Label fx:id="filenameLabel" minWidth="50.0" styleClass="text-component" text="Please load program file to continue." />
-            <HBox alignment="CENTER_LEFT" minHeight="80.0" prefHeight="80.0" spacing="10.0">
-               <opaqueInsets>
-                  <Insets />
-               </opaqueInsets>
+            <VBox alignment="CENTER_LEFT">
                <children>
-                  <Button fx:id="openFileButton" mnemonicParsing="false" onAction="#openFileButtonAction" styleClass="text-component" text="Open file..." />
-                  <Label styleClass="text-component" text="Expansion degree: " />
-                  <ChoiceBox fx:id="expansionChoiceBox" disable="true" prefWidth="150.0" />
+                  <Button fx:id="openFileButton" mnemonicParsing="false" onAction="#openFileButtonAction" styleClass="text-component" text="Open file...">
+                     <VBox.margin>
+                        <Insets left="20.0" />
+                     </VBox.margin>
+                  </Button>
+                  <HBox fx:id="programControlsHbox" alignment="CENTER_LEFT" disable="true" minHeight="80.0" prefHeight="50.0" spacing="10.0">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <children>
+                        <Label layoutX="191.0" layoutY="40.0" styleClass="text-component" text="Function:" />
+                        <ChoiceBox fx:id="programChoiceBox" prefWidth="150.0" />
+                        <Label styleClass="text-component" text="Expansion degree: " />
+                        <ChoiceBox fx:id="expansionChoiceBox" prefWidth="150.0" />
+                     </children>
+                     <padding>
+                        <Insets left="20.0" />
+                     </padding>
+                  </HBox>
                </children>
-               <padding>
-                  <Insets left="20.0" />
-               </padding>
-            </HBox>
+            </VBox>
          </children>
       </VBox>
    </top>

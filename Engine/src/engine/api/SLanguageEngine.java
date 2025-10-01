@@ -7,6 +7,7 @@ import engine.debugger.ProgramDebugger;
 import engine.execution.ProgramRunner;
 import engine.execution.exception.SProgramNotLoadedException;
 import engine.expansion.ProgramExpander;
+import engine.function.Function;
 import engine.loader.FromXMLProgramLoader;
 import engine.loader.event.LoadingListener;
 import engine.loader.exception.NotXMLException;
@@ -16,11 +17,13 @@ import engine.peeker.ProgramViewer;
 import engine.program.Program;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class SLanguageEngine {
-    private Program program;
+    private String mainProgramName;
+    private Program currentProgram;
+    private final Map<String,Program> avaliablePrograms = new HashMap<>();
     private ProgramExpander programExpander;
     private List<ProgramExecutionResult> previousExecutions;
 
@@ -37,20 +40,31 @@ public class SLanguageEngine {
         FromXMLProgramLoader loader = new FromXMLProgramLoader();
         loader.loadXML(path, listener);
         loader.validateProgram();
-        program = loader.getProgram();
-        programExpander = new ProgramExpander(program);
+        currentProgram = loader.getProgram();
+
+        mainProgramName = currentProgram.getName();
+        avaliablePrograms.clear();
+        avaliablePrograms.put(currentProgram.getName(), currentProgram);
+        avaliablePrograms.putAll(
+                loader.getFunctions().stream()
+                        .collect(Collectors.toMap(
+                                Program::getName, program -> program
+                        ))
+        );
+
+        programExpander = new ProgramExpander(currentProgram);
 
         previousExecutions = new ArrayList<>();
     }
 
     public boolean programNotLoaded(){
-        return program == null;
+        return currentProgram == null;
     }
 
     public int getMaxExpansionDegree() {
         if(programNotLoaded())
             throw new SProgramNotLoadedException("Program has not been loaded");
-        return program.getMaxExpansionDegree();
+        return currentProgram.getMaxExpansionDegree();
     }
 
     public ProgramPeek getProgramPeek() {
@@ -59,12 +73,12 @@ public class SLanguageEngine {
 
     public ProgramPeek getExpandedProgramPeek(int expansionDegree) {
         if(expansionDegree > getMaxExpansionDegree())
-            throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + program.getMaxExpansionDegree());
+            throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + currentProgram.getMaxExpansionDegree());
         if(programNotLoaded()) {
             throw new SProgramNotLoadedException("Program is not loaded");
         }
 
-        return new ProgramViewer(program).getProgramPeek(expansionDegree, programExpander);
+        return new ProgramViewer(currentProgram).getProgramPeek(expansionDegree, programExpander);
     }
 
     public ProgramExecutionResult runProgram(List<Long> inputs, int expansionDegree, boolean specificInputs) {
@@ -99,6 +113,27 @@ public class SLanguageEngine {
         return new DebugHandle(debugger);
     }
 
+
+    // returns all the functions names that the program uses including the main program. the main is first in list
+    public List<String> getAvaliableProgramsNames() {
+        var functionNamesList = new ArrayList<>(avaliablePrograms.keySet().stream()
+                .filter(functionName -> !functionName.equals(mainProgramName))
+                .toList());
+        // main program comes first, then functions
+        functionNamesList.addFirst(mainProgramName);
+
+        return functionNamesList;
+    }
+
+    public void setCurrentProgram(String programName) {
+        Program requested = avaliablePrograms.get(programName);
+        if(requested == null)
+            throw new IllegalArgumentException("File does not contain program: " + programName);
+
+        currentProgram = requested;
+        programExpander = new ProgramExpander(currentProgram);
+    }
+
     public List<ProgramExecutionResult> getExecutionHistory(){
         if(programNotLoaded())
             throw new SProgramNotLoadedException("Program is not loaded");
@@ -118,8 +153,8 @@ public class SLanguageEngine {
     }
 
     private Program createExpandedProgram(int expansionDegree) {
-        if (expansionDegree > program.getMaxExpansionDegree())
-            throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + program.getMaxExpansionDegree());
+        if (expansionDegree > currentProgram.getMaxExpansionDegree())
+            throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + currentProgram.getMaxExpansionDegree());
         return programExpander.expand(expansionDegree);
     }
 

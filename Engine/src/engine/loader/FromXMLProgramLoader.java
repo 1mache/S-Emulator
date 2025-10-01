@@ -1,5 +1,7 @@
 package engine.loader;
 
+import engine.function.Function;
+import engine.function.FunctionCall;
 import engine.jaxb.generated.SProgram;
 import engine.loader.event.LoadingListener;
 import engine.loader.exception.NotXMLException;
@@ -12,7 +14,10 @@ import engine.instruction.utility.Instructions;
 import jakarta.xml.bind.JAXBException;
 
 import java.io.FileNotFoundException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class FromXMLProgramLoader {
     private Program program; // if this is null, the program isn't loaded
@@ -64,5 +69,16 @@ public class FromXMLProgramLoader {
         if(!validated)
             throw new IllegalStateException("Program has not been validated");
         return program;
+    }
+
+    public Set<Function> getFunctions() {
+        if(program == null)
+            throw new IllegalStateException("Program has not been loaded");
+        if(!validated)
+            throw new IllegalStateException("Program has not been validated");
+
+        return translator.getFunctionReferences().stream()
+                .map(FunctionCall::getFunction)
+                .collect(Collectors.toSet());
     }
 }

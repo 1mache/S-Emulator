@@ -23,6 +23,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -48,6 +49,12 @@ public class PrimaryController implements Initializable {
     private Button openFileButton;
 
     @FXML
+    private HBox programControlsHbox;
+
+    @FXML
+    private ChoiceBox<String> programChoiceBox;
+
+    @FXML
     private ChoiceBox<Integer> expansionChoiceBox;
 
     @FXML
@@ -66,6 +73,8 @@ public class PrimaryController implements Initializable {
     private final BooleanProperty programLoadedProperty = new SimpleBooleanProperty(false);
     private final StringProperty  programPathProperty   = new SimpleStringProperty("None");
 
+    private final ObservableList<String> avaliablePrograms = FXCollections.observableArrayList();
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         playSoundTheme();
@@ -73,6 +82,8 @@ public class PrimaryController implements Initializable {
         initInstructionTables();
 
         initExpansionDegreeSelection();
+
+        initProgramSelection();
 
         initDebugRelated();
 
@@ -108,13 +119,28 @@ public class PrimaryController implements Initializable {
         expansionDegreeProperty.bind(expansionChoiceBox.getSelectionModel().selectedItemProperty());
         expansionChoiceBox.getSelectionModel().selectedItemProperty().addListener(
                 (v, old, now) ->{
-                    mainInstructionTableController.setInstructions(
-                            engine.getExpandedProgramPeek(expansionDegreeProperty.get()).instructions());
-                    expansionTableController.clear();
+                    if(engine.programNotLoaded()) return;
+                    showCurrentProgramWithSelectedExpansion();
                 }
         );
         // bind the expansion deg. property to execution tab controller
         executionTabController.getExpansionDegreeProperty().bind(expansionDegreeProperty);
+    }
+
+    private void initProgramSelection(){
+        programChoiceBox.setItems(avaliablePrograms);
+        programChoiceBox.getSelectionModel().selectedIndexProperty().addListener(
+                (v, old, now) ->{
+                    if(engine.programNotLoaded()) return;
+                    // select by index. it will be the same in the choice box, but this way we can alter the
+                    // text of the names in the choice box.
+                    engine.setCurrentProgram(engine.getAvaliableProgramsNames().get(now.intValue()));
+                    // reset expansion
+                    expansionChoiceBox.setValue(0);
+
+                    showCurrentProgramWithSelectedExpansion();
+                }
+        );
     }
 
     private void initInstructionTables() {
@@ -165,20 +191,28 @@ public class PrimaryController implements Initializable {
                         () -> {
                             ObservableList<Integer> degrees = FXCollections.observableArrayList();
                             if (programLoadedProperty.get()) {
-                                for (int i = 0; i <= engine.getMaxExpansionDegree(); i++) {
+                                for (int i = 0; i <= engine.getMaxExpansionDegree(); i++)
                                     degrees.add(i);
-                                }
                             }
+
+                            // 0 expansion degree by default
+                            Platform.runLater(() -> expansionChoiceBox.setValue(0));
+
                             return degrees;
                         },
-                        programLoadedProperty
+                        programLoadedProperty, programChoiceBox.valueProperty()
                 )
         );
+
         programLoadedProperty.addListener(
                 (v, was, now) -> {
                     if(now) {
-                        expansionChoiceBox.setDisable(false);
-                        expansionChoiceBox.setValue(0); // reset to 0 when new program loaded
+                        programControlsHbox.setDisable(false);
+                        avaliablePrograms.setAll(engine.getAvaliableProgramsNames());
+                        String first = avaliablePrograms.getFirst();
+                        avaliablePrograms.set(0, first + " (main)");
+                        // program choice box option by default
+                        programChoiceBox.setValue(programChoiceBox.getItems().getFirst());
                     }
                 }
         );
@@ -200,8 +234,16 @@ public class PrimaryController implements Initializable {
         );
     }
 
+    private void showCurrentProgramWithSelectedExpansion() {
+        mainInstructionTableController.setInstructions(
+                engine.getExpandedProgramPeek(expansionDegreeProperty.get()).instructions());
+
+        expansionTableController.clear(); // reset the bottom table
+    }
+
     private void onDebugStateChange(DebugState debugState) {
-        expansionChoiceBox.setDisable(debugState != DebugState.NOT_IN_DEBUG); // we don't want to allow changing expansions while debugging
+        // we don't want to allow changing expansions or functions while debugging
+        programControlsHbox.setDisable(debugState != DebugState.NOT_IN_DEBUG);
 
         if(debugState == DebugState.END)
             mainInstructionTableController.resetDebugHighlight();
