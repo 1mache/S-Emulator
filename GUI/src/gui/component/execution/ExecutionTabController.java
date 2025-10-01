@@ -184,8 +184,11 @@ public class ExecutionTabController implements Initializable {
     public void stepOverAction(ActionEvent event) {
         // if debug finished this button will not be active so no check needed
         DebugStepPeek delta = debugHandle.stepOver();
-        if(delta.variable().isPresent())
-            variableTableController.addVariableEntries(Map.of(delta.variable().get(), delta.newValue()));
+        if(delta.variable().isPresent()){
+            String varName = delta.variable().get();
+            variableTableController.addVariableEntries(Map.of(varName, delta.newValue()));
+            variableTableController.highlightVariable(varName);
+        }
 
         debugHandle.whichLine()
                 .ifPresentOrElse(
@@ -370,7 +373,10 @@ public class ExecutionTabController implements Initializable {
         String STOP_DEBUG_BUTTON_TEXT = "Stop Debug";
 
         switch (newValue) {
-            case NOT_IN_DEBUG-> mainActionButton.setText(RUN_PROGRAM_BUTTON_TEXT);
+            case NOT_IN_DEBUG-> {
+                mainActionButton.setText(RUN_PROGRAM_BUTTON_TEXT);
+                variableTableController.resetHighlight();
+            }
             case RUNNING -> {
                 setDebugControlsDisabled(true);
                 mainActionButton.setText(STOP_DEBUG_BUTTON_TEXT);
@@ -389,6 +395,8 @@ public class ExecutionTabController implements Initializable {
 
                 setDebugControlsDisabled(true);
                 mainActionButton.setText(RUN_PROGRAM_BUTTON_TEXT);
+
+                variableTableController.resetHighlight();
             }
             case null, default -> {
                 throw new IllegalArgumentException("Illegal state passed: " + newValue);
