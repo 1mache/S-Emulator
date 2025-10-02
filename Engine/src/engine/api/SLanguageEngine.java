@@ -26,7 +26,7 @@ public class SLanguageEngine {
     private Program currentProgram;
     private final Map<String,Program> avaliablePrograms = new HashMap<>();
     private ProgramExpander programExpander;
-    private List<ProgramExecutionResult> previousExecutions;
+    private LinkedHashMap<FunctionIdentifier, ProgramExecutionResult> previousExecutions;
 
     private SLanguageEngine(){}
     // Singleton
@@ -55,7 +55,7 @@ public class SLanguageEngine {
 
         programExpander = new ProgramExpander(currentProgram);
 
-        previousExecutions = new ArrayList<>();
+        previousExecutions = new LinkedHashMap<>();
     }
 
     public boolean programNotLoaded(){
@@ -99,7 +99,14 @@ public class SLanguageEngine {
                 expansionDegree,
                 runner.getCycles()
         );
-        previousExecutions.add(executionResult);
+
+        previousExecutions.put(
+                new FunctionIdentifier(
+                        currentProgram.getName(),
+                        // user string if function, name if regular program
+                        currentProgram instanceof Function f ? f.getUserString() : currentProgram.getName()
+                ),
+                executionResult);
         return executionResult;
     }
 
@@ -140,11 +147,11 @@ public class SLanguageEngine {
         programExpander = new ProgramExpander(currentProgram);
     }
 
-    public List<ProgramExecutionResult> getExecutionHistory(){
+    public Map<FunctionIdentifier,ProgramExecutionResult> getExecutionHistory(){
         if(programNotLoaded())
             throw new SProgramNotLoadedException("Program is not loaded");
 
-        return previousExecutions;
+        return Map.copyOf(previousExecutions);
     }
 
     // =============== private ===============
