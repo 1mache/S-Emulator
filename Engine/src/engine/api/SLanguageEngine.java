@@ -26,7 +26,9 @@ public class SLanguageEngine {
     private Program currentProgram;
     private final Map<String,Program> avaliablePrograms = new HashMap<>();
     private ProgramExpander programExpander;
-    private LinkedHashMap<FunctionIdentifier, ProgramExecutionResult> previousExecutions;
+
+    // history
+    private Map<String, List<ProgramExecutionResult>> previousExecutions;
 
     private SLanguageEngine(){}
     // Singleton
@@ -100,13 +102,17 @@ public class SLanguageEngine {
                 runner.getCycles()
         );
 
-        previousExecutions.put(
-                new FunctionIdentifier(
-                        currentProgram.getName(),
-                        // user string if function, name if regular program
-                        currentProgram instanceof Function f ? f.getUserString() : currentProgram.getName()
-                ),
-                executionResult);
+        List<ProgramExecutionResult> executionResults = previousExecutions.get(currentProgram.getName());
+        if (executionResults == null) {
+            // key does not exist, create a new list with the item
+            executionResults = new ArrayList<>();
+            executionResults.add(executionResult);
+            previousExecutions.put(currentProgram.getName(), executionResults);
+        } else {
+            // key exists, add the item to the existing list
+            executionResults.add(executionResult);
+        }
+
         return executionResult;
     }
 
@@ -147,11 +153,11 @@ public class SLanguageEngine {
         programExpander = new ProgramExpander(currentProgram);
     }
 
-    public Map<FunctionIdentifier,ProgramExecutionResult> getExecutionHistory(){
-        if(programNotLoaded())
-            throw new SProgramNotLoadedException("Program is not loaded");
+    public List<ProgramExecutionResult> getExecutionHistoryOfCurrent(){
+        List<ProgramExecutionResult> results = previousExecutions.get(currentProgram.getName());
 
-        return Map.copyOf(previousExecutions);
+        // if no history for this function, return empty list
+        return Objects.requireNonNullElseGet(results, List::of);
     }
 
     // =============== private ===============

@@ -77,7 +77,7 @@
             <VBox alignment="CENTER" prefHeight="170.0" prefWidth="498.0" GridPane.rowIndex="1">
                <children>
                   <Label text="Execution history" />
-                  <Button fx:id="showHistoryButton" mnemonicParsing="false" text="Show History" />
+                  <Button fx:id="showHistoryButton" mnemonicParsing="false" onAction="#showHistoryAction" text="Show History" />
                </children>
             </VBox>
          </children>

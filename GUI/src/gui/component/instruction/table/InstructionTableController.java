@@ -100,7 +100,7 @@ public class InstructionTableController implements Initializable {
         instructionTable.refresh(); // force re-render so CSS updates
     }
 
-    // private:
+    // ===================== private: =======================
     private void defineColumnValues() {
         lineNumberColumn.setCellValueFactory(cellData ->
                 new ReadOnlyObjectWrapper<>(cellData.getValue().lineId() + 1)

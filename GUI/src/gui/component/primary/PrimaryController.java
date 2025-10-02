@@ -7,6 +7,7 @@ import engine.loader.exception.NotXMLException;
 import engine.loader.exception.UnknownLabelException;
 import gui.component.execution.DebugState;
 import gui.component.execution.ExecutionTabController;
+import gui.component.history.HistoryTableController;
 import gui.component.instruction.table.InstructionTableController;
 import gui.task.ProgramLoadTask;
 import javafx.application.Platform;
@@ -17,7 +18,9 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -35,6 +38,7 @@ import javafx.geometry.Insets;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
@@ -66,6 +70,9 @@ public class PrimaryController implements Initializable {
 
     @FXML
     private ExecutionTabController executionTabController;
+
+    @FXML
+    private Button showHistoryButton;
 
     private SLanguageEngine engine;
 
@@ -106,6 +113,30 @@ public class PrimaryController implements Initializable {
         loadProgram(fileChosen);
     }
 
+    @FXML
+    public void showHistoryAction(ActionEvent event){
+        final String HISTORY_LAYOUT_PATH = "/gui/component/history/history_tab.fxml";
+
+        FXMLLoader loader = new FXMLLoader();
+        URL historyTableUrl = getClass().getResource(HISTORY_LAYOUT_PATH);
+
+        loader.setLocation(historyTableUrl);
+        try {
+            Parent root = loader.load();
+            HistoryTableController controller = loader.getController();
+            controller.setItems(engine.getExecutionHistoryOfCurrent());
+
+            Stage dialog = new Stage();
+            dialog.setTitle("Run History");
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.setScene(new Scene(root));
+            dialog.showAndWait();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void setEngine(SLanguageEngine engine) {
         if(engine == null)
             throw new AssertionError("engine is null");
@@ -132,13 +163,14 @@ public class PrimaryController implements Initializable {
         programChoiceBox.setItems(avaliablePrograms);
         programChoiceBox.getSelectionModel().selectedIndexProperty().addListener(
                 (v, old, now) ->{
-                    if(engine.programNotLoaded()) return;
+                    if(engine.programNotLoaded() || now.intValue() < 0) return;
                     // select by index. it will be the same in the choice box, but this way we can alter the
                     // text of the names in the choice box.
                     engine.setCurrentProgram(engine.getAvaliablePrograms().get(now.intValue()));
                     // reset expansion
                     expansionChoiceBox.setValue(0);
 
+                    executionTabController.reset(); // reset execution tab
                     showCurrentProgramWithSelectedExpansion();
                 }
         );

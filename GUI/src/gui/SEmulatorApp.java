@@ -12,7 +12,7 @@ import javafx.stage.Stage;
 public class SEmulatorApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        final String LAYOUT_FXML_PATH = "component/primary/app_layout.fxml";
+        final String LAYOUT_FXML_PATH = "/gui/component/primary/app_layout.fxml";
 
         SLanguageEngine engine = SLanguageEngine.getInstance();
 
