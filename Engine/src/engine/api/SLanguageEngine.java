@@ -1,5 +1,6 @@
 package engine.api;
 
+import engine.api.dto.FunctionIdentifier;
 import engine.api.dto.debug.DebugHandle;
 import engine.api.dto.ProgramExecutionResult;
 import engine.api.dto.ProgramPeek;
@@ -115,18 +116,23 @@ public class SLanguageEngine {
 
 
     // returns all the functions names that the program uses including the main program. the main is first in list
-    public List<String> getAvaliableProgramsNames() {
-        var functionNamesList = new ArrayList<>(avaliablePrograms.keySet().stream()
-                .filter(functionName -> !functionName.equals(mainProgramName))
+    public List<FunctionIdentifier> getAvaliablePrograms() {
+        var functionStringsList = new ArrayList<>(avaliablePrograms.values().stream()
+                .filter(program -> !program.getName().equals(mainProgramName))
+                // everyone except main is a function (if not something's wrong)
+                .map(program -> {
+                    var function = (Function) program;
+                    return new FunctionIdentifier(function.getName(), function.getUserString());
+                })
                 .toList());
         // main program comes first, then functions
-        functionNamesList.addFirst(mainProgramName);
+        functionStringsList.addFirst(new FunctionIdentifier(mainProgramName, mainProgramName));
 
-        return functionNamesList;
+        return functionStringsList;
     }
 
-    public void setCurrentProgram(String programName) {
-        Program requested = avaliablePrograms.get(programName);
+    public void setCurrentProgram(FunctionIdentifier programName) {
+        Program requested = avaliablePrograms.get(programName.name());
         if(requested == null)
             throw new IllegalArgumentException("File does not contain program: " + programName);
 

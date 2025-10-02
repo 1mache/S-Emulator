@@ -1,6 +1,7 @@
 package gui.component.primary;
 
 import engine.api.SLanguageEngine;
+import engine.api.dto.FunctionIdentifier;
 import engine.api.dto.InstructionPeek;
 import engine.loader.exception.NotXMLException;
 import engine.loader.exception.UnknownLabelException;
@@ -134,7 +135,7 @@ public class PrimaryController implements Initializable {
                     if(engine.programNotLoaded()) return;
                     // select by index. it will be the same in the choice box, but this way we can alter the
                     // text of the names in the choice box.
-                    engine.setCurrentProgram(engine.getAvaliableProgramsNames().get(now.intValue()));
+                    engine.setCurrentProgram(engine.getAvaliablePrograms().get(now.intValue()));
                     // reset expansion
                     expansionChoiceBox.setValue(0);
 
@@ -208,7 +209,11 @@ public class PrimaryController implements Initializable {
                 (v, was, now) -> {
                     if(now) {
                         programControlsHbox.setDisable(false);
-                        avaliablePrograms.setAll(engine.getAvaliableProgramsNames());
+                        avaliablePrograms.setAll(
+                                engine.getAvaliablePrograms().stream()
+                                        .map(FunctionIdentifier::userString)
+                                        .toList()
+                        );
                         String first = avaliablePrograms.getFirst();
                         avaliablePrograms.set(0, first + " (main)");
                         // program choice box option by default
