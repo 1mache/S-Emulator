@@ -5,6 +5,7 @@ import engine.api.dto.ProgramPeek;
 import engine.expansion.ProgramExpander;
 import engine.instruction.Instruction;
 import engine.instruction.utility.InstructionReference;
+import engine.instruction.utility.Instructions;
 import engine.label.Label;
 import engine.program.Program;
 import engine.variable.Variable;
@@ -55,10 +56,37 @@ public class ProgramViewer {
                 program.getName(),
                 getInputVariablePeeks(),
                 getLabelStrings(expandedProgram.getUsedLabels()),
+                getWorkVariablePeeks(),
                 instructionPeeks
         );
     }
 
+    public static List<Integer> idsOfInstructionsThatUse(Program program, Variable variable) {
+        List<Integer> ids = new ArrayList<>();
+        int id = 0;
+        for (var instruction: program.getInstructions()) {
+            if(Instructions.extractVariables(instruction).contains(variable))
+                ids.add(id);
+            id++;
+        }
+
+        return ids;
+    }
+
+    public static List<Integer> idsOfInstructionsThatUse(Program program, Label label) {
+        List<Integer> ids = new ArrayList<>();
+        int id = 0;
+        for (var instruction: program.getInstructions()) {
+            if(Instructions.extractUsedLabels(instruction).contains(label))
+                ids.add(id);
+            id++;
+        }
+
+        return ids;
+    }
+
+
+    // ===================== private =======================
 
     private InstructionPeek getInstructionPeek(Instruction instruction, int lineId, InstructionPeek expandedFrom) {
         return new InstructionPeek(
@@ -73,6 +101,12 @@ public class ProgramViewer {
 
     private List<String> getInputVariablePeeks(){
         return program.getInputVariables().stream()
+                .map(Variable::stringRepresentation)
+                .toList();
+    }
+
+    private List<String> getWorkVariablePeeks(){
+        return program.getWorkVariables().stream()
                 .map(Variable::stringRepresentation)
                 .toList();
     }

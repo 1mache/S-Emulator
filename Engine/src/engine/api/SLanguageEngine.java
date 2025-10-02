@@ -9,13 +9,19 @@ import engine.execution.ProgramRunner;
 import engine.execution.exception.SProgramNotLoadedException;
 import engine.expansion.ProgramExpander;
 import engine.function.Function;
+import engine.label.FixedLabel;
+import engine.label.Label;
+import engine.label.NumericLabel;
 import engine.loader.FromXMLProgramLoader;
 import engine.loader.event.LoadingListener;
 import engine.loader.exception.NotXMLException;
+import engine.loader.exception.SProgramXMLException;
 import engine.loader.exception.UnknownFunctionException;
 import engine.loader.exception.UnknownLabelException;
 import engine.peeker.ProgramViewer;
 import engine.program.Program;
+import engine.variable.Variable;
+import engine.variable.VariableType;
 
 import java.io.FileNotFoundException;
 import java.util.*;
@@ -160,6 +166,23 @@ public class SLanguageEngine {
         return Objects.requireNonNullElseGet(results, List::of);
     }
 
+    public List<Integer> getInstructionsIdsThatUse(String symbolStr, int expansionDegree){
+        Variable maybeVariable = str2Variable(symbolStr);
+        if(maybeVariable != null)
+            return ProgramViewer.idsOfInstructionsThatUse(
+                    programExpander.expand(expansionDegree),
+                    maybeVariable
+            );
+        Label maybeLabel = str2Label(symbolStr);
+        if(maybeLabel != null)
+            return ProgramViewer.idsOfInstructionsThatUse(
+                    programExpander.expand(expansionDegree),
+                    maybeLabel
+            );
+
+        throw new IllegalArgumentException("Illegal symbol: " + symbolStr);
+    }
+
     // =============== private ===============
 
     private void validateInputs(List<Long> inputs) {
@@ -182,5 +205,38 @@ public class SLanguageEngine {
             runner.initInputVariablesSpecific(inputs);
         else
             runner.initInputVariables(inputs);
+    }
+
+    private Variable str2Variable(String str){
+        if(str.length() == 2) {
+            return switch (str.charAt(0)) {
+                case VariableType.INPUT_VARIABLE_CHAR -> Variable.createInputVariable(
+                        Character.getNumericValue(str.charAt(1))
+                );
+                case VariableType.WORK_VARIABLE_CHAR -> Variable.createWorkVariable(
+                        Character.getNumericValue(str.charAt(1))
+                );
+                default -> null;
+            };
+        }
+
+        // different length, must be "y", or it is invalid
+        if(str.equals(Character.toString(VariableType.RESULT_VARIABLE_CHAR))) {
+            return Variable.RESULT;
+        }
+
+        return null;
+    }
+
+    private Label str2Label(String str) {
+        if(str.equals(FixedLabel.EXIT.stringRepresentation()))
+            return FixedLabel.EXIT; // exit label
+
+        if(!str.matches("L\\d++"))
+            return null;
+        int numberPart = Integer.parseInt(str.replaceAll("\\D", ""));
+
+        // take only the lineId part and construct a numeric label
+        return new NumericLabel(numberPart);
     }
 }
