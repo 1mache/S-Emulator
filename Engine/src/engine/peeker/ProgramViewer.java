@@ -55,8 +55,8 @@ public class ProgramViewer {
         return new ProgramPeek(
                 program.getName(),
                 getInputVariablePeeks(),
-                getLabelStrings(expandedProgram.getUsedLabels()),
                 getWorkVariablePeeks(),
+                getLabelStrings(expandedProgram.getUsedLabels()),
                 instructionPeeks
         );
     }

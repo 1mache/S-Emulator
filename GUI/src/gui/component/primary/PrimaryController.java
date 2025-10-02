@@ -4,6 +4,7 @@ import engine.api.SLanguageEngine;
 import engine.api.dto.FunctionIdentifier;
 import engine.api.dto.InstructionPeek;
 import engine.api.dto.ProgramExecutionResult;
+import engine.api.dto.ProgramPeek;
 import engine.loader.exception.NotXMLException;
 import gui.component.execution.DebugState;
 import gui.component.execution.ExecutionTabController;
@@ -20,6 +21,7 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.CacheHint;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -60,6 +62,9 @@ public class PrimaryController implements Initializable {
     private ChoiceBox<Integer> expansionChoiceBox;
 
     @FXML
+    private ComboBox<String> highlightChoiceBox;
+
+    @FXML
     private InstructionTableController mainInstructionTableController;
 
     @FXML
@@ -84,6 +89,8 @@ public class PrimaryController implements Initializable {
         initInstructionTables();
 
         initExpansionDegreeSelection();
+
+        initHighlightSelection();
 
         initProgramSelection();
 
@@ -166,14 +173,30 @@ public class PrimaryController implements Initializable {
         programChoiceBox.getSelectionModel().selectedIndexProperty().addListener(
                 (v, old, now) ->{
                     if(engine.programNotLoaded() || now.intValue() < 0) return;
-                    // select by index. it will be the same in the choice box, but this way we can alter the
-                    // text of the names in the choice box.
-                    engine.setCurrentProgram(engine.getAvaliablePrograms().get(now.intValue()));
-                    // reset expansion
-                    expansionChoiceBox.setValue(0);
+                    resetProgramView();
 
-                    executionTabController.reset(); // reset execution tab
+                    // select by index.
+                    engine.setCurrentProgram(engine.getAvaliablePrograms().get(now.intValue()));
+
                     showCurrentProgramWithSelectedExpansion();
+                }
+        );
+    }
+
+    private void initHighlightSelection(){
+        highlightChoiceBox.setValue(null);
+        highlightChoiceBox.getSelectionModel().selectedItemProperty().addListener(
+                (v, old, now) ->{
+                    if(engine.programNotLoaded()) return;
+
+                    if(now == null) {
+                        mainInstructionTableController.resetLinesHighlight();
+                        return;
+                    }
+
+                    mainInstructionTableController.setLinesHighlight(
+                            engine.getInstructionsIdsThatUse(now, expansionDegreeProperty.get())
+                    );
                 }
         );
     }
@@ -239,6 +262,37 @@ public class PrimaryController implements Initializable {
                 )
         );
 
+        // highlight choice box
+        highlightChoiceBox.itemsProperty().bind(
+                Bindings.createObjectBinding(
+                        () -> {
+                            ObservableList<String> symbols = FXCollections.observableArrayList();
+                            if (programLoadedProperty.get()) {
+                                symbols.add(null); // null highlight, meaning dont highlight
+                                ProgramPeek programPeek = engine.getExpandedProgramPeek(expansionDegreeProperty.get());
+
+                                symbols.addAll(
+                                        programPeek.inputVariables()
+                                );
+
+                                symbols.addAll(
+                                        programPeek.workVariables()
+                                );
+
+                                symbols.addAll(
+                                        programPeek.labelsUsed()
+                                );
+                            }
+
+                            Platform.runLater(() ->  highlightChoiceBox.setValue(null));
+
+                            return symbols;
+                        },
+                        programLoadedProperty, programChoiceBox.valueProperty(), expansionDegreeProperty
+                )
+        );
+
+        // function selection
         programLoadedProperty.addListener(
                 (v, was, now) -> {
                     if(now) {
@@ -264,9 +318,10 @@ public class PrimaryController implements Initializable {
         programLoadedProperty.addListener(
                 (v, was, now) -> {
                     if (now){
+                        resetProgramView();
+
                         mainInstructionTableController.setInstructions(engine.getProgramPeek().instructions());
 
-                        executionTabController.reset();
                         executionTabController.buildInputGrid();
                     }
                 }
@@ -282,10 +337,15 @@ public class PrimaryController implements Initializable {
 
     private void onDebugStateChange(DebugState debugState) {
         // we don't want to allow changing expansions or functions while debugging
-        programControlsHbox.setDisable(debugState != DebugState.NOT_IN_DEBUG);
+        if(debugState != DebugState.NOT_IN_DEBUG) {
+            programControlsHbox.setDisable(true);
+            resetHighlight();
+        }
 
-        if(debugState == DebugState.END)
+        if(debugState == DebugState.END || debugState == DebugState.NOT_IN_DEBUG){
             mainInstructionTableController.resetDebugHighlight();
+            programControlsHbox.setDisable(false);
+        }
     }
 
     private void onDebugStoppedOnLine(int lineId) {
@@ -389,6 +449,20 @@ public class PrimaryController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void resetProgramView() {
+        // reset expansion
+        expansionChoiceBox.setValue(0);
+
+        resetHighlight();
+
+        executionTabController.reset();
+    }
+
+    private void resetHighlight(){
+        highlightChoiceBox.setValue(null);
+        mainInstructionTableController.resetLinesHighlight();
     }
 
     private void playSoundTheme() {

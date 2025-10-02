@@ -48,6 +48,8 @@ public class InstructionTableController implements Initializable {
     private final Set<Integer> breakpoints = new HashSet<>();
     private final Set<EventHandler<BreakpointChangeAction>> breakPointChangeListeners = new HashSet<>();
 
+    private final Set<Integer> multiHighlightedLines = new HashSet<>();
+
     private final int NO_LINE = -1;
     private int debugHighlightedLine = NO_LINE;
 
@@ -100,6 +102,17 @@ public class InstructionTableController implements Initializable {
         instructionTable.refresh(); // force re-render so CSS updates
     }
 
+    public void setLinesHighlight(List<Integer> lineIds) {
+        multiHighlightedLines.clear();
+        multiHighlightedLines.addAll(lineIds);
+        instructionTable.refresh(); // refresh to update styles
+    }
+
+    public void resetLinesHighlight() {
+        multiHighlightedLines.clear();
+        instructionTable.refresh();
+    }
+
     // ===================== private: =======================
     private void defineColumnValues() {
         lineNumberColumn.setCellValueFactory(cellData ->
@@ -127,24 +140,31 @@ public class InstructionTableController implements Initializable {
 
     private void setInstructionRowBehaviour() {
         instructionTable.setRowFactory(tv -> {
-            // highlight logic
             TableRow<InstructionPeek> row = new TableRow<>() {
                 @Override
                 protected void updateItem(InstructionPeek item, boolean empty) {
                     super.updateItem(item, empty);
 
-                    // always reset styles first
+                    // remove all highlight styles first
                     getStyleClass().remove(CssClasses.DEBUG_HIGHLIGHTED);
+                    getStyleClass().remove(CssClasses.HIGHLIGHTED);
 
                     if (!empty && item != null) {
-                        if (item.lineId() == debugHighlightedLine) {
+                        int lineId = item.lineId();
+
+                        // debug highlight (single line)
+                        if (lineId == debugHighlightedLine) {
                             getStyleClass().add(CssClasses.DEBUG_HIGHLIGHTED);
+                        }
+
+                        // multi line highlight
+                        if (multiHighlightedLines.contains(lineId)) {
+                            getStyleClass().add(CssClasses.HIGHLIGHTED);
                         }
                     }
                 }
             };
 
-            // clicking on a row triggers an event
             row.setOnMouseClicked(event -> {
                 if (!row.isEmpty()) {
                     InstructionPeek rowData = row.getItem();

@@ -46,7 +46,7 @@
                               <ChoiceBox fx:id="programChoiceBox" prefWidth="150.0" />
                               <Label styleClass="text-component" text="Expansion degree: " />
                               <ChoiceBox fx:id="expansionChoiceBox" prefWidth="150.0" />
-                              <ComboBox fx:id="highlightChoiceBox" maxHeight="24.0" maxWidth="150.0" minHeight="24.0" minWidth="70.0" prefHeight="24.0" prefWidth="150.0" promptText="Highlight selection" />
+                              <ComboBox fx:id="highlightChoiceBox" maxHeight="24.0" maxWidth="150.0" minHeight="24.0" minWidth="70.0" prefHeight="24.0" prefWidth="150.0" promptText="No highlight" />
                            </children>
                            <padding>
                               <Insets left="20.0" />
