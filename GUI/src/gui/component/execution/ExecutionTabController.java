@@ -112,7 +112,7 @@ public class ExecutionTabController implements Initializable {
         validateInputs();
         if(!inputsValidProperty.get()) return;
 
-        resetCyclesTextField();
+        setCyclesText(0);
         disableInputs(true);
 
         ProgramExecutionResult result;
@@ -175,7 +175,7 @@ public class ExecutionTabController implements Initializable {
         variableTableController.clear();
         // clear input text field
         inputFields.values().forEach(textField ->  textField.setText("0"));
-        resetCyclesTextField();
+        setCyclesText(0);
 
         debugStateMachine.transitionTo(DebugState.NOT_IN_DEBUG);
     }
@@ -189,6 +189,8 @@ public class ExecutionTabController implements Initializable {
             variableTableController.addVariableEntries(Map.of(varName, delta.newValue()));
             variableTableController.highlightVariable(varName);
         }
+
+        setCyclesText(debugHandle.getCurrentCycles()); // update cycles
 
         debugHandle.whichLine()
                 .ifPresentOrElse(
@@ -319,8 +321,8 @@ public class ExecutionTabController implements Initializable {
         );
     }
 
-    private void resetCyclesTextField() {
-        cyclesLabel.setText("Cycles: " + 0);
+    private void setCyclesText(long cycles) {
+        cyclesLabel.setText("Cycles: " + cycles);
     }
 
     private void setDebugControlsDisabled(boolean disabled) {
@@ -387,6 +389,7 @@ public class ExecutionTabController implements Initializable {
                 setDebugControlsDisabled(false);
                 mainActionButton.setText(STOP_DEBUG_BUTTON_TEXT);
                 variableTableController.setVariableEntries(debugHandle.getResult().variableMap());
+                setCyclesText(debugHandle.getCurrentCycles()); // update cycles
             }
             case END -> {
                 DebugEndResult result = debugHandle.getResult();

@@ -46,4 +46,8 @@ public class DebugHandle{
                 debugger.getCycles()
         );
     }
+
+    public long getCurrentCycles() {
+        return debugger.getCycles();
+    }
 }
