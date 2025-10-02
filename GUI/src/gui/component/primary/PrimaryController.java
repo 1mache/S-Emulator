@@ -5,7 +5,6 @@ import engine.api.dto.FunctionIdentifier;
 import engine.api.dto.InstructionPeek;
 import engine.api.dto.ProgramExecutionResult;
 import engine.loader.exception.NotXMLException;
-import engine.loader.exception.UnknownLabelException;
 import gui.component.execution.DebugState;
 import gui.component.execution.ExecutionTabController;
 import gui.component.history.HistoryTableController;
