@@ -241,6 +241,7 @@ public class ExecutionTabController implements Initializable {
         modeChoiceBox.setValue(runMode);
         debugStateMachine.transitionTo(DebugState.NOT_IN_DEBUG);
         variableTableController.clear();
+        setCyclesText(0);
         buildInputGrid();
         disableInputs(false);
     }

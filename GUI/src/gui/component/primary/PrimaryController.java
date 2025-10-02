@@ -23,10 +23,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -71,9 +68,6 @@ public class PrimaryController implements Initializable {
 
     @FXML
     private ExecutionTabController executionTabController;
-
-    @FXML
-    private Button showHistoryButton;
 
     private SLanguageEngine engine;
 
@@ -336,14 +330,10 @@ public class PrimaryController implements Initializable {
 
             Throwable ex = loaderTask.getException();
             switch (ex) {
-                case NotXMLException ignored ->
-                        Platform.runLater(() -> showError("Error. File not an XML"));
-                case FileNotFoundException ignored ->
-                        Platform.runLater(() -> showError("Error. File not found"));
-                case UnknownLabelException ignored ->
-                        Platform.runLater(() -> showError(ex.getMessage()));
+                case NotXMLException ignored -> {}
+                case FileNotFoundException ignored -> {}
                 default ->
-                        Platform.runLater(() -> showError("Unhandled error: " + ex.getMessage()));
+                        Platform.runLater(() -> showError(ex.getMessage()));
             }
         });
 
@@ -394,9 +384,12 @@ public class PrimaryController implements Initializable {
         expansionTableController.setInstructions(expansionChain);
     }
 
-    private void showError(String s) {
-        System.out.println(s);
-        //filenameLabel.setText(s); //TODO:fix this
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error while loading file");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     private void playSoundTheme() {
