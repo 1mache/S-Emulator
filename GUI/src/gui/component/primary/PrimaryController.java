@@ -3,6 +3,7 @@ package gui.component.primary;
 import engine.api.SLanguageEngine;
 import engine.api.dto.FunctionIdentifier;
 import engine.api.dto.InstructionPeek;
+import engine.api.dto.ProgramExecutionResult;
 import engine.loader.exception.NotXMLException;
 import engine.loader.exception.UnknownLabelException;
 import gui.component.execution.DebugState;
@@ -123,13 +124,21 @@ public class PrimaryController implements Initializable {
         loader.setLocation(historyTableUrl);
         try {
             Parent root = loader.load();
-            HistoryTableController controller = loader.getController();
-            controller.setItems(engine.getExecutionHistoryOfCurrent());
-
             Stage dialog = new Stage();
             dialog.setTitle("Run History");
             dialog.initModality(Modality.APPLICATION_MODAL);
             dialog.setScene(new Scene(root));
+
+            HistoryTableController controller = loader.getController();
+            controller.setItems(engine.getExecutionHistoryOfCurrent());
+            controller.addReRunButtonListener(e -> {
+                dialog.close();
+                executionTabController.reset();
+                ProgramExecutionResult selectedRun = controller.getSelectedLine();
+                executionTabController.setInputsInTextFields(selectedRun.inputs());
+                expansionChoiceBox.setValue(selectedRun.expansionDegree());
+            });
+
             dialog.showAndWait();
 
         } catch (IOException e) {

@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class HistoryTableController implements Initializable {
 
@@ -81,6 +80,10 @@ public class HistoryTableController implements Initializable {
     public void showVariablesAction(ActionEvent event) {
         if(selectedLine == null) return;
         variableTableController.setVariableEntries(selectedLine.variableMap());
+    }
+
+    public ProgramExecutionResult getSelectedLine() {
+        return selectedLine;
     }
 
     public void setItems(List<ProgramExecutionResult> resultList){

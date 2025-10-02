@@ -59,7 +59,7 @@ public class ExecutionTabController implements Initializable {
     private List<Button> debugControls;
 
     private SLanguageEngine engine;
-    private final Map<String, TextField> inputFields = new HashMap<>();
+    private final Map<String, TextField> inputFields = new LinkedHashMap<>();
     private final BooleanProperty inputsValidProperty = new SimpleBooleanProperty(true);
     private final IntegerProperty expansionDegreeProperty = new SimpleIntegerProperty(0);
 
@@ -282,6 +282,17 @@ public class ExecutionTabController implements Initializable {
         rc.setPrefHeight(30);
         rc.setVgrow(Priority.SOMETIMES);
         inputVariableGrid.getRowConstraints().add(rc);
+    }
+
+    public void setInputsInTextFields(List<Long> inputs){
+        if(inputs.size() != inputFields.size()){
+            throw new IllegalArgumentException("Size of inputs list doesnt match the amount of input fields");
+        }
+        int i = 0;
+        for(TextField field : inputFields.values()){
+            field.setText(inputs.get(i).toString());
+            i++;
+        }
     }
 
     // --------- private: ------------
