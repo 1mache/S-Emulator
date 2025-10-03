@@ -1,7 +1,6 @@
 package engine.api;
 
 import engine.api.dto.FunctionIdentifier;
-import engine.api.dto.debug.DebugEndResult;
 import engine.api.dto.debug.DebugHandle;
 import engine.api.dto.ProgramExecutionResult;
 import engine.api.dto.ProgramPeek;
@@ -16,7 +15,6 @@ import engine.label.NumericLabel;
 import engine.loader.FromXMLProgramLoader;
 import engine.loader.event.LoadingListener;
 import engine.loader.exception.NotXMLException;
-import engine.loader.exception.SProgramXMLException;
 import engine.loader.exception.UnknownFunctionException;
 import engine.loader.exception.UnknownLabelException;
 import engine.peeker.ProgramViewer;
