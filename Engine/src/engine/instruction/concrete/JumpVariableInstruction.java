@@ -1,14 +1,14 @@
 package engine.instruction.concrete;
 
-import engine.argument.Argument;
-import engine.execution.context.VariableContext;
+import engine.instruction.argument.InstructionArgument;
+import engine.execution.context.RunContext;
 import engine.instruction.AbstractJumpInstruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
+import engine.label.NumericLabel;
 import engine.program.Program;
 import engine.program.StandardProgram;
-import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -27,9 +27,11 @@ public class JumpVariableInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected boolean isJump(VariableContext context) {
-        return context.getVariableValue(getVariable())
-                .equals(context.getVariableValue(otherVariable));
+    protected IsJumpResult isJump(RunContext context) {
+        return new IsJumpResult(
+                context.getVariableValue(getVariable()).equals(context.getVariableValue(otherVariable)),
+                staticCycles()
+        );
     }
 
     @Override
@@ -40,17 +42,20 @@ public class JumpVariableInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    public List<Argument> getArguments() {
+    public List<InstructionArgument> getArguments() {
         return List.of(getTargetLabel(), otherVariable);
     }
 
     @Override
-    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
-        Variable z1 = generator.getNextWorkVariable();
-        Variable z2 = generator.getNextWorkVariable();
-        Label l1 = generator.getNextLabel();
-        Label l2 = generator.getNextLabel();
-        Label l3 = generator.getNextLabel();
+    protected Program getSyntheticExpansion() {
+        int avaliableWorkVarNumber = getAvaliableWorkVarNumber();
+        int avaliableLabelNumber = getAvaliableLabelNumber();
+
+        Variable z1 = Variable.createWorkVariable(avaliableWorkVarNumber++);
+        Variable z2 = Variable.createWorkVariable(avaliableWorkVarNumber++);
+        Label l1 = new NumericLabel(avaliableLabelNumber++);
+        Label l2 = new NumericLabel(avaliableLabelNumber++);
+        Label l3 = new NumericLabel(avaliableLabelNumber++);
         Label empty = FixedLabel.EMPTY;
 
         return new StandardProgram(

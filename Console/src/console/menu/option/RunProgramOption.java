@@ -1,7 +1,7 @@
 package console.menu.option;
 
 import engine.api.SLanguageEngine;
-import engine.api.dto.ExecutionResult;
+import engine.api.dto.ProgramExecutionResult;
 import engine.api.dto.ProgramPeek;
 import engine.execution.exception.SProgramNotLoadedException;
 
@@ -24,11 +24,11 @@ public class RunProgramOption extends AbstractExpandingOption {
             System.out.println("Running program:");
             printProgramPeek(engine.getExpandedProgramPeek(expansionDegree), expansionDegree, false);
 
-            ExecutionResult result = engine.runProgram(inputs, expansionDegree);
+            ProgramExecutionResult result = engine.runProgram(inputs, expansionDegree, false);
             System.out.println("Program execution result: " + result.outputValue());
             System.out.println("Variables that were used:");
             result.variableMap().forEach((key, value) -> System.out.println(key + "= " + value));
-            System.out.println("Execution took: " + result.cyclesUsed() + " cycles.");
+            System.out.println("Execution took: " + result.cycles() + " cycles.");
 
         } catch (SProgramNotLoadedException e) {
             System.out.println("Error: Program is not loaded. Load it first (option 1)");

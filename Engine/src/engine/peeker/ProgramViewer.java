@@ -2,110 +2,98 @@ package engine.peeker;
 
 import engine.api.dto.InstructionPeek;
 import engine.api.dto.ProgramPeek;
+import engine.expansion.ProgramExpander;
 import engine.instruction.Instruction;
+import engine.instruction.utility.InstructionReference;
+import engine.instruction.utility.Instructions;
 import engine.label.Label;
 import engine.program.Program;
-import engine.program.generator.LabelVariableGenerator;
-import engine.instruction.utility.Instructions;
 import engine.variable.Variable;
 
 import java.util.*;
 
 public class ProgramViewer {
     private final Program program;
-    private final LabelVariableGenerator labelVariableGenerator;
-    private final InstructionPeek expandedFrom; // can be null
-    // all instructions that we've seen, to extract labels
-    private final Set<Instruction> allInstructions;
 
     public ProgramViewer(Program program) {
-        this(program, new LabelVariableGenerator(program),null, new HashSet<>());
-    }
-
-    // for internal use
-    private ProgramViewer(
-            Program program,
-            LabelVariableGenerator labelVariableGenerator,
-            InstructionPeek expandedFrom,
-            Set<Instruction> allInstructions
-    ) {
         this.program = program;
-        this.labelVariableGenerator = labelVariableGenerator;
-        this.expandedFrom = expandedFrom;
-        this.allInstructions = allInstructions;
     }
 
-    public ProgramPeek getProgramPeek(int expansionDegree){
-        return getProgramPeekRec(expansionDegree, 0);
+    public ProgramPeek getProgramPeek(int expansionDegree) {
+        return getProgramPeek(expansionDegree, null);
     }
 
-    // "recursive" version
-    private ProgramPeek getProgramPeekRec(int expansionDegree, int globalLineCount) {
-        List<InstructionPeek> instructionPeekList = new ArrayList<>();
-        List<Instruction> baseInstructions = program.getInstructions();
+    public ProgramPeek getProgramPeek(int expansionDegree, ProgramExpander programExpander) {
+        if(programExpander == null)
+            programExpander = new ProgramExpander(program);
 
-        /* start the instruction counter from the expandedFrom instruction lineId.
-           if the instruction we are expanding was at line <k>, we want to
-            start counting expanded instructions at line <k> */
-        int baseInstructionCounter = Optional.ofNullable(expandedFrom)
-                .map(InstructionPeek::lineId)
-                .orElse(0);
+        Program expandedProgram = programExpander.expand(expansionDegree);
 
-        for (Instruction instruction : baseInstructions) {
-            // which line are we on in the final ProgramPeek
-            int currentLine = globalLineCount;
+        List<InstructionPeek> instructionPeeks = new ArrayList<>();
 
-            ProgramPeek expansionPeek = null;
+        for (int lineId = 0; lineId < expandedProgram.getInstructions().size(); lineId++) {
+            List<InstructionReference> expansionChain = programExpander.getExpansionChainOf(lineId);
 
-            if (expansionDegree > 0) {
-                int lineNumberOfThisWithoutExpansions = baseInstructionCounter;
-                expansionPeek = instruction.getExpansionInProgram(labelVariableGenerator)
-                        .map(expansion -> {
-                            allInstructions.addAll(expansion.getInstructions());
-
-                            // this is the peek for this instruction as a base for other instructions
-                            InstructionPeek basePeek = getInstructionPeek(
-                                    instruction,
-                                    lineNumberOfThisWithoutExpansions,
-                                    expandedFrom
-                            );
-
-                            // view the expansion with another ProgramViewer
-                            return new ProgramViewer(
-                                    expansion,
-                                    labelVariableGenerator,
-                                    basePeek, // this instruction is what we expanded from
-                                    allInstructions
-                            ).getProgramPeekRec(expansionDegree - 1, currentLine);
-                        })
-                        .orElse(null);
+            // construct the expandedFrom chain
+            InstructionPeek expandedFrom = null;
+            for (InstructionReference instructionReference : expansionChain) {
+                expandedFrom = getInstructionPeek(
+                        instructionReference.instruction(),
+                        instructionReference.lineId(),
+                        expandedFrom
+                );
             }
 
-            if (expansionPeek == null) {
-                instructionPeekList.add(getInstructionPeek(instruction, currentLine, expandedFrom));
-                globalLineCount++;
-            } else {
-                instructionPeekList.addAll(expansionPeek.instructions());
-                globalLineCount += expansionPeek.instructions().size();
-            }
-
-            baseInstructionCounter++;
+            // add the instruction peek to the result list
+            instructionPeeks.add(getInstructionPeek(
+                    expandedProgram.getInstructions().get(lineId),
+                    lineId,
+                    expandedFrom
+            ));
         }
 
         return new ProgramPeek(
                 program.getName(),
                 getInputVariablePeeks(),
-                getLabelStrings(Instructions.extractUsedLabels(allInstructions.stream().toList())),
-                instructionPeekList
+                getWorkVariablePeeks(),
+                getLabelStrings(expandedProgram.getUsedLabels()),
+                instructionPeeks
         );
     }
+
+    public static List<Integer> idsOfInstructionsThatUse(Program program, Variable variable) {
+        List<Integer> ids = new ArrayList<>();
+        int id = 0;
+        for (var instruction: program.getInstructions()) {
+            if(Instructions.extractVariables(instruction).contains(variable))
+                ids.add(id);
+            id++;
+        }
+
+        return ids;
+    }
+
+    public static List<Integer> idsOfInstructionsThatUse(Program program, Label label) {
+        List<Integer> ids = new ArrayList<>();
+        int id = 0;
+        for (var instruction: program.getInstructions()) {
+            if(Instructions.extractUsedLabels(instruction).contains(label))
+                ids.add(id);
+            id++;
+        }
+
+        return ids;
+    }
+
+
+    // ===================== private =======================
 
     private InstructionPeek getInstructionPeek(Instruction instruction, int lineId, InstructionPeek expandedFrom) {
         return new InstructionPeek(
                 instruction.stringRepresentation(),
                 instruction.getLabel().stringRepresentation(),
                 instruction.isSynthetic(),
-                instruction.cycles(),
+                instruction.staticCycles(),
                 expandedFrom,
                 lineId
         );
@@ -113,6 +101,12 @@ public class ProgramViewer {
 
     private List<String> getInputVariablePeeks(){
         return program.getInputVariables().stream()
+                .map(Variable::stringRepresentation)
+                .toList();
+    }
+
+    private List<String> getWorkVariablePeeks(){
+        return program.getWorkVariables().stream()
                 .map(Variable::stringRepresentation)
                 .toList();
     }

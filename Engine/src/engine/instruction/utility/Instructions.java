@@ -1,25 +1,38 @@
 package engine.instruction.utility;
 
-import engine.argument.ArgumentType;
+import engine.function.FunctionCall;
+import engine.function.parameter.FunctionParamList;
+import engine.instruction.argument.InstructionArgument;
+import engine.instruction.argument.InstructionArgumentType;
 import engine.instruction.Instruction;
-import engine.jaxb.loader.ArgumentLabelInfo;
+import engine.loader.ArgumentLabelInfo;
 import engine.label.FixedLabel;
 import engine.label.Label;
-import engine.program.InstructionReference;
 import engine.variable.Variable;
 import engine.variable.VariableType;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Instructions {
 
+    public static List<Variable> extractVariables(Instruction instruction) {
+        Set<Variable> variables = new HashSet<>();
+        if(instruction.getVariable() != Variable.NO_VAR)
+            variables.add(instruction.getVariable());
+
+        variables.addAll(extractVariablesFromArguments(List.of(instruction), VariableType.NONE));
+
+        return variables.stream().sorted(Variable.VARIABLE_COMPARATOR).toList();
+    }
+
     public static List<Variable> extractInputVariables(List<Instruction> instructions) {
-        return extractVariables(instructions, VariableType.INPUT);
+        return extractVariablesOfType(instructions, VariableType.INPUT);
     }
 
     public static List<Variable> extractWorkVariables(List<Instruction> instructions){
-        return extractVariables(instructions, VariableType.WORK);
+        return extractVariablesOfType(instructions, VariableType.WORK);
     }
 
     public static Map<Label, InstructionReference> extractLabeledInstructions(
@@ -40,37 +53,49 @@ public class Instructions {
         return result;
     }
 
+    public static List<Label> extractUsedLabels(Instruction instruction) {
+        Set<Label> labels = new HashSet<>();
+        if(instruction.getLabel() != FixedLabel.EMPTY)
+            labels.add(instruction.getLabel());
+
+        labels.addAll(
+                getArgumentLabels(List.of(instruction)).stream()
+                        .map(ArgumentLabelInfo::label)
+                        .collect(Collectors.toSet())
+        );
+
+        return labels.stream().sorted(Label.comparator()).toList();
+    }
+
     public static List<ArgumentLabelInfo> getArgumentLabels(List<Instruction> instructions) {
         return instructions.stream()
                 .flatMap(instr -> instr.getArguments().stream()
-                        .filter(arg -> arg.getArgumentType() == ArgumentType.LABEL)
-                        .map(arg -> new ArgumentLabelInfo(instr.getName(), (Label) arg)))
+                        .flatMap(arg -> extractLabelsRecursive(instr.getName(), arg)))
                 .distinct()
-                .toList();
+                .collect(Collectors.toList());
     }
 
-    public static List<Label> extractUsedLabels(List<Instruction> instructions) {
-        return extractUsedLabels(extractLabeledInstructions(instructions), getArgumentLabels(instructions));
+    private static Stream<ArgumentLabelInfo> extractLabelsRecursive(String instructionName, InstructionArgument arg) {
+        return switch (arg.getArgumentType()) {
+            case LABEL -> Stream.of(new ArgumentLabelInfo(instructionName, (Label) arg));
+
+            case FUNC_PARAM_LIST -> ((FunctionParamList) arg).params().stream()
+                    .filter(param -> param instanceof InstructionArgument)
+                    .map(param -> (InstructionArgument) param)
+                    .flatMap(param -> extractLabelsRecursive(instructionName, param));
+
+            case FUNCTION_REF -> ((FunctionCall) arg).getParamList().params().stream()
+                    .filter(param -> param instanceof InstructionArgument)
+                    .map(param -> (InstructionArgument) param)
+                    .flatMap(param -> extractLabelsRecursive(instructionName, param));
+            default -> Stream.empty();
+        };
     }
 
-    // overloading for when you have the results of the functions cached
-    public static List<Label> extractUsedLabels(
-            Map<Label, InstructionReference> labeledInstructions,
-            List<ArgumentLabelInfo> argumentLabels
-    ) {
-        List<Label> instructionLabels = new ArrayList<>(
-                labeledInstructions.keySet().stream()
-                .sorted(Label.comparator())
-                .toList()
-        );
 
-        if(exitIsUsed(argumentLabels))
-            instructionLabels.add(FixedLabel.EXIT);
+    // ------------ private: ------------
 
-        return instructionLabels;
-    }
-
-    private static List<Variable> extractVariables(List<Instruction> instructions, VariableType variableType) {
+    private static List<Variable> extractVariablesOfType(List<Instruction> instructions, VariableType variableType) {
         // collect variables directly operated by instructions
         Set<Variable> operatedVars =
                 instructions.stream()
@@ -78,14 +103,7 @@ public class Instructions {
                         .filter(var -> var.getType() == variableType)
                         .collect(Collectors.toSet());
 
-        // collect all input variables that are arguments in the instructions
-        Set<Variable> argumentVars =
-                instructions.stream()
-                        .flatMap(instr -> instr.getArguments().stream())
-                        .filter(arg -> arg.getArgumentType() == ArgumentType.VARIABLE)
-                        .map(arg -> (Variable) arg)
-                        .filter(var -> var.getType() == variableType)
-                        .collect(Collectors.toSet());
+        var argumentVars = extractVariablesFromArguments(instructions, variableType);
 
         // unite the two sets
         Set<Variable> allInputs = new HashSet<>(operatedVars);
@@ -97,10 +115,36 @@ public class Instructions {
                 .toList();
     }
 
-    private static boolean exitIsUsed(List<ArgumentLabelInfo> argumentLabels)
-    {
-        return argumentLabels.stream()
-                .map(ArgumentLabelInfo::label)
-                .anyMatch(label -> label.equals(FixedLabel.EXIT));
+    private static Set<Variable> extractVariablesFromArguments(List<Instruction> instructions, VariableType variableType) {
+        return instructions.stream()
+                .flatMap(instr -> instr.getArguments().stream())
+                .flatMap(arg -> extractVariablesRecursive(arg, variableType))
+                .collect(Collectors.toSet());
+    }
+
+    private static Stream<Variable> extractVariablesRecursive(InstructionArgument arg, VariableType variableType) {
+        switch (arg.getArgumentType()) {
+            case VARIABLE:
+                Variable v = (Variable) arg;
+                if (variableType == VariableType.NONE || v.getType() == variableType) {
+                    return Stream.of(v);
+                } else {
+                    return Stream.empty();
+                }
+            case FUNC_PARAM_LIST:
+                // Recursively extract from param list
+                return ((FunctionParamList) arg).params().stream()
+                        .filter(param -> param instanceof InstructionArgument)
+                        .map(param -> (InstructionArgument)param)
+                        .flatMap(param -> extractVariablesRecursive(param, variableType));
+            case FUNCTION_REF:
+                // Recursively extract from function call arguments
+                return ((FunctionCall) arg).getParamList().params().stream()
+                        .filter(param -> param instanceof InstructionArgument)
+                        .map(param -> (InstructionArgument)param)
+                        .flatMap(param -> extractVariablesRecursive(param, variableType));
+            default:
+                return Stream.empty();
+        }
     }
 }

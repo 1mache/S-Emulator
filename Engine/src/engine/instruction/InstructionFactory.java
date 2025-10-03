@@ -1,8 +1,10 @@
 package engine.instruction;
 
-import engine.argument.Argument;
-import engine.argument.ArgumentType;
-import engine.argument.ConstantArgument;
+import engine.function.FunctionCall;
+import engine.function.parameter.FunctionParamList;
+import engine.instruction.argument.InstructionArgument;
+import engine.instruction.argument.InstructionArgumentType;
+import engine.numeric.constant.NumericConstant;
 import engine.instruction.concrete.*;
 import engine.instruction.exception.InstructionArgumentsException;
 import engine.label.Label;
@@ -15,7 +17,7 @@ public class InstructionFactory {
             InstructionData instructionData,
             Variable variable,
             Label instructionLabel,
-            List<Argument> arguments
+            List<InstructionArgument> arguments
     ){
         // validates the arguments (should always succeed)
         checkArguments(arguments, instructionData);
@@ -37,7 +39,7 @@ public class InstructionFactory {
                 yield new AssignmentInstruction(variable, instructionLabel, assignedVariable);
             }
             case CONSTANT_ASSIGNMENT -> {
-                ConstantArgument constant = (ConstantArgument) arguments.getFirst();
+                NumericConstant constant = (NumericConstant) arguments.getFirst();
                 yield new ConstantAssignmentInstruction(variable, instructionLabel, constant);
             }
             case JUMP_ZERO -> {
@@ -46,7 +48,7 @@ public class InstructionFactory {
             }
             case JUMP_EQUAL_CONSTANT -> {
                 Label target = (Label) arguments.getFirst();
-                ConstantArgument constant = (ConstantArgument) arguments.get(1);
+                NumericConstant constant = (NumericConstant) arguments.get(1);
                 yield new JumpConstantInstruction(variable, instructionLabel, target, constant);
             }
             case JUMP_EQUAL_VARIABLE -> {
@@ -54,17 +56,28 @@ public class InstructionFactory {
                 Variable comparedVar = (Variable) arguments.get(1);
                 yield new JumpVariableInstruction(variable, instructionLabel, target, comparedVar);
             }
+            case QUOTE -> {
+                FunctionCall quotedReference = (FunctionCall) arguments.getFirst();
+                FunctionParamList params = (FunctionParamList) arguments.get(1);
+                yield new QuoteInstruction(variable, instructionLabel, quotedReference, params);
+            }
+            case JUMP_EQUAL_FUNCTION -> {
+                Label target = (Label) arguments.getFirst();
+                FunctionCall funcReference = (FunctionCall) arguments.get(1);
+                FunctionParamList params = (FunctionParamList) arguments.get(2);
+                yield new JumpFunctionInstruction(variable, instructionLabel, target, funcReference, params);
+            }
         };
     }
 
-    private static void checkArguments(List<Argument> arguments, InstructionData instructionData){
+    private static void checkArguments(List<InstructionArgument> arguments, InstructionData instructionData){
         var neededTypes = instructionData.getArgumentTypes();
         if(neededTypes.size() != arguments.size())
             throw new InstructionArgumentsException("Wrong lineId of arguments in instruction: " +
                                                         instructionData.name());
 
-        List<ArgumentType> givenTypes = arguments.stream()
-                .map(Argument::getArgumentType)
+        List<InstructionArgumentType> givenTypes = arguments.stream()
+                .map(InstructionArgument::getArgumentType)
                 .toList();
 
         if(!givenTypes.equals(neededTypes))

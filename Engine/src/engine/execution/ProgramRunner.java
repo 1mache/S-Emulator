@@ -1,12 +1,11 @@
 package engine.execution;
 
-import engine.execution.context.VariableContext;
-import engine.execution.context.VariableTable;
+import engine.execution.context.RunContext;
+import engine.execution.context.RunContextImpl;
 import engine.instruction.Instruction;
 import engine.label.Label;
 import engine.label.FixedLabel;
 import engine.program.Program;
-import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -14,115 +13,136 @@ import java.util.Map;
 import java.util.Optional;
 
 public class ProgramRunner {
-    private final Program program;
-    private VariableContext variableContext;
-    private final LabelVariableGenerator labelVariableGenerator;
+    protected final Program program;
+    protected RunContext runContext;
 
     // instruction pointer
     private int pc = 0;
     private long cycles = 0;
 
     public ProgramRunner(Program program) {
-        this(program, new VariableTable(), new LabelVariableGenerator(program));
-    }
-
-    // private ctor for internal logic use
-    private ProgramRunner(Program program,
-                         VariableContext variableContext,
-                         LabelVariableGenerator labelVariableGenerator) {
         this.program = program;
-        this.variableContext = variableContext;
-        this.labelVariableGenerator = labelVariableGenerator;
+        runContext = new RunContextImpl();
     }
 
     public void reset(){
-        labelVariableGenerator.reset();
-        variableContext = new VariableTable();
+        runContext = new RunContextImpl();
         pc = 0;
         cycles = 0;
     }
 
-    public Label run(int expansionDegree) {
+    public boolean run(){
+        return run(FixedLabel.EMPTY);
+    }
+    /*
+     an execution that starts at pc (or at init jump label)
+     returns whether the run reached the end of the program
+    */
+    protected boolean run(Label initJumpLabel) {
         Optional<Instruction> currInstruction;
-        Label jumpLabel = FixedLabel.EMPTY;
+        Label jumpLabel = initJumpLabel;
 
         do {
+            if(breakCheck(pc))
+                return false; // early stop
+
             if (jumpLabel == FixedLabel.EMPTY) {
                 currInstruction = program.getInstructionByIndex(pc);
-                jumpLabel = executeInstruction(expansionDegree, currInstruction.orElse(null));
+                jumpLabel = executeInstruction(currInstruction.orElse(null));
             }
             else {
-                // jump needs to happen
-                currInstruction = program.getInstructionByLabel(jumpLabel);
-                // set the pc to the relevant line
-                program.getLineNumberOfLabel(jumpLabel)
-                        .ifPresent(lineId -> pc = lineId);
+                currInstruction = jumpToInstructionByLabel(jumpLabel);
 
                 if(currInstruction.isPresent())
-                    jumpLabel = executeInstruction(expansionDegree, currInstruction.get());
+                    jumpLabel = executeInstruction(currInstruction.get());
 
             }
-            if(jumpLabel == FixedLabel.EXIT) break; // check for exit
         }
         while (currInstruction.isPresent());
 
-        // return the last jump label
-        return jumpLabel;
+        return true;
     }
 
     public Long getRunOutput(){
-        return variableContext.getVariableValue(Variable.RESULT);
+        return runContext.getVariableValue(Variable.RESULT);
     }
 
-    public Map<String, Long> getVariableValues() {
-        return variableContext.getOrganizedVariableValues();
+    public Map<String, Long> getAllVariableValues() {
+        return runContext.getOrganizedVariableValues();
     }
 
-    public Long getCycles() {
+    public long getCycles() {
         return cycles;
     }
 
     public void initInputVariables(List<Long> initInput) {
         int counter = 1;
         for(Long input : initInput) {
-            variableContext.setVariableValue(Variable.createInputVariable(counter), input);
+            runContext.setVariableValue(Variable.createInputVariable(counter), input);
             counter++;
         }
+
+        runContext.setVariableValue(Variable.RESULT, 0L);
     }
 
-    // ------------ private: -------------
+    public void initInputVariablesSpecific(List<Long> initInput) {
+        if(initInput.size() > program.getInputVariables().size())
+            throw new IllegalArgumentException("Too many input values provided. Expected at most " + program.getInputVariables().size() + " but got " + initInput.size());
 
-    // expands and executes
-    private Label executeInstruction(int expansionLevel, Instruction instruction) {
-        if (instruction == null) {
-            return FixedLabel.EMPTY;
+        var inputVars = program.getInputVariables();
+        int minSize = Math.min(initInput.size(), inputVars.size());
+        int i;
+        for(i = 0; i < minSize; i++) {
+            runContext.setVariableValue(inputVars.get(i), initInput.get(i));
+        }
+        for(; i < inputVars.size(); i++) {
+            runContext.setVariableValue(inputVars.get(i), 0L);
         }
 
-        Optional<Program> expansion = Optional.empty();
-        if(expansionLevel != 0)
-            expansion = instruction.getExpansionInProgram(labelVariableGenerator);
-
-        // if expansion is empty, the instruction is synthetic
-        if (expansion.isEmpty()) {
-            return executeInstruction(instruction);
-        }
-
-        pc++;
-        // run with the same variable context and labelVariableGenerator
-        ProgramRunner runner = new ProgramRunner(expansion.get(), variableContext, labelVariableGenerator);
-        Label result = runner.run(expansionLevel-1);
-        cycles += runner.getCycles();
-        return result;
+        runContext.setVariableValue(Variable.RESULT, 0L);
     }
 
-    // executes instruction the normal way
-    private Label executeInstruction(Instruction instruction) {
-        pc++;
+    // ------------ internal: ------------
+
+    protected int getPc(){
+        return pc;
+    }
+
+    // called before each instruction. override to implement debug modes
+    protected boolean breakCheck(int pc) {
+        return false; // this is normal execution
+    }
+
+    // Note: returns empty if label is EXIT
+    protected Optional<Instruction> jumpToInstructionByLabel(Label jumpLabel) {
+        Optional<Instruction> jumpedTo;
+        // jump needs to happen
+        jumpedTo = program.getInstructionByLabel(jumpLabel);
+        return jumpedTo;
+    }
+
+    protected Label executeInstruction(Instruction instruction) {
         Optional<Instruction> optionalInstruction = Optional.ofNullable(instruction);
-        optionalInstruction.ifPresent(i -> cycles += i.cycles());
 
-        return optionalInstruction
-                .map(ins -> ins.execute(variableContext))
+        var jumpLabel = optionalInstruction
+                .map(ins -> {
+                    InstructionExecutionResult result = ins.execute(runContext);
+                    cycles += result.cycles(); // add cycles cost
+                    return result.jumpTo();
+                })
                 .orElse(FixedLabel.EMPTY);
+
+
+        if(jumpLabel == FixedLabel.EXIT) {
+            // the end, will not crash if we call getInstructionByIndex with this pc.
+            pc = program.getInstructions().size() + 1;
+        } else if(jumpLabel == FixedLabel.EMPTY)
+            pc++;
+        else {
+            program.getLineNumberOfLabel(jumpLabel)
+                    .ifPresent(lineId -> pc = lineId);
+        }
+
+        return jumpLabel;
     }
 }

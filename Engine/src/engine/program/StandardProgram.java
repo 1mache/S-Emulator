@@ -1,9 +1,11 @@
 package engine.program;
 
 import engine.instruction.Instruction;
+import engine.instruction.utility.InstructionReference;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.instruction.utility.Instructions;
+import engine.loader.ArgumentLabelInfo;
 import engine.variable.Variable;
 
 import java.util.*;
@@ -42,10 +44,19 @@ public class StandardProgram implements Program {
 
     @Override
     public List<Label> getUsedLabels() {
-        return Instructions.extractUsedLabels(
-                labeledInstructions,
-                Instructions.getArgumentLabels(instructions)
+        List<Label> instructionLabels = new ArrayList<>(
+                labeledInstructions.keySet().stream()
+                        .sorted(Label.comparator())
+                        .toList()
         );
+
+        if(Instructions.getArgumentLabels(instructions).stream()
+                .map(ArgumentLabelInfo::label)
+                .anyMatch(label -> label.equals(FixedLabel.EXIT))
+          )
+            instructionLabels.add(FixedLabel.EXIT);
+
+        return instructionLabels;
     }
 
     @Override
@@ -55,7 +66,7 @@ public class StandardProgram implements Program {
 
     @Override
     public Optional<Instruction> getInstructionByLabel(Label label) {
-        if(label == FixedLabel.EMPTY)
+        if(label == FixedLabel.EMPTY || label == FixedLabel.EXIT)
             return Optional.empty();
         return Optional.ofNullable(labeledInstructions.get(label))
                 .map(InstructionReference::instruction);
@@ -63,7 +74,7 @@ public class StandardProgram implements Program {
 
     @Override
     public Optional<Integer> getLineNumberOfLabel(Label label) {
-        if(label == FixedLabel.EMPTY)
+        if(label == FixedLabel.EMPTY || label == FixedLabel.EXIT)
             return Optional.empty();
         return Optional.ofNullable(labeledInstructions.get(label))
                 .map(InstructionReference::lineId);
@@ -93,7 +104,7 @@ public class StandardProgram implements Program {
         maxExpansionDegree = 0;
 
         for(Instruction instruction : instructions) {
-            int expansionDegree = instruction.getExpansionStandalone()
+            int expansionDegree = instruction.getExpansion()
                     .map(expansion -> expansion.getMaxExpansionDegree() + 1)
                     .orElse(0);
 

@@ -1,15 +1,16 @@
 package engine.instruction.concrete;
 
-import engine.argument.Argument;
-import engine.execution.context.VariableContext;
+import engine.execution.InstructionExecutionResult;
+import engine.instruction.argument.InstructionArgument;
+import engine.execution.context.RunContext;
 import engine.instruction.AbstractInstruction;
 import engine.instruction.Instruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
+import engine.label.NumericLabel;
 import engine.program.Program;
 import engine.program.StandardProgram;
-import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.ArrayList;
@@ -25,9 +26,9 @@ public class ZeroVariableInstruction extends AbstractInstruction {
     }
 
     @Override
-    public Label execute(VariableContext context) {
+    public InstructionExecutionResult execute(RunContext context) {
         context.setVariableValue(getVariable(), 0);
-        return FixedLabel.EMPTY;
+        return new InstructionExecutionResult(FixedLabel.EMPTY, staticCycles());
     }
 
     @Override
@@ -36,13 +37,13 @@ public class ZeroVariableInstruction extends AbstractInstruction {
     }
 
     @Override
-    public List<Argument> getArguments() {
+    public List<InstructionArgument> getArguments() {
         return List.of(); // no arguments
     }
 
     @Override
-    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
-        Label l1 = generator.getNextLabel();
+    protected Program getSyntheticExpansion() {
+        Label l1 = new NumericLabel(getAvaliableLabelNumber());
         List<Instruction> instructionList = new ArrayList<>();
 
         /* this instruction has a label on its first expanded instruction, if the original

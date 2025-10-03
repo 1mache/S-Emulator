@@ -1,14 +1,14 @@
 package engine.instruction.concrete;
 
-import engine.argument.Argument;
-import engine.execution.context.VariableContext;
+import engine.instruction.argument.InstructionArgument;
+import engine.execution.context.RunContext;
 import engine.instruction.InstructionData;
 import engine.instruction.AbstractJumpInstruction;
 import engine.label.FixedLabel;
 import engine.label.Label;
+import engine.label.NumericLabel;
 import engine.program.Program;
 import engine.program.StandardProgram;
-import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -24,8 +24,8 @@ public class JumpZeroInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    protected boolean isJump(VariableContext context) {
-        return context.getVariableValue(getVariable()) == 0;
+    protected IsJumpResult isJump(RunContext context) {
+        return new IsJumpResult(context.getVariableValue(getVariable()) == 0, staticCycles());
     }
 
     @Override
@@ -35,13 +35,13 @@ public class JumpZeroInstruction extends AbstractJumpInstruction {
     }
 
     @Override
-    public List<Argument> getArguments() {
+    public List<InstructionArgument> getArguments() {
         return List.of(getTargetLabel());
     }
 
     @Override
-    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
-        Label l1 = generator.getNextLabel();
+    protected Program getSyntheticExpansion() {
+        Label l1 = new NumericLabel(getAvaliableLabelNumber());
 
         return new StandardProgram(
                 getName() + "Expansion",

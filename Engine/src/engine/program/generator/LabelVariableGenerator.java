@@ -6,6 +6,7 @@ import engine.label.NumericLabel;
 import engine.program.Program;
 import engine.variable.Variable;
 
+import java.util.Collection;
 import java.util.List;
 
 public class LabelVariableGenerator {
@@ -15,31 +16,27 @@ public class LabelVariableGenerator {
     private int labelCounter;
     private int variableCounter;
 
-    // no program context
-    public LabelVariableGenerator(){
-        initLabelCounter = 1;
-        initVariableCounter = 1;
-    }
+    public LabelVariableGenerator(Collection<Label> usedLabels, Collection<Variable> usedWorkVariables){
+        // calculate the initial label counter as one more than the largest NumericLabel number present
+        int maxLabelNum = usedLabels.stream()
+                .filter(l -> l instanceof NumericLabel)
+                .mapToInt(l -> ((NumericLabel) l).getNumber())
+                .max()
+                .orElse(0); // default to 0 if no NumericLabels found
+        initLabelCounter = maxLabelNum + 1;
 
-    public LabelVariableGenerator(Program program) {
-        List<Label> labels = program.getUsedLabels();
-        List<Variable> workVariables = program.getWorkVariables();
-
-        // take the first label and variable lineId available
-        if(labels.isEmpty() || labels.equals(List.of(FixedLabel.EXIT)))
-            initLabelCounter = 1;
-        else if(labels.getLast().equals(FixedLabel.EXIT))
-            // we know that EXIT is last if present
-            initLabelCounter = ((NumericLabel)labels.get(labels.size()-2)).getNumber() + 1;
-        else
-            initLabelCounter = ((NumericLabel)labels.getLast()).getNumber() + 1;
-
-        if(workVariables.isEmpty())
-            initVariableCounter = 1;
-        else
-            initVariableCounter = workVariables.getLast().getNumber() + 1;
+        // calculate the initial variable counter as one more than the largest Variable number present
+        int maxVarNum = usedWorkVariables.stream()
+                .mapToInt(Variable::getNumber)
+                .max()
+                .orElse(0); // default to 0 if none
+        initVariableCounter = maxVarNum + 1;
 
         reset();
+    }
+
+    public LabelVariableGenerator(Program contextProgram) {
+        this(contextProgram.getUsedLabels(), contextProgram.getWorkVariables());
     }
 
     public void reset(){

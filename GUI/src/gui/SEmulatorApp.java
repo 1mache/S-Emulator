@@ -1,0 +1,55 @@
+package gui;
+
+import engine.api.SLanguageEngine;
+import gui.component.primary.PrimaryController;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+public class SEmulatorApp extends Application {
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        final String LAYOUT_FXML_PATH = "/gui/component/primary/app_layout.fxml";
+
+        SLanguageEngine engine = SLanguageEngine.getInstance();
+
+        var fxmlUrl = getClass().getResource(LAYOUT_FXML_PATH);
+        if (fxmlUrl == null) {
+            System.out.println("Unable to locate " + LAYOUT_FXML_PATH);
+            Platform.exit();
+            return;
+        }
+
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(fxmlUrl);
+
+        Parent root = loader.load();
+
+        PrimaryController controller = loader.getController();
+        controller.setEngine(engine);
+
+        Scene scene = new Scene(root);
+        loadStyles(scene);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("SEmulator");
+        primaryStage.show();
+    }
+
+    public static void main(String[] args) {
+        Application.launch(args);
+    }
+
+    private void loadStyles(Scene scene){
+        final String STYLES_CSS_PATH = "/gui/styles.css";
+
+        var stylesUrl = getClass().getResource(STYLES_CSS_PATH);
+        if (stylesUrl != null) {
+            scene.getStylesheets().add(stylesUrl.toExternalForm());
+        } else {
+            System.out.println("Unable to locate " + STYLES_CSS_PATH);
+        }
+    }
+}

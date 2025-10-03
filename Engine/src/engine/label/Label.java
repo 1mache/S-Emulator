@@ -1,11 +1,11 @@
 package engine.label;
 
-import engine.argument.Argument;
-import engine.argument.ArgumentType;
+import engine.instruction.argument.InstructionArgument;
+import engine.instruction.argument.InstructionArgumentType;
 
 import java.util.Comparator;
 
-public interface Label extends Argument {
+public interface Label extends InstructionArgument {
     String stringRepresentation();
 
     static Comparator<Label> comparator() {
@@ -31,7 +31,7 @@ public interface Label extends Argument {
     }
 
     @Override
-    default ArgumentType getArgumentType() {
-        return ArgumentType.LABEL;
+    default InstructionArgumentType getArgumentType() {
+        return InstructionArgumentType.LABEL;
     }
 }

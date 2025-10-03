@@ -1,8 +1,9 @@
 package engine.instruction.concrete;
 
-import engine.argument.Argument;
-import engine.argument.ConstantArgument;
-import engine.execution.context.VariableContext;
+import engine.execution.InstructionExecutionResult;
+import engine.instruction.argument.InstructionArgument;
+import engine.numeric.constant.NumericConstant;
+import engine.execution.context.RunContext;
 import engine.instruction.AbstractInstruction;
 import engine.instruction.Instruction;
 import engine.instruction.InstructionData;
@@ -10,28 +11,27 @@ import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.program.Program;
 import engine.program.StandardProgram;
-import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ConstantAssignmentInstruction extends AbstractInstruction {
-    private final ConstantArgument constant;
+    private final NumericConstant constant;
 
     public ConstantAssignmentInstruction(
              Variable variable,
              Label label,
-             ConstantArgument constant
+             NumericConstant constant
     ) {
         super(InstructionData.CONSTANT_ASSIGNMENT, variable, label);
         this.constant = constant;
     }
 
     @Override
-    public Label execute(VariableContext context) {
+    public InstructionExecutionResult execute(RunContext context) {
         context.setVariableValue(getVariable(), constant.value());
-        return FixedLabel.EMPTY;
+        return new InstructionExecutionResult(FixedLabel.EMPTY, staticCycles());
     }
 
     @Override
@@ -40,12 +40,12 @@ public class ConstantAssignmentInstruction extends AbstractInstruction {
     }
 
     @Override
-    public List<Argument> getArguments() {
+    public List<InstructionArgument> getArguments() {
         return List.of(constant);
     }
 
     @Override
-    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
+    protected Program getSyntheticExpansion() {
         List<Instruction> instructionList = new ArrayList<>();
         Variable thisVariable = getVariable();
 

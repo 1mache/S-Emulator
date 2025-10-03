@@ -1,14 +1,15 @@
 package engine.instruction.concrete;
 
-import engine.argument.Argument;
-import engine.execution.context.VariableContext;
+import engine.execution.InstructionExecutionResult;
+import engine.instruction.argument.InstructionArgument;
+import engine.execution.context.RunContext;
 import engine.instruction.AbstractInstruction;
 import engine.instruction.InstructionData;
 import engine.label.FixedLabel;
 import engine.label.Label;
+import engine.label.NumericLabel;
 import engine.program.Program;
 import engine.program.StandardProgram;
-import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 
 import java.util.List;
@@ -26,9 +27,9 @@ public class AssignmentInstruction extends AbstractInstruction {
     }
 
     @Override
-    public Label execute(VariableContext context) {
+    public InstructionExecutionResult execute(RunContext context) {
         context.setVariableValue(getVariable(), context.getVariableValue(assignedVariable));
-        return FixedLabel.EMPTY;
+        return new InstructionExecutionResult(FixedLabel.EMPTY, staticCycles());
     }
 
     @Override
@@ -37,17 +38,19 @@ public class AssignmentInstruction extends AbstractInstruction {
     }
 
     @Override
-    public List<Argument> getArguments() {
-        return List.of(assignedVariable); // no arguments
+    public List<InstructionArgument> getArguments() {
+        return List.of(assignedVariable);
     }
 
     @Override
-    protected Program getSyntheticExpansion(LabelVariableGenerator generator) {
-        Label l1 = generator.getNextLabel();
-        Label l2 = generator.getNextLabel();
-        Label l3 = generator.getNextLabel();
+    protected Program getSyntheticExpansion() {
+        int avaliableLabelNumber = getAvaliableLabelNumber();
+
+        Label l1 = new NumericLabel(avaliableLabelNumber++);
+        Label l2 = new NumericLabel(avaliableLabelNumber++);
+        Label l3 = new NumericLabel(avaliableLabelNumber++);
         Label empty = FixedLabel.EMPTY;
-        Variable z1 = generator.getNextWorkVariable();
+        Variable z1 = Variable.createWorkVariable(getAvaliableWorkVarNumber());
 
         return new StandardProgram(
                 getName() + "Expansion",
