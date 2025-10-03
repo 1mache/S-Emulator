@@ -1,6 +1,7 @@
 package engine.api;
 
 import engine.api.dto.FunctionIdentifier;
+import engine.api.dto.debug.DebugEndResult;
 import engine.api.dto.debug.DebugHandle;
 import engine.api.dto.ProgramExecutionResult;
 import engine.api.dto.ProgramPeek;
@@ -108,16 +109,7 @@ public class SLanguageEngine {
                 runner.getCycles()
         );
 
-        List<ProgramExecutionResult> executionResults = previousExecutions.get(currentProgram.getName());
-        if (executionResults == null) {
-            // key does not exist, create a new list with the item
-            executionResults = new ArrayList<>();
-            executionResults.add(executionResult);
-            previousExecutions.put(currentProgram.getName(), executionResults);
-        } else {
-            // key exists, add the item to the existing list
-            executionResults.add(executionResult);
-        }
+        addExecutionToHistory(executionResult);
 
         return executionResult;
     }
@@ -130,7 +122,20 @@ public class SLanguageEngine {
 
         initializeInputs(debugger, inputs, specificInputs);
 
-        return new DebugHandle(debugger);
+        return new DebugHandle(
+                debugger,
+                debugResult -> {
+                    addExecutionToHistory(
+                            new ProgramExecutionResult(
+                                    debugResult.output(),
+                                    debugResult.variableMap(),
+                                    inputs,
+                                    expansionDegree,
+                                    debugger.getCycles()
+                            )
+                    );
+                }
+        );
     }
 
 
@@ -205,6 +210,19 @@ public class SLanguageEngine {
             runner.initInputVariablesSpecific(inputs);
         else
             runner.initInputVariables(inputs);
+    }
+
+    private void addExecutionToHistory(ProgramExecutionResult executionResult) {
+        List<ProgramExecutionResult> executionResults = previousExecutions.get(currentProgram.getName());
+        if (executionResults == null) {
+            // key does not exist, create a new list with the item
+            executionResults = new ArrayList<>();
+            executionResults.add(executionResult);
+            previousExecutions.put(currentProgram.getName(), executionResults);
+        } else {
+            // key exists, add the item to the existing list
+            executionResults.add(executionResult);
+        }
     }
 
     private Variable str2Variable(String str){

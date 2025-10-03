@@ -1,15 +1,19 @@
 package engine.api.dto.debug;
 
+import engine.api.dto.ProgramExecutionResult;
 import engine.debugger.ProgramDebugger;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 // handle to be passed to the caller
-public class DebugHandle{
+public class DebugHandle {
+    private final Consumer<DebugEndResult> onRunEnded;
     private final ProgramDebugger debugger;
 
-    public DebugHandle(ProgramDebugger debugger){
-            this.debugger = debugger;
+    public DebugHandle(ProgramDebugger debugger, Consumer<DebugEndResult> onRunEnded){
+        this.debugger = debugger;
+        this.onRunEnded = onRunEnded;
     }
 
     public boolean startDebug() {return debugger.run();}
@@ -28,7 +32,12 @@ public class DebugHandle{
     }
 
     public boolean resume(){
-        return debugger.resume();
+        if (debugger.resume()) {
+            onRunEnded.accept(getResult());
+            return true;
+        }
+
+        return false;
     }
 
     public void addBreakpoint(int lineNumber){
@@ -38,6 +47,7 @@ public class DebugHandle{
 
     public DebugEndResult getResult() {
         return new DebugEndResult(
+                debugger.getRunOutput(),
                 debugger.getAllVariableValues(),
                 debugger.getCycles()
         );
