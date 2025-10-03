@@ -27,10 +27,6 @@ public class DebugHandle{
         return new DebugStepPeek(debugger.stepOver());
     }
 
-    public DebugStepPeek stepBack(){
-        return new DebugStepPeek(debugger.stepBack());
-    }
-
     public boolean resume(){
         return debugger.resume();
     }

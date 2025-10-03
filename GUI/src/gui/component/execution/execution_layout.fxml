@@ -28,7 +28,6 @@
                <children>
                   <Button fx:id="mainActionButton" mnemonicParsing="false" onAction="#onMainAction" text="Run Program" />
                   <Button fx:id="stepOverButton" disable="true" mnemonicParsing="false" onAction="#stepOverAction" text="Step Over" />
-                  <Button fx:id="stepBackButton" disable="true" layoutX="210.0" layoutY="35.0" mnemonicParsing="false" onAction="#stepBackAction" text="Step Back" />
                   <Button fx:id="continueButton" disable="true" layoutX="300.0" layoutY="35.0" mnemonicParsing="false" onAction="#continueAction" text="Continue" />
                </children>
             </TilePane>

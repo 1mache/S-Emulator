@@ -51,9 +51,6 @@ public class ExecutionTabController implements Initializable {
     private Button stepOverButton;
 
     @FXML
-    private Button stepBackButton;
-
-    @FXML
     private Button continueButton;
 
     private List<Button> debugControls;
@@ -201,12 +198,6 @@ public class ExecutionTabController implements Initializable {
     }
 
     @FXML
-    public void stepBackAction(ActionEvent event) {
-        // if debug finished this button will not be active so no check needed
-        System.out.println("I am stepping back");
-    }
-
-    @FXML
     public void continueAction(ActionEvent event) {
         debugStateMachine.transitionTo(DebugState.RUNNING);
         if(debugHandle.resume())
@@ -325,7 +316,8 @@ public class ExecutionTabController implements Initializable {
 
     private void initDebugRelated() {
         // define debug controls
-        debugControls = List.of(stepOverButton, stepBackButton, continueButton);
+        debugControls = List.of(stepOverButton, continueButton);
+        debugControls = List.of(stepOverButton, continueButton);
 
         // when debug finishes:
         debugStateMachine.addListener(

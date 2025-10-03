@@ -76,14 +76,7 @@ public class ProgramDebugger extends ProgramRunner {
         if(pausedOn == null) // executed last instruction
             transitionToEnd();
 
-        return new DebugStep(variable, oldValue, newValue, pcBeforeExecution);
-    }
-
-    public DebugStep stepBack(){
-        int pcBeforeExecution = getPc();
-
-        enforceOnInstructionState();
-        return new DebugStep(Variable.NO_VAR, 0L,0L, pcBeforeExecution); // NOT IMPLEMENTED
+        return new DebugStep(variable, newValue, pcBeforeExecution);
     }
 
     public boolean resume(){
@@ -107,7 +100,7 @@ public class ProgramDebugger extends ProgramRunner {
     protected boolean breakCheck(int pc) {
         boolean hitBreakPoint = breakpoints.contains(pc);
         if(hitBreakPoint)
-            // (should never actually be null here))
+            // (should never actually be null here)
             transitionToOnInstruction(program.getInstructionByIndex(pc).orElse(null));
 
         return hitBreakPoint;
