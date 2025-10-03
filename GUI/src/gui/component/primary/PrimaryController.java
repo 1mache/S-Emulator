@@ -325,10 +325,10 @@ public class PrimaryController implements Initializable {
                     if (now){
                         resetProgramView();
 
+                        mainInstructionTableController.clear();
+
                         mainInstructionTableController.setInstructions(engine.getProgramPeek().instructions());
                         summaryLineField.setText(buildSummaryLine());
-
-                        executionTabController.buildInputGrid();
                     }
                 }
         );

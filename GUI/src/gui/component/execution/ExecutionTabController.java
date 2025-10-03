@@ -232,6 +232,7 @@ public class ExecutionTabController implements Initializable {
         modeChoiceBox.setValue(runMode);
         debugStateMachine.transitionTo(DebugState.NOT_IN_DEBUG);
         variableTableController.clear();
+        breakpoints.clear();
         setCyclesText(0);
         buildInputGrid();
         disableInputs(false);
@@ -364,11 +365,11 @@ public class ExecutionTabController implements Initializable {
 
     private void onInputsValidityChange(Boolean now) {
         if (now) {
-            String DEFAULT_LABEL_TEXT = "Input Variables (positive integers)";
+            String DEFAULT_LABEL_TEXT = "Input Variables (pos. integers)";
             inputVarsLabel.setText(DEFAULT_LABEL_TEXT);
             inputVarsLabel.getStyleClass().remove(CssClasses.ERROR_FIELD);
         } else {
-            inputVarsLabel.setText("Please correct invalid inputs");
+            inputVarsLabel.setText("Invalid inputs");
             if (!inputVarsLabel.getStyleClass().contains(CssClasses.ERROR_FIELD)) {
                 inputVarsLabel.getStyleClass().add(CssClasses.ERROR_FIELD);
             }
