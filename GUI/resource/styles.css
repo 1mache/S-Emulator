@@ -1,10 +1,10 @@
 .error-field {
-    -fx-text-fill: red;
-    -fx-border-color: red;
+    -fx-text-fill: #ef4444;
+    -fx-border-color: #ef4444;
 }
 
 .highlighted {
-    -fx-background-color: yellow;
+    -fx-background-color: #fbbf24;
 }
 
 .debug-highlighted {
