@@ -1,7 +1,6 @@
 package gui.component.history;
 
 import engine.api.dto.ProgramExecutionResult;
-import gui.component.history.event.HistoryRowAction;
 import gui.component.variable.table.VariableTableController;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -42,10 +41,15 @@ public class HistoryTableController implements Initializable {
     @FXML
     private TableColumn<ProgramExecutionResult, Long> cyclesColumn;
 
+    @FXML
+    private Button showButton;
+
+    @FXML
+    private Button reRunButton;
+
     private final ObservableList<ProgramExecutionResult> executionResults = FXCollections.observableArrayList();
 
     private ProgramExecutionResult selectedLine;
-    private final Set<EventHandler<HistoryRowAction>> lineSelectionListeners = new HashSet<>();
 
     private final Set<EventHandler<ActionEvent>> reRunButtonListeners = new HashSet<>();
 
@@ -61,6 +65,7 @@ public class HistoryTableController implements Initializable {
                         if (!row.isEmpty()) {
                             selectedLine = row.getItem();
                         }
+                        onLineSelected();
                     });
                     return row;
                 }
@@ -69,6 +74,7 @@ public class HistoryTableController implements Initializable {
         initHistoryTableColumns();
 
         variableTableController.clear();
+
     }
 
     @FXML
@@ -89,10 +95,6 @@ public class HistoryTableController implements Initializable {
     public void setItems(List<ProgramExecutionResult> resultList){
         executionResults.addAll(resultList);
         historyTable.setItems(executionResults);
-    }
-
-    public void addLineSelectionListener(EventHandler<HistoryRowAction> handler) {
-        lineSelectionListeners.add(handler);
     }
 
     public void addReRunButtonListener(EventHandler<ActionEvent> handler) {
@@ -134,9 +136,15 @@ public class HistoryTableController implements Initializable {
         );
     }
 
-    private void fireLineSelected(){
-        for(var listener: lineSelectionListeners)
-            listener.handle(new HistoryRowAction(selectedLine));
+    private void onLineSelected() {
+        if(selectedLine != null) {
+            showButton.setDisable(false);
+            reRunButton.setDisable(false);
+        }
+        else{
+            showButton.setDisable(true);
+            reRunButton.setDisable(true);
+        }
     }
 
     private void fireReRunButtonPressed(ActionEvent event){

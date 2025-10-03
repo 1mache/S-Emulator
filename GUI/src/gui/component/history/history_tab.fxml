@@ -31,8 +31,8 @@
                         <Font name="System Bold" size="14.0" />
                      </font>
                   </Label>
-                  <Button fx:id="showButton" mnemonicParsing="false" onAction="#showVariablesAction" styleClass="control-button" text="Show" />
-                  <Button fx:id="reRunButton" mnemonicParsing="false" onAction="#reRunAction" styleClass="control-button" text="Re-run" />
+                  <Button fx:id="showButton" disable="true" mnemonicParsing="false" onAction="#showVariablesAction" styleClass="control-button" text="Show" />
+                  <Button fx:id="reRunButton" disable="true" mnemonicParsing="false" onAction="#reRunAction" styleClass="control-button" text="Re-run" />
                </children>
                <padding>
                   <Insets left="5.0" right="5.0" />
