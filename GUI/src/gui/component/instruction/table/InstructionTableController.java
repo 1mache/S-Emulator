@@ -68,6 +68,10 @@ public class InstructionTableController implements Initializable {
         instructionTable.setPlaceholder(new Label(message));
     }
 
+    public List<InstructionPeek> getInstructions(){
+        return List.copyOf(instructions);
+    }
+
     public void setInstructions(List<InstructionPeek> instructions){
         this.instructions.clear();
         this.instructions.addAll(instructions);

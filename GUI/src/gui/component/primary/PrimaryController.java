@@ -67,6 +67,9 @@ public class PrimaryController implements Initializable {
     private InstructionTableController mainInstructionTableController;
 
     @FXML
+    private TextField summaryLineField;
+
+    @FXML
     private InstructionTableController expansionTableController;
 
     @FXML
@@ -114,19 +117,22 @@ public class PrimaryController implements Initializable {
     }
 
     @FXML
-    public void showHistoryAction(ActionEvent event){
+    public void showHistoryAction(ActionEvent event) {
         final String HISTORY_LAYOUT_PATH = "/gui/component/history/history_tab.fxml";
 
         FXMLLoader loader = new FXMLLoader();
         URL historyTableUrl = getClass().getResource(HISTORY_LAYOUT_PATH);
-
         loader.setLocation(historyTableUrl);
+
         try {
             Parent root = loader.load();
             Stage dialog = new Stage();
             dialog.setTitle("Run History");
             dialog.initModality(Modality.APPLICATION_MODAL);
-            dialog.setScene(new Scene(root));
+            Scene dialogScene = new Scene(root);
+            dialogScene.getStylesheets().addAll(rootBorderPane.getStylesheets());
+
+            dialog.setScene(dialogScene);
 
             HistoryTableController controller = loader.getController();
             controller.setItems(engine.getExecutionHistoryOfCurrent());
@@ -144,6 +150,7 @@ public class PrimaryController implements Initializable {
             throw new RuntimeException(e);
         }
     }
+
 
     public void setEngine(SLanguageEngine engine) {
         if(engine == null)
@@ -320,6 +327,7 @@ public class PrimaryController implements Initializable {
                         resetProgramView();
 
                         mainInstructionTableController.setInstructions(engine.getProgramPeek().instructions());
+                        summaryLineField.setText(buildSummaryLine());
 
                         executionTabController.buildInputGrid();
                     }
@@ -332,6 +340,7 @@ public class PrimaryController implements Initializable {
                 engine.getExpandedProgramPeek(expansionDegreeProperty.get()).instructions());
 
         expansionTableController.clear(); // reset the bottom table
+        summaryLineField.setText(buildSummaryLine());
     }
 
     private void onDebugStateChange(DebugState debugState) {
@@ -462,6 +471,22 @@ public class PrimaryController implements Initializable {
     private void resetHighlight(){
         highlightChoiceBox.setValue(null);
         mainInstructionTableController.resetLinesHighlight();
+    }
+
+    private String buildSummaryLine(){
+        List<InstructionPeek> instructions = mainInstructionTableController.getInstructions();
+
+        final int[] baseInstructionsCount = {0};
+        final int[] syntheticInstructionsCount = {0};
+        instructions.forEach(instruction -> {
+            if(instruction.isSynthetic())
+                syntheticInstructionsCount[0]++;
+            else
+                baseInstructionsCount[0]++;
+        });
+
+        return String.format("B: %d | S: %d | Total: %d",
+                baseInstructionsCount[0], syntheticInstructionsCount[0], instructions.size());
     }
 
     private void playSoundTheme() {

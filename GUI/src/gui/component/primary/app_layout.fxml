@@ -43,7 +43,7 @@
                            </opaqueInsets>
                            <children>
                               <Label layoutX="191.0" layoutY="40.0" styleClass="text-component" text="Function:" />
-                              <ChoiceBox fx:id="programChoiceBox" prefWidth="150.0" />
+                              <ChoiceBox fx:id="programChoiceBox" prefWidth="200.0" />
                               <Label styleClass="text-component" text="Expansion degree: " />
                               <ChoiceBox fx:id="expansionChoiceBox" prefWidth="150.0" />
                               <ComboBox fx:id="highlightChoiceBox" prefWidth="180.0" promptText="No highlight" />
@@ -68,9 +68,9 @@
                </rowConstraints>
                <children>
                   <fx:include fx:id="executionTab" minHeight="400.0" minWidth="200.0" source="../execution/execution_layout.fxml" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
-                  <VBox alignment="CENTER" prefHeight="170.0" prefWidth="498.0" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+                  <VBox alignment="CENTER" prefHeight="170.0" prefWidth="498.0" spacing="10.0" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                      <children>
-                        <Label text="Execution history" />
+                        <Label styleClass="title" text="Execution history" />
                         <Button fx:id="showHistoryButton" mnemonicParsing="false" onAction="#showHistoryAction" styleClass="control-button" text="Show History" VBox.vgrow="ALWAYS" />
                      </children>
                   </VBox>
@@ -78,12 +78,12 @@
             </GridPane>
          </right>
          <center>
-            <SplitPane dividerPositions="0.5" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="350.0" orientation="VERTICAL" prefHeight="600.0" prefWidth="539.0" BorderPane.alignment="CENTER">
+            <SplitPane dividerPositions="0.5965447154471544" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="350.0" orientation="VERTICAL" prefHeight="600.0" prefWidth="539.0" BorderPane.alignment="CENTER">
                <items>
                   <VBox minHeight="0.0" prefHeight="267.0" prefWidth="519.0">
                      <children>
                         <fx:include fx:id="mainInstructionTable" minHeight="200.0" minWidth="400.0" source="../instruction/table/table_layout.fxml" VBox.vgrow="ALWAYS" />
-                        <TextField fx:id="summaryLineField" alignment="CENTER" editable="false" minHeight="25.0" text="Summary Line" VBox.vgrow="ALWAYS">
+                        <TextField fx:id="summaryLineField" alignment="CENTER" editable="false" minHeight="35.0" prefHeight="40.0" styleClass="summary" text="Summary" VBox.vgrow="ALWAYS">
                            <VBox.margin>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </VBox.margin>
@@ -98,7 +98,7 @@
                   </VBox>
                   <VBox alignment="CENTER" minHeight="225.0" prefHeight="297.0" prefWidth="489.0" spacing="3.0">
                      <children>
-                        <Label fx:id="SelectedInstructionHistoryChain" alignment="CENTER" minHeight="25.0" text="Selected Instruction history chain" VBox.vgrow="ALWAYS">
+                        <Label fx:id="SelectedInstructionHistoryChain" alignment="CENTER" minHeight="25.0" styleClass="title" text="Selected Instruction history chain" VBox.vgrow="ALWAYS">
                            <font>
                               <Font name="System Bold" size="16.0" />
                            </font>
