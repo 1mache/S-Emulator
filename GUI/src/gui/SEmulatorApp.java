@@ -43,7 +43,8 @@ public class SEmulatorApp extends Application {
     }
 
     private void loadStyles(Scene scene){
-        final String STYLES_CSS_PATH = "/styles.css";
+        final String STYLES_CSS_PATH = "/gui/styles.css";
+
         var stylesUrl = getClass().getResource(STYLES_CSS_PATH);
         if (stylesUrl != null) {
             scene.getStylesheets().add(stylesUrl.toExternalForm());

@@ -86,7 +86,6 @@ public class PrimaryController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        playSoundTheme();
 
         initInstructionTables();
 
@@ -487,18 +486,5 @@ public class PrimaryController implements Initializable {
 
         return String.format("B: %d | S: %d | Total: %d",
                 baseInstructionsCount[0], syntheticInstructionsCount[0], instructions.size());
-    }
-
-    private void playSoundTheme() {
-        final String MAMALIGA_SOUND_PATH = "/sound/magic_mamaliga.mp3";
-        boolean DEBUG = true;
-
-        var mamaligaUrl = getClass().getResource(MAMALIGA_SOUND_PATH);
-        if(mamaligaUrl != null && !DEBUG) {
-            Media mamaligaSound = new Media(mamaligaUrl.toExternalForm());
-            MediaPlayer player = new MediaPlayer(mamaligaSound);
-            player.setCycleCount(MediaPlayer.INDEFINITE);
-            player.play();
-        }
     }
 }
