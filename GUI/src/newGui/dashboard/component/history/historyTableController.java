@@ -3,6 +3,7 @@ package newGui.dashboard.component.history;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
@@ -16,6 +17,7 @@ public class historyTableController implements Initializable {
     @FXML private TableColumn<?, ?> cycels;
     @FXML private TableColumn<?, ?> functionOrProgram;
     @FXML private Label history;
+    @FXML private ScrollPane mainHistory;
     @FXML private TableView<?> historyTable;
     @FXML private TableColumn<?, ?> level;
     @FXML private TableColumn<?, ?> name;
@@ -25,6 +27,7 @@ public class historyTableController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        historyTable.setPlaceholder(new Label("No history to display"));
 
     }
 }

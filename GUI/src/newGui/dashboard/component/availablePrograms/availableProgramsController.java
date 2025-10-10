@@ -3,6 +3,7 @@ package newGui.dashboard.component.availablePrograms;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
@@ -11,8 +12,8 @@ import java.util.ResourceBundle;
 
 public class availableProgramsController implements Initializable {
 
-    @FXML
-    private Label availbalePrograms;
+    @FXML private ScrollPane mainAvailbaleProgram;
+    @FXML private Label availbalePrograms;
     @FXML private TableColumn<?, ?> averageCreditCost;
     @FXML private TableColumn<?, ?> maxLevel;
     @FXML private TableColumn<?, ?> name;
