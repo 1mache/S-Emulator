@@ -1,39 +1,36 @@
 package newGui.dashboard.component.usersInfo;
 
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
 
-public class usersTableInfoController {
+import java.net.URL;
+import java.util.ResourceBundle;
 
-    @FXML
-    private TableColumn<?, ?> CurrentCredit;
+public class usersTableInfoController implements Initializable {
 
-    @FXML
-    private TableColumn<?, ?> Name;
+    @FXML private TableColumn<?, ?> currentCredit;
+    @FXML private TableColumn<?, ?> name;
+    @FXML private TableColumn<?, ?> numberOfNewFunctions;
+    @FXML private TableColumn<?, ?> numberOfNewPrograms;
+    @FXML private TableColumn<?, ?> runs;
+    @FXML private Button unselectButton;
+    @FXML private TableColumn<?, ?> usedCredit;
+    @FXML private ScrollPane users;
+    @FXML private Label usersInformation;
+    @FXML private TableView<?> usersTable;
 
-    @FXML
-    private TableColumn<?, ?> NumberOfNewFunctions;
 
-    @FXML
-    private TableColumn<?, ?> NumberOfNewPrograms;
+    @FXML void UnselectButtonListener(ActionEvent event) {
 
-    @FXML
-    private TableColumn<?, ?> Runs;
+    }
 
-    @FXML
-    private Button UnselectButton;
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
 
-    @FXML
-    private TableColumn<?, ?> UsedCredit;
-
-    @FXML
-    private TableView<?> historyTable;
-
-    @FXML
-    private ScrollPane usersTable;
+    }
 
 }
+

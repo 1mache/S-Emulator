@@ -1,41 +1,30 @@
 package newGui.dashboard.component.history;
 
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
 
-public class historyTableController {
+import java.net.URL;
+import java.util.ResourceBundle;
 
-    @FXML
-    private TableColumn<?, ?> Architecture;
+public class historyTableController implements Initializable {
 
-    @FXML
-    private TableColumn<?, ?> Cycels;
+    @FXML private TableColumn<?, ?> architecture;
+    @FXML private TableColumn<?, ?> cycels;
+    @FXML private TableColumn<?, ?> functionOrProgram;
+    @FXML private Label history;
+    @FXML private TableView<?> historyTable;
+    @FXML private TableColumn<?, ?> level;
+    @FXML private TableColumn<?, ?> name;
+    @FXML private TableColumn<?, ?> number;
+    @FXML private TableColumn<?, ?> result;
 
-    @FXML
-    private TableColumn<?, ?> FunctionOrProgram;
 
-    @FXML
-    private Label History;
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
 
-    @FXML
-    private TableColumn<?, ?> Level;
-
-    @FXML
-    private TableColumn<?, ?> Name;
-
-    @FXML
-    private TableColumn<?, ?> Number;
-
-    @FXML
-    private TableColumn<?, ?> Result;
-
-    @FXML
-    private TableView<?> historyTable;
-
-    @FXML
-    private VBox rght;
-
+    }
 }
