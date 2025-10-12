@@ -1,4 +1,4 @@
-package newGui.dashboard.component.availablePrograms;
+package newGui.pages.dashboard.component.availablePrograms;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
