@@ -19,7 +19,6 @@ import engine.loader.exception.UnknownFunctionException;
 import engine.loader.exception.UnknownLabelException;
 import engine.peeker.ProgramViewer;
 import engine.program.Program;
-import engine.program.StandardProgram;
 import engine.variable.Variable;
 import engine.variable.VariableType;
 
@@ -131,18 +130,16 @@ public class SLanguageEngine {
 
         return new DebugHandle(
                 debugger,
-                debugResult -> {
-                    addExecutionToHistory(
-                            request,
-                            new ProgramExecutionResult(
-                                    debugResult.output(),
-                                    debugResult.variableMap(),
-                                    inputs,
-                                    expansionDegree,
-                                    debugger.getCycles()
-                            )
-                    );
-                }
+                debugResult -> addExecutionToHistory(
+                        request,
+                        new ProgramExecutionResult(
+                                debugResult.output(),
+                                debugResult.variableMap(),
+                                inputs,
+                                expansionDegree,
+                                debugger.getCycles()
+                        )
+                )
         );
     }
 

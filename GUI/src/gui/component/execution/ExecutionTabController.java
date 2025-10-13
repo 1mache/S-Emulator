@@ -430,9 +430,7 @@ public class ExecutionTabController implements Initializable {
 
                 variableTableController.resetHighlight();
             }
-            case null, default -> {
-                throw new IllegalArgumentException("Illegal state passed: " + newValue);
-            }
+            case null, default -> throw new IllegalArgumentException("Illegal state passed: " + newValue);
         }
     }
 
