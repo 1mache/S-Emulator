@@ -14,7 +14,7 @@ public class ShowHistoryOption extends MenuPage {
     @Override
     public void execute(SLanguageEngine engine) {
         try {
-            List<ProgramExecutionResult> history = engine.getExecutionHistoryOfCurrent();
+            List<ProgramExecutionResult> history = engine.getExecutionHistory();
             if(history.isEmpty()){
                 System.out.println("No executions found for " + engine.getProgramPeek().name() + " yet.");
             }

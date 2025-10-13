@@ -9,7 +9,7 @@ import javafx.concurrent.Task;
 
 import java.io.FileNotFoundException;
 
-public class ProgramLoadTask extends Task<Void> {
+public class ProgramLoadTask extends Task<String> {
     private final SLanguageEngine engine;
     private final String programPath;
 
@@ -35,9 +35,9 @@ public class ProgramLoadTask extends Task<Void> {
     }
 
     @Override
-    protected Void call()
+    protected String call()
             throws NotXMLException, FileNotFoundException, UnknownLabelException, UnknownFunctionException {
-        engine.loadProgram(programPath, loadingListener);
-        return null;
+
+        return engine.loadProgram(programPath, loadingListener);
     }
 }

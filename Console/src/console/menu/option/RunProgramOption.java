@@ -22,7 +22,7 @@ public class RunProgramOption extends AbstractExpandingOption {
             List<Long> inputs = getInputValues();
 
             System.out.println("Running program:");
-            printProgramPeek(engine.getExpandedProgramPeek(expansionDegree), expansionDegree, false);
+            printProgramPeek(engine.getProgramPeek(expansionDegree), expansionDegree, false);
 
             ProgramExecutionResult result = engine.runProgram(inputs, expansionDegree, false);
             System.out.println("Program execution result: " + result.outputValue());

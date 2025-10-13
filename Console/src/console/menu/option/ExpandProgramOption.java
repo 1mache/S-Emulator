@@ -14,7 +14,7 @@ public class ExpandProgramOption extends AbstractExpandingOption {
     public void execute(SLanguageEngine engine) {
         try{
             int expansionDegree = getExpansionDegree(engine.getMaxExpansionDegree());
-            ProgramPeek programPeek = engine.getExpandedProgramPeek(expansionDegree);
+            ProgramPeek programPeek = engine.getProgramPeek(expansionDegree);
             System.out.println("Program name: " + programPeek.name());
             System.out.println("Input variables used: " + programPeek.inputVariables());
             System.out.println("Labels used: " + programPeek.labelsUsed());
