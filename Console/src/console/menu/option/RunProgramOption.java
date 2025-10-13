@@ -1,5 +1,7 @@
 package console.menu.option;
 
+import console.menu.option.helper.ProgramName;
+import engine.api.EngineRequest;
 import engine.api.SLanguageEngine;
 import engine.api.dto.ProgramExecutionResult;
 import engine.api.dto.ProgramPeek;
@@ -13,18 +15,26 @@ public class RunProgramOption extends AbstractExpandingOption {
     }
 
     @Override
-    public void execute(SLanguageEngine engine) {
+    public void execute(SLanguageEngine engine, ProgramName programName) {
         try {
-            int expansionDegree = getExpansionDegree(engine.getMaxExpansionDegree());
-            ProgramPeek program = engine.getProgramPeek();
+            int expansionDegree = getExpansionDegree(engine.getMaxExpansionDegree(programName.get()));
+            ProgramPeek program = engine.getProgramPeek(
+                    new EngineRequest(USERNAME, programName.get())
+            );
+
+            ProgramPeek expanded = engine.getProgramPeek(
+                    new EngineRequest(USERNAME, programName.get(), expansionDegree)
+            );
 
             System.out.println("The inputs that the program uses are: " + program.inputVariables());
             List<Long> inputs = getInputValues();
 
             System.out.println("Running program:");
-            printProgramPeek(engine.getProgramPeek(expansionDegree), expansionDegree, false);
+            printProgramPeek(expanded, expansionDegree, false);
 
-            ProgramExecutionResult result = engine.runProgram(inputs, expansionDegree, false);
+            ProgramExecutionResult result = engine.runProgram(
+                    new EngineRequest(USERNAME, programName.get(), expansionDegree), inputs, false
+            );
             System.out.println("Program execution result: " + result.outputValue());
             System.out.println("Variables that were used:");
             result.variableMap().forEach((key, value) -> System.out.println(key + "= " + value));

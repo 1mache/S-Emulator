@@ -1,5 +1,7 @@
 package console.menu.option;
 
+import console.menu.option.helper.ProgramName;
+import engine.api.EngineRequest;
 import engine.api.SLanguageEngine;
 import engine.api.dto.ProgramExecutionResult;
 import engine.execution.exception.SProgramNotLoadedException;
@@ -12,11 +14,13 @@ public class ShowHistoryOption extends MenuPage {
     }
 
     @Override
-    public void execute(SLanguageEngine engine) {
+    public void execute(SLanguageEngine engine, ProgramName programName) {
         try {
-            List<ProgramExecutionResult> history = engine.getExecutionHistory();
+            List<ProgramExecutionResult> history = engine.getExecutionHistory(
+                    new EngineRequest(USERNAME, programName.get())
+            );
             if(history.isEmpty()){
-                System.out.println("No executions found for " + engine.getProgramPeek().name() + " yet.");
+                System.out.println("No executions found for " + programName.get() + " yet.");
             }
             int i = 0;
             for (var execution : history) {

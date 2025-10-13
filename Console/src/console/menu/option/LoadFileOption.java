@@ -1,5 +1,6 @@
 package console.menu.option;
 
+import console.menu.option.helper.ProgramName;
 import engine.api.SLanguageEngine;
 import engine.loader.exception.NotXMLException;
 import engine.loader.exception.UnknownFunctionException;
@@ -14,7 +15,7 @@ public class LoadFileOption extends MenuPage {
     }
 
     @Override
-    public void execute(SLanguageEngine engine) {
+    public void execute(SLanguageEngine engine, ProgramName programName) {
         System.out.println("Please enter the full path of the XML file to load: ");
 
         String path = getFilePath();
@@ -24,7 +25,7 @@ public class LoadFileOption extends MenuPage {
         }
 
         try{
-            engine.loadProgram(path, null);
+            programName.set(engine.loadProgram(path, null));
             System.out.println("Program loaded successfully");
         }
         catch (FileNotFoundException | NotXMLException | UnknownLabelException | UnknownFunctionException e) {
