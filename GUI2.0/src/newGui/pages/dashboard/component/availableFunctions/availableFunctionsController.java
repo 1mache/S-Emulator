@@ -1,0 +1,30 @@
+package newGui.pages.dashboard.component.availableFunctions;
+
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+
+import java.net.URL;
+import java.util.ResourceBundle;
+
+
+public class availableFunctionsController implements Initializable {
+
+    @FXML private Label availbalePrograms;
+    @FXML private TableColumn<?, ?> averageCreditCost;
+    @FXML private TableColumn<?, ?> maxLevel;
+    @FXML private TableColumn<?, ?> name;
+    @FXML private TableColumn<?, ?> numberOfInstructions;
+    @FXML private TableView<?> programsTable;
+    @FXML private TableColumn<?, ?> runs;
+    @FXML private TableColumn<?, ?> uploadBy;
+
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+
+    }
+}
+
