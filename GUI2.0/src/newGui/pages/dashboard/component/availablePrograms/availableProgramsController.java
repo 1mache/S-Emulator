@@ -11,8 +11,6 @@ import java.util.ResourceBundle;
 
 public class availableProgramsController implements Initializable {
 
-    @FXML
-    private Label availbalePrograms;
     @FXML private TableColumn<?, ?> averageCreditCost;
     @FXML private TableColumn<?, ?> maxLevel;
     @FXML private TableColumn<?, ?> name;

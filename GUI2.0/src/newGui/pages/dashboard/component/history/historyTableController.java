@@ -16,7 +16,6 @@ public class historyTableController implements Initializable {
     @FXML private TableColumn<?, ?> architecture;
     @FXML private TableColumn<?, ?> cycels;
     @FXML private TableColumn<?, ?> functionOrProgram;
-    @FXML private Label history;
     @FXML private ScrollPane mainHistory;
     @FXML private TableView<?> historyTable;
     @FXML private TableColumn<?, ?> level;
@@ -27,7 +26,7 @@ public class historyTableController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        historyTable.setPlaceholder(new Label("No history to display"));
+        //historyTable.setPlaceholder(new Label("No history to display"));
 
     }
 }
