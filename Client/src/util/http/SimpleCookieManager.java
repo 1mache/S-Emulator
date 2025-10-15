@@ -6,33 +6,21 @@ import okhttp3.HttpUrl;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 public class SimpleCookieManager implements CookieJar {
 
-    private final static String CACHE_MANAGER_PREFIX = "    [Cookie Manager] ---> ";
-    Map<String, Map<String, Cookie>> cookies = new HashMap<>();
-    private Consumer<String> logData = System.out::println;
-
-    public void setLogData(Consumer<String> logData) {
-        this.logData = logData;
-    }
+    private final Map<String, Map<String, Cookie>> cookies = new HashMap<>();
 
     @NotNull
     @Override
     public List<Cookie> loadForRequest(@NotNull HttpUrl httpUrl) {
         String host = httpUrl.host();
-        StringBuilder sb = new StringBuilder();
-        sb.append(CACHE_MANAGER_PREFIX).append("Fetching cookies for domain: [").append(host).append("]...");
-        List<Cookie> cookiesPerDomain = Collections.emptyList();
         synchronized (this) {
             if (cookies.containsKey(host)) {
-                cookiesPerDomain = new ArrayList<>(cookies.get(host).values());
+                return new ArrayList<>(cookies.get(host).values());
             }
         }
-        sb.append(" Total of ").append(cookiesPerDomain.size()).append(" cookie(s) will be loaded !");
-        logData.accept(sb.toString());
-        return cookiesPerDomain;
+        return Collections.emptyList();
     }
 
     @Override
@@ -40,13 +28,9 @@ public class SimpleCookieManager implements CookieJar {
         String host = httpUrl.host();
         synchronized (this) {
             Map<String, Cookie> cookiesMap = cookies.computeIfAbsent(host, key -> new HashMap<>());
-            responseCookies
-                    .stream()
-                    .filter(cookie -> !cookiesMap.containsKey(cookie.name()))
-                    .forEach(cookie -> {
-                        logData.accept(CACHE_MANAGER_PREFIX + "Storing cookie [" + cookie.name() + "] --> [" + cookie.value() + "]");
-                        cookiesMap.put(cookie.name(), cookie);
-                    });
+            for (Cookie cookie : responseCookies) {
+                cookiesMap.put(cookie.name(), cookie); // replace always
+            }
         }
     }
 

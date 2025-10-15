@@ -11,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
 import newGui.pages.dashboard.component.primary.dashboardController;
 import newGui.pages.login.component.login.loginController;
 
@@ -48,22 +49,27 @@ public class mainClientAppController {
         loadLoginPage();
     }
 
+    public StringProperty getUserNameProperty() {
+        return currentUserName;
+    }
+
     private void loadLoginPage() {
         URL loginPageUrl = getClass().getResource(LOGIN_PAGE_FXML_RESOURCE_LOCATION);
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(loginPageUrl);
             loginComponent = fxmlLoader.load();
+            loadLoginStyles(loginComponent);
             logicController = fxmlLoader.getController();
             logicController.setMainClientAppController(this);
-            loadLoginStyles(loginComponent.getScene());
             setMainPanelTo(loginComponent);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void loadLoginStyles(Scene scene){
+    private void loadLoginStyles(Parent scene){
 
         var stylesUrl = getClass().getResource(LOGIN_PAGE_STYLE_RESOURCE_LOCATION);
         // Add the stylesheet to the scene if found`
@@ -80,16 +86,26 @@ public class mainClientAppController {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(dashboardPageUrl);
             dashboradComponent = fxmlLoader.load();
+            loadDashboardStyles(dashboradComponent);
             dashboardController = fxmlLoader.getController();
             dashboardController.setMainClientAppController(this);
-            loadDashboardStyles(dashboradComponent.getScene());
-            setMainPanelTo(dashboradComponent);
+            dashboardController.activate();
+
+            // Get the current stage
+            Stage stage = (Stage) mainPanel.getScene().getWindow();
+            stage.setMinHeight(800);
+            stage.setMinWidth(1000);
+            stage.setTitle("S-Emulator – Dashboard");
+
+            Scene scene = stage.getScene();
+            scene.setRoot(dashboradComponent);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void loadDashboardStyles(Scene scene){
+    private void loadDashboardStyles(Parent scene){
 
         var stylesUrl = getClass().getResource(DASHBOARD_PAGE_STYLE_RESOURCE_LOCATION);
         // Add the stylesheet to the scene if found`
@@ -116,11 +132,4 @@ public class mainClientAppController {
     public void switchToDashboard() {
         loadDashboardPage();
     }
-
-
-
-
-
-
-
 }

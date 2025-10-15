@@ -1,7 +1,9 @@
 package newGui.pages.dashboard.component.availableFunctions;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -19,7 +21,13 @@ public class availableFunctionsController implements Initializable {
     @FXML private TableView<?> programsTable;
     @FXML private TableColumn<?, ?> runs;
     @FXML private TableColumn<?, ?> uploadBy;
+    @FXML private Button executeProgram;
 
+
+    @FXML
+    void executeProgramListener(ActionEvent event) {
+
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

@@ -1,5 +1,6 @@
 package newGui.pages.login.component.login;
 
+import com.google.gson.Gson;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -36,10 +37,6 @@ public class loginController {
     @FXML
     public void initialize() {
         errorMessageLabel.textProperty().bind(errorMessageProperty);
-        HttpClientUtil.setCookieManagerLoggingFacility(line ->
-                Platform.runLater(() ->
-                        /// to check what is doing
-                        updateHttpStatusLine(line)));
     }
 
     @FXML
@@ -59,8 +56,6 @@ public class loginController {
                 .build()
                 .toString();
 
-        ///  for what??
-        updateHttpStatusLine("New request is launched for: " + finalUrl);
 
         HttpClientUtil.runAsync(finalUrl, new Callback() {
 
@@ -71,6 +66,33 @@ public class loginController {
                         errorMessageProperty.set("Something went wrong: " + e.getMessage())
                 );
             }
+
+
+
+
+
+//                    @Override
+//                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+//                        String responseBody = response.body().string();
+//                        if (response.code() != 200) {
+//                            Platform.runLater(() ->
+//                                    errorMessageProperty.set("Something went wrong: " + responseBody)
+//                            );
+//                        } else {
+//                            // Parse the response body into Information object
+//                            Information info = GSON_INSTANCE.fromJson(responseBody, Information.class);
+//
+//                            Platform.runLater(() -> {
+//                                // Print the Information object using toString()
+//                                System.out.println(info.toString());
+//
+//                                mainClientAppController.updateUserName(userName);
+//                                mainClientAppController.switchToDashboard();
+//                            });
+//
+
+
+
 
             // Succeeded to connect the server and get response
             @Override
@@ -95,23 +117,12 @@ public class loginController {
         Platform.exit();
     }
 
+    // Clear error message when user types
     @FXML
     private void userNameKeyTyped(KeyEvent event) {
         errorMessageProperty.set("");
     }
 
-
-
-
-
-
-
-
-
-    // need to change the type of chatAppMainController to dashboardController
-    private void updateHttpStatusLine(String data) {
-        //mainClientAppController.updateHttpLine(data);
-    }
 
     public void setMainClientAppController(mainClientAppController mainAppController) {
         this.mainClientAppController = mainAppController;

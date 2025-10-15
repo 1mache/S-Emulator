@@ -1,6 +1,7 @@
 package newGui.pages.dashboard.component.primary;
 
 
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -15,7 +16,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import static util.Constants.*;
 
-public class dashboardController implements Initializable {
+public class dashboardController {
 
     private mainClientAppController mainClientAppController;
 
@@ -30,23 +31,19 @@ public class dashboardController implements Initializable {
     @FXML private usersTableInfoController userTableInfoController; // top left
     @FXML private historyTableController historyTableController; // bottom left
 
-
-
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-
+    public void activate() {
+        topController.bindUserName(mainClientAppController.getUserNameProperty());
 
     }
 
 
-
-    private void onActivated() {
-//        if (topController != null)                topController.refresh();
-//        if (availableProgramsController != null)  availableProgramsController.loadPrograms();
-//        if (availableFunctionsController != null) availableFunctionsController.loadFunctions();
-//        if (userTableInfoController != null)     usersTableInfoController.reloadUsers();
-//        if (historyTableController != null)       historyTableController.reloadHistory();
-    }
+//        private void onActivated(String st) {
+////        if (topController != null)                topController.refresh();
+////        if (availableProgramsController != null)  availableProgramsController.loadPrograms();
+////        if (availableFunctionsController != null) availableFunctionsController.loadFunctions();
+////        if (userTableInfoController != null)     usersTableInfoController.reloadUsers();
+////        if (historyTableController != null)       historyTableController.reloadHistory();
+//    }
 
     public void setMainClientAppController(mainClientAppController mainAppController) {
         this.mainClientAppController = mainAppController;

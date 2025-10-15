@@ -1,6 +1,7 @@
 package util;
 
 import com.google.gson.Gson;
+import okhttp3.MediaType;
 
 public class Constants {
 
@@ -16,7 +17,7 @@ public class Constants {
 
 
     public final static String LOGIN_PAGE_FXML_RESOURCE_LOCATION = "/newGui/pages/login/component/login/login.fxml";
-    public final static String LOGIN_PAGE_STYLE_RESOURCE_LOCATION = "/newGui/pages/login/component/main/login.css";
+    public final static String LOGIN_PAGE_STYLE_RESOURCE_LOCATION = "/newGui/pages/login/component/login/login.css";
 
     public final static String DASHBOARD_PAGE_FXML_RESOURCE_LOCATION = "/newGui/pages/dashboard/component/primary/dashboard.fxml";
     public final static String DASHBOARD_PAGE_STYLE_RESOURCE_LOCATION = "/newGui/pages/dashboard/component/primary/dashboard_styling.css";
@@ -30,10 +31,15 @@ public class Constants {
     private final static String FULL_SERVER_PATH = BASE_URL + CONTEXT_PATH;
 
     public final static String LOGIN_PAGE = FULL_SERVER_PATH + "/login";
+    public final static String DASHBOARD_PAGE = FULL_SERVER_PATH + "/dashboard";
+
+
+    public static final String LOAD_FILE_PAGE = FULL_SERVER_PATH + "/load-file";
 
 
 
-
+    // infp type in the request body
+    public static final MediaType MEDIA_TYPE_XML = MediaType.get("application/xml");
 
 
 
