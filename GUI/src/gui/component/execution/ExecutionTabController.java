@@ -1,15 +1,14 @@
 package gui.component.execution;
 
-import engine.api.EngineRequest;
+import dto.ProgramExecutionResult;
+import dto.debug.DebugEndResult;
+import dto.debug.DebugStepPeek;
+import engine.api.RunHistory;
 import engine.api.SLanguageEngine;
-import engine.api.dto.debug.DebugEndResult;
-import engine.api.dto.debug.DebugHandle;
-import engine.api.dto.ProgramExecutionResult;
-import engine.api.dto.debug.DebugStepPeek;
+import engine.api.debug.DebugHandle;
 import gui.component.execution.event.DebugStateChange;
 import gui.component.execution.event.DebugStopOnLine;
 import gui.component.variable.table.VariableTableController;
-import gui.utility.ApplicationConstants;
 import gui.utility.CssClasses;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -55,11 +54,11 @@ public class ExecutionTabController implements Initializable {
     @FXML
     private Button continueButton;
 
-    private static final String USER_NAME = ApplicationConstants.APP_USERNAME;
-
     private List<Button> debugControls;
 
     private SLanguageEngine engine;
+    private final RunHistory runHistory = new RunHistory();
+
     private final Map<String, TextField> inputFields = new LinkedHashMap<>();
     private final BooleanProperty inputsValidProperty = new SimpleBooleanProperty(true);
     private final IntegerProperty expansionDegreeProperty = new SimpleIntegerProperty(0);
@@ -124,27 +123,25 @@ public class ExecutionTabController implements Initializable {
         setCyclesText(0);
         disableInputs(true);
 
-        var request = new EngineRequest(
-                USER_NAME,
-                programNameProperty.get(),
-                expansionDegreeProperty.get()
-        );
-
         ProgramExecutionResult result;
         if(runMode == RunMode.EXECUTION){
             result = engine.runProgram(
-                    request,
+                    programNameProperty.get(),
+                    expansionDegreeProperty.get(),
                     getInputsFromTextFields(),
-                    true
+                    true,
+                    runHistory
             );
             variableTableController.setVariableEntries(result.variableMap());
             cyclesLabel.setText("Cycles: " + result.cycles());
         }
         else if(runMode == RunMode.DEBUG){
-            debugHandle = engine.debugProgram(
-                    request,
+            debugHandle = engine.startDebugSession(
+                    programNameProperty.get(),
+                    expansionDegreeProperty.get(),
                     getInputsFromTextFields(),
-                    true
+                    true,
+                    runHistory
             );
 
             breakpoints.forEach(
@@ -222,6 +219,10 @@ public class ExecutionTabController implements Initializable {
             debugStateMachine.transitionTo(DebugState.END);
         else
             debugStateMachine.transitionTo(DebugState.ON_INSTRUCTION);
+    }
+
+    public RunHistory getRunHistory() {
+        return runHistory;
     }
 
     public void addDebugLineChangeListener(EventHandler<DebugStopOnLine> listener){
@@ -319,11 +320,8 @@ public class ExecutionTabController implements Initializable {
 
     private void buildInputGrid() {
         List<String> variableNames = engine.getProgramPeek(
-                new EngineRequest(
-                        USER_NAME,
-                        programNameProperty.get(),
-                        expansionDegreeProperty.get()
-                )
+                programNameProperty.get(),
+                expansionDegreeProperty.get()
         ).inputVariables();
 
         inputVariableGrid.getChildren().clear();

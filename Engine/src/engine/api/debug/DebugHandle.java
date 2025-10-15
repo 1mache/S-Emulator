@@ -1,12 +1,15 @@
-package engine.api.dto.debug;
+package engine.api.debug;
 
-import engine.api.dto.ProgramExecutionResult;
+import dto.debug.DebugEndResult;
+import dto.debug.DebugStepPeek;
+import engine.debugger.DebugStep;
 import engine.debugger.ProgramDebugger;
+import engine.variable.Variable;
 
 import java.util.Optional;
 import java.util.function.Consumer;
 
-// handle to be passed to the caller
+// handle to be allocated for a debugging session
 public class DebugHandle {
     private final Consumer<DebugEndResult> onRunEnded;
     private final ProgramDebugger debugger;
@@ -28,7 +31,15 @@ public class DebugHandle {
     }
 
     public DebugStepPeek stepOver() {
-        return new DebugStepPeek(debugger.stepOver());
+        DebugStep debugStep = debugger.stepOver();
+        String variableChanged = null;
+        if(debugStep.variableChanged() != Variable.NO_VAR)
+            variableChanged = debugStep.variableChanged().stringRepresentation();
+
+        return new DebugStepPeek(
+                variableChanged,
+                debugStep.newValue()
+        );
     }
 
     public boolean resume(){

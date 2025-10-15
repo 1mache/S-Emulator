@@ -1,4 +1,4 @@
-package engine.api.dto.debug;
+package dto.debug;
 
 import java.util.Map;
 

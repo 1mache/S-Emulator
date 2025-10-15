@@ -1,6 +1,6 @@
 package gui.component.instruction.table.event;
 
-import engine.api.dto.InstructionPeek;
+import dto.InstructionPeek;
 import javafx.event.ActionEvent;
 
 public class RowClickAction extends ActionEvent {

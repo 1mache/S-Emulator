@@ -1,6 +1,6 @@
 package gui.component.history;
 
-import engine.api.dto.ProgramExecutionResult;
+import dto.ProgramExecutionResult;
 import gui.component.variable.table.VariableTableController;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;

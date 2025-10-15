@@ -1,9 +1,9 @@
 package engine.api;
 
-import engine.api.dto.FunctionIdentifier;
-import engine.api.dto.debug.DebugHandle;
-import engine.api.dto.ProgramExecutionResult;
-import engine.api.dto.ProgramPeek;
+import dto.FunctionIdentifier;
+import dto.ProgramExecutionResult;
+import dto.ProgramPeek;
+import engine.api.debug.DebugHandle;
 import engine.debugger.ProgramDebugger;
 import engine.execution.ProgramRunner;
 import engine.execution.exception.SProgramNotLoadedException;
@@ -29,9 +29,6 @@ import java.util.stream.Collectors;
 public class SLanguageEngine {
     private final Map<String,Program> avaliablePrograms = new HashMap<>();
 
-    // history
-    private Map<String, List<ProgramExecutionResult>> previousExecutions;
-
     private SLanguageEngine(){}
     // Singleton
     private static final SLanguageEngine instance = new SLanguageEngine();
@@ -56,8 +53,6 @@ public class SLanguageEngine {
                         ))
         );
 
-        previousExecutions = new LinkedHashMap<>();
-
         return mainProgram.getName();
     }
 
@@ -74,10 +69,7 @@ public class SLanguageEngine {
         return program.getMaxExpansionDegree();
     }
 
-    public ProgramPeek getProgramPeek(EngineRequest request) {
-        String programName = request.programName();
-        int expansionDegree = request.expansionDegree();
-
+    public ProgramPeek getProgramPeek(String programName, int expansionDegree) {
         if(programNotLoaded(programName))
             throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
 
@@ -89,13 +81,12 @@ public class SLanguageEngine {
         return new ProgramViewer(program).getProgramPeek(expansionDegree);
     }
 
-    public ProgramExecutionResult runProgram(EngineRequest request,
+    public ProgramExecutionResult runProgram(String programName,
+                                             int expansionDegree,
                                              List<Long> inputs,
-                                             boolean specificInputs) {
+                                             boolean specificInputs,
+                                             RunHistory history) {
         validateInputs(inputs);
-
-        String programName = request.programName();
-        int expansionDegree = request.expansionDegree();
 
         Program expandedProgram = createExpandedProgram(programName, expansionDegree);
         var runner = new ProgramRunner(expandedProgram);
@@ -112,16 +103,18 @@ public class SLanguageEngine {
                 runner.getCycles()
         );
 
-        addExecutionToHistory(request, executionResult);
+        history.addExecution(programName, executionResult);
 
         return executionResult;
     }
 
-    public DebugHandle debugProgram(EngineRequest request, List<Long> inputs, boolean specificInputs) {
+    // ========================== Debug ===========================
+    public DebugHandle startDebugSession(String programName,
+                                         int expansionDegree,
+                                         List<Long> inputs,
+                                         boolean specificInputs,
+                                         RunHistory history) {
         validateInputs(inputs);
-
-        String programName = request.programName();
-        int expansionDegree = request.expansionDegree();
 
         Program expandedProgram = createExpandedProgram(programName, expansionDegree);
         var debugger = new ProgramDebugger(expandedProgram);
@@ -130,8 +123,8 @@ public class SLanguageEngine {
 
         return new DebugHandle(
                 debugger,
-                debugResult -> addExecutionToHistory(
-                        request,
+                debugResult -> history.addExecution(
+                        programName,
                         new ProgramExecutionResult(
                                 debugResult.output(),
                                 debugResult.variableMap(),
@@ -142,7 +135,7 @@ public class SLanguageEngine {
                 )
         );
     }
-
+    // =============================================================
 
     // returns all the functions names that the program uses including the main programs. the programs are first in list
     public List<FunctionIdentifier> getAvaliablePrograms() {
@@ -163,21 +156,8 @@ public class SLanguageEngine {
         return functionStringsList;
     }
 
-    public List<ProgramExecutionResult> getExecutionHistory(EngineRequest request) {
-        String programName = request.programName();
-
-        if(programNotLoaded(programName))
-            throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
-
-        var program = getProgramByName(programName);
-        List<ProgramExecutionResult> results = previousExecutions.get(program.getName());
-
-        // if no history for this function, return empty list
-        return Objects.requireNonNullElseGet(results, List::of);
-    }
-
-    public List<Integer> getInstructionsIdsThatUse(EngineRequest request, String symbolStr){
-        var expandedProgram = createExpandedProgram(request.programName(), request.expansionDegree());
+    public List<Integer> getInstructionsIdsThatUse(String programName, int expansionDegree, String symbolStr){
+        var expandedProgram = createExpandedProgram(programName, expansionDegree);
 
         Variable maybeVariable = str2Variable(symbolStr);
         if(maybeVariable != null)
@@ -229,24 +209,6 @@ public class SLanguageEngine {
             runner.initInputVariablesSpecific(inputs);
         else
             runner.initInputVariables(inputs);
-    }
-
-    private void addExecutionToHistory(EngineRequest request, ProgramExecutionResult executionResult) {
-        String programName = request.programName();
-
-        if (programNotLoaded(programName))
-            throw new SProgramNotLoadedException("Program " + programName + " has not been loaded");
-
-        List<ProgramExecutionResult> executionResults = previousExecutions.get(programName);
-        if (executionResults == null) {
-            // key does not exist, create a new list with the item
-            executionResults = new ArrayList<>();
-            executionResults.add(executionResult);
-            previousExecutions.put(programName, executionResults);
-        } else {
-            // key exists, add the item to the existing list
-            executionResults.add(executionResult);
-        }
     }
 
     private Variable str2Variable(String str){

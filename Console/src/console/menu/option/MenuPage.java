@@ -1,10 +1,9 @@
 package console.menu.option;
 
-import console.menu.option.helper.ConsoleConstants;
 import console.menu.option.helper.ProgramName;
+import dto.InstructionPeek;
+import dto.ProgramPeek;
 import engine.api.SLanguageEngine;
-import engine.api.dto.InstructionPeek;
-import engine.api.dto.ProgramPeek;
 
 import java.util.ArrayList;
 import java.util.InputMismatchException;
@@ -12,8 +11,6 @@ import java.util.List;
 import java.util.Scanner;
 
 public class MenuPage implements MenuOption {
-    protected final static String USERNAME = ConsoleConstants.CONSOLE_USERNAME;
-
     private final ArrayList<MenuOption> options;
 
     private final String name;

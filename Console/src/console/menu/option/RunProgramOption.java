@@ -1,10 +1,10 @@
 package console.menu.option;
 
+import console.menu.option.helper.GlobalExecutionHistory;
 import console.menu.option.helper.ProgramName;
-import engine.api.EngineRequest;
+import dto.ProgramExecutionResult;
+import dto.ProgramPeek;
 import engine.api.SLanguageEngine;
-import engine.api.dto.ProgramExecutionResult;
-import engine.api.dto.ProgramPeek;
 import engine.execution.exception.SProgramNotLoadedException;
 
 import java.util.*;
@@ -19,11 +19,11 @@ public class RunProgramOption extends AbstractExpandingOption {
         try {
             int expansionDegree = getExpansionDegree(engine.getMaxExpansionDegree(programName.get()));
             ProgramPeek program = engine.getProgramPeek(
-                    new EngineRequest(USERNAME, programName.get())
+                    programName.get(), 0
             );
 
             ProgramPeek expanded = engine.getProgramPeek(
-                    new EngineRequest(USERNAME, programName.get(), expansionDegree)
+                    programName.get(), expansionDegree
             );
 
             System.out.println("The inputs that the program uses are: " + program.inputVariables());
@@ -33,7 +33,7 @@ public class RunProgramOption extends AbstractExpandingOption {
             printProgramPeek(expanded, expansionDegree, false);
 
             ProgramExecutionResult result = engine.runProgram(
-                    new EngineRequest(USERNAME, programName.get(), expansionDegree), inputs, false
+                programName.get(), expansionDegree, inputs, false, GlobalExecutionHistory.get()
             );
             System.out.println("Program execution result: " + result.outputValue());
             System.out.println("Variables that were used:");

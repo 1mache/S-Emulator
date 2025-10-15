@@ -1,9 +1,8 @@
 package console.menu.option;
 
 import console.menu.option.helper.ProgramName;
-import engine.api.EngineRequest;
+import dto.ProgramPeek;
 import engine.api.SLanguageEngine;
-import engine.api.dto.ProgramPeek;
 import engine.execution.exception.SProgramNotLoadedException;
 
 
@@ -17,7 +16,7 @@ public class PrintProgramOption extends MenuPage {
         ProgramPeek programPeek;
         try {
             programPeek = engine.getProgramPeek(
-                    new EngineRequest(USERNAME, programName.get())
+                    programName.get(), 0
             );
         } catch (SProgramNotLoadedException e) {
             System.out.println("Error: Program is not loaded. Load it first (option 1)");

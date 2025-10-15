@@ -1,6 +1,6 @@
 package gui.component.instruction.table;
 
-import engine.api.dto.InstructionPeek;
+import dto.InstructionPeek;
 import gui.component.instruction.table.event.BreakpointChangeAction;
 import gui.component.instruction.table.event.RowClickAction;
 import gui.utility.CssClasses;

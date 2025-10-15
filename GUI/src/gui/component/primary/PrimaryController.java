@@ -1,18 +1,16 @@
 package gui.component.primary;
 
-import engine.api.EngineRequest;
+import dto.FunctionIdentifier;
+import dto.InstructionPeek;
+import dto.ProgramExecutionResult;
+import dto.ProgramPeek;
 import engine.api.SLanguageEngine;
-import engine.api.dto.FunctionIdentifier;
-import engine.api.dto.InstructionPeek;
-import engine.api.dto.ProgramExecutionResult;
-import engine.api.dto.ProgramPeek;
 import engine.loader.exception.NotXMLException;
 import gui.component.execution.DebugState;
 import gui.component.execution.ExecutionTabController;
 import gui.component.history.HistoryTableController;
 import gui.component.instruction.table.InstructionTableController;
 import gui.task.ProgramLoadTask;
-import gui.utility.ApplicationConstants;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
@@ -135,9 +133,10 @@ public class PrimaryController implements Initializable {
             dialog.setScene(dialogScene);
 
             HistoryTableController controller = loader.getController();
-            controller.setItems(engine.getExecutionHistory(
-                    createEngineRequest()
-            ));
+            controller.setItems(
+                    executionTabController.getRunHistory()
+                            .getExecutionsOf(selectedProgramNameProperty.get())
+            );
             controller.addReRunButtonListener(e -> {
                 dialog.close();
                 executionTabController.reset();
@@ -162,13 +161,6 @@ public class PrimaryController implements Initializable {
     }
 
     // ===================== private =======================
-    private EngineRequest createEngineRequest(){
-        return new EngineRequest(
-                ApplicationConstants.APP_USERNAME,
-                selectedProgramNameProperty.get(),
-                expansionDegreeProperty.get()
-        );
-    }
 
     private void initExpansionDegreeSelection() {
         // what happens on expansion degree change
@@ -215,7 +207,8 @@ public class PrimaryController implements Initializable {
 
                     mainInstructionTableController.setLinesHighlight(
                             engine.getInstructionsIdsThatUse(
-                                    createEngineRequest(),
+                                    selectedProgramNameProperty.get(),
+                                    expansionDegreeProperty.get(),
                                     now
                             )
                     );
@@ -295,7 +288,10 @@ public class PrimaryController implements Initializable {
                             ObservableList<String> symbols = FXCollections.observableArrayList();
                             if (programLoadedProperty.get()) {
                                 symbols.add(null); // null highlight, meaning dont highlight
-                                ProgramPeek programPeek = engine.getProgramPeek(createEngineRequest());
+                                ProgramPeek programPeek = engine.getProgramPeek(
+                                        selectedProgramNameProperty.get(),
+                                        expansionDegreeProperty.get()
+                                );
 
                                 symbols.addAll(
                                         programPeek.inputVariables()
@@ -349,7 +345,10 @@ public class PrimaryController implements Initializable {
                         mainInstructionTableController.clear();
 
                         mainInstructionTableController.setInstructions(
-                                engine.getProgramPeek(createEngineRequest()).instructions()
+                                engine.getProgramPeek(
+                                        selectedProgramNameProperty.get(),
+                                        expansionDegreeProperty.get()
+                                ).instructions()
                         );
                         summaryLineField.setText(buildSummaryLine());
                     }
@@ -359,7 +358,10 @@ public class PrimaryController implements Initializable {
 
     private void showCurrentProgramWithSelectedExpansion() {
         mainInstructionTableController.setInstructions(
-                engine.getProgramPeek(createEngineRequest()).instructions());
+                engine.getProgramPeek(
+                        selectedProgramNameProperty.get(),
+                        expansionDegreeProperty.get()
+                ).instructions());
 
         expansionTableController.clear(); // reset the bottom table
         summaryLineField.setText(buildSummaryLine());
