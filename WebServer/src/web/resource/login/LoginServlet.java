@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import web.utils.ServletUtils;
 
 import java.io.BufferedReader;
@@ -20,8 +21,11 @@ public class LoginServlet extends HttpServlet {
 
         try (BufferedReader reader = request.getReader()) {
             LoginForm loginForm = ServletUtils.GsonInstance.fromJson(reader, LoginForm.class);
-            if(userManager.addUser(loginForm.username()))
+            if(userManager.addUser(loginForm.username())){
+                HttpSession session = request.getSession(true);
+                session.setAttribute(ServletUtils.USERNAME_ATR_NAME, loginForm.username());
                 response.setStatus(HttpServletResponse.SC_OK);
+            }
             else
                 response.setStatus(HttpServletResponse.SC_CONFLICT);
         }

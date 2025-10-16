@@ -2,7 +2,7 @@ package dto;
 
 import java.util.Objects;
 
-public record FunctionIdentifier(String name, String userString) {
+public record FunctionIdentifier(String name, String userString, boolean isProgram) {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

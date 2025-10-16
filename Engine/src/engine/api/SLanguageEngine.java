@@ -76,7 +76,7 @@ public class SLanguageEngine {
                 .toList();
     }
 
-    public boolean programNotLoaded(String programName) {
+    public synchronized boolean programNotLoaded(String programName) {
         return !avaliablePrograms.containsKey(programName);
     }
 
@@ -87,6 +87,14 @@ public class SLanguageEngine {
         var program = getProgramByName(programName);
 
         return program.getMaxExpansionDegree();
+    }
+
+    public int instructionCountOf(String programName) {
+        if(programNotLoaded(programName))
+            throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
+
+        var program = getProgramByName(programName);
+        return program.getInstructions().size();
     }
 
     public ProgramPeek getProgramPeek(String programName, int expansionDegree) {
@@ -128,6 +136,14 @@ public class SLanguageEngine {
         return executionResult;
     }
 
+    public int getRunCountOf(String programName) {
+        if(programNotLoaded(programName))
+            throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
+
+        var program = getProgramByName(programName);
+        return 0; // TODO: proper logic
+    }
+
     // ========================== Debug ===========================
     public DebugHandle startDebugSession(String programName,
                                          int expansionDegree,
@@ -157,8 +173,16 @@ public class SLanguageEngine {
     }
     // =============================================================
 
+    public long getAverageCostOf(String programName) {
+        if (programNotLoaded(programName))
+            throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
+
+        Program program = getProgramByName(programName);
+        return 0; // TODO: proper logic
+    }
+
     // returns all the functions names that the program uses including the main programs. the programs are first in list
-    public List<FunctionIdentifier> getAvaliablePrograms() {
+    public synchronized List<FunctionIdentifier> getAvaliablePrograms() {
         return getFunctionIdentifiers(avaliablePrograms.values());
     }
 
@@ -184,7 +208,11 @@ public class SLanguageEngine {
     // =============== private ===============
 
     private Program getProgramByName(String programName) {
-        var program = avaliablePrograms.get(programName);
+        Program program;
+        synchronized (this){
+            program = avaliablePrograms.get(programName);
+        }
+
         if(program == null)
             throw new IllegalArgumentException("File does not contain program: " + programName);
         return program;
@@ -254,14 +282,14 @@ public class SLanguageEngine {
                 .filter(program -> program instanceof Function)
                 .map(program -> {
                     var function = (Function) program;
-                    return new FunctionIdentifier(function.getName(), function.getUserString());
+                    return new FunctionIdentifier(function.getName(), function.getUserString(), false);
                 })
                 .toList());
 
         // programs are first in the list
-        avaliablePrograms.values().stream()
+        functions.stream()
                 .filter(program -> !(program instanceof Function))
-                .map(program -> new FunctionIdentifier(program.getName(), program.getName()))
+                .map(program -> new FunctionIdentifier(program.getName(), program.getName(), true))
                 .forEach(functionStringsList::addFirst);
 
         return functionStringsList;

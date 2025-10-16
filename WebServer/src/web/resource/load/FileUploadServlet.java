@@ -5,10 +5,7 @@ import engine.loader.exception.UnknownLabelException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Part;
+import jakarta.servlet.http.*;
 import web.exception.InvalidUserException;
 import web.utils.ServletUtils;
 
@@ -27,7 +24,6 @@ import java.util.List;
         maxRequestSize = 1024 * 1024 * 100 // 100 MB
 )
 public class FileUploadServlet extends HttpServlet {
-    public static final String USERNAME_PARAM = "username";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -35,7 +31,8 @@ public class FileUploadServlet extends HttpServlet {
 
         Collection<Part> parts = request.getParts();
 
-        String username = request.getParameter(USERNAME_PARAM);
+        HttpSession session = request.getSession(false);
+        String username = (String) session.getAttribute(ServletUtils.USERNAME_ATR_NAME);
 
         // get all InputStreams from uploaded parts
         List<InputStream> inputStreams = new ArrayList<>();
@@ -51,8 +48,11 @@ public class FileUploadServlet extends HttpServlet {
         var appContext = ServletUtils.getAppContext(getServletContext());
         try {
             appContext.loadProgram(username, fileContent);
-        } catch (UnknownFunctionException | UnknownLabelException | InvalidUserException e) {
+        } catch (UnknownFunctionException | UnknownLabelException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(e.getMessage());
+        } catch (InvalidUserException e){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write(e.getMessage());
         }
     }

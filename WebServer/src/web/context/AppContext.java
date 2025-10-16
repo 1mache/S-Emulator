@@ -1,4 +1,4 @@
-package web.resource.context;
+package web.context;
 
 import engine.api.SLanguageEngine;
 import engine.loader.exception.UnknownFunctionException;
@@ -15,7 +15,7 @@ public class AppContext {
     private SLanguageEngine engine;
     private UserManager userManager;
 
-    private final Map<String, String> function2User = new HashMap<String, String>();
+    private final Map<String, String> function2User = new HashMap<>();
 
     private static final Object ENGINE_LOCK = new Object();
     private static final Object USER_MANAGER_LOCK = new Object();
@@ -47,8 +47,8 @@ public class AppContext {
             throw new InvalidUserException("User does not exist: " + user);
         }
 
-        List<String> addedFunctions = engine.loadProgram(inputStream, null);
         synchronized (this){
+            List<String> addedFunctions = getEngine().loadProgram(inputStream, null);
             addedFunctions.forEach(function -> function2User.put(function, user));
         }
     }
@@ -59,6 +59,12 @@ public class AppContext {
                     .filter(entry -> entry.getValue().equals(user))
                     .map(Map.Entry::getKey)
                     .toList();
+        }
+    }
+
+    public String getFunctionOwner(String functionName){
+        synchronized (this) {
+            return function2User.get(functionName);
         }
     }
 }

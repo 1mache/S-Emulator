@@ -2,10 +2,11 @@ package web.utils;
 
 import com.google.gson.Gson;
 import jakarta.servlet.ServletContext;
-import web.resource.context.AppContext;
+import web.context.AppContext;
 
 public class ServletUtils {
     private static final String APP_CONTEXT_ATR_NAME = "appContext";
+    public static final String USERNAME_ATR_NAME = "username";
 
     private static final Object APP_CONTEXT_LOCK = new Object();
 
