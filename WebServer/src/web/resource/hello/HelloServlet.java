@@ -1,4 +1,4 @@
-package hello;
+package web.resource.hello;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

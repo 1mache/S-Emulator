@@ -1,4 +1,4 @@
-package engine.api.dto;
+package dto;
 
 import java.util.Objects;
 

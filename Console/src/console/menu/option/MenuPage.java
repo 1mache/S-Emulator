@@ -1,8 +1,9 @@
 package console.menu.option;
 
+import console.menu.option.helper.ProgramName;
+import dto.InstructionPeek;
+import dto.ProgramPeek;
 import engine.api.SLanguageEngine;
-import engine.api.dto.InstructionPeek;
-import engine.api.dto.ProgramPeek;
 
 import java.util.ArrayList;
 import java.util.InputMismatchException;
@@ -17,7 +18,7 @@ public class MenuPage implements MenuOption {
 
     private static class ExitOption implements MenuOption {
         @Override
-        public void execute(SLanguageEngine engine) {}
+        public void execute(SLanguageEngine engine, ProgramName programName) {}
 
         @Override
         public String getName() {
@@ -42,7 +43,7 @@ public class MenuPage implements MenuOption {
     }
 
     @Override
-    public void execute(SLanguageEngine engine) {
+    public void execute(SLanguageEngine engine, ProgramName programName) {
         System.out.println(message);
     }
 

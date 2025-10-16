@@ -1,10 +1,10 @@
 package gui.component.primary;
 
+import dto.FunctionIdentifier;
+import dto.InstructionPeek;
+import dto.ProgramExecutionResult;
+import dto.ProgramPeek;
 import engine.api.SLanguageEngine;
-import engine.api.dto.FunctionIdentifier;
-import engine.api.dto.InstructionPeek;
-import engine.api.dto.ProgramExecutionResult;
-import engine.api.dto.ProgramPeek;
 import engine.loader.exception.NotXMLException;
 import gui.component.execution.DebugState;
 import gui.component.execution.ExecutionTabController;
@@ -77,8 +77,9 @@ public class PrimaryController implements Initializable {
 
     private final IntegerProperty expansionDegreeProperty = new SimpleIntegerProperty(0);
 
-    private final BooleanProperty programLoadedProperty = new SimpleBooleanProperty(false);
-    private final StringProperty  programPathProperty   = new SimpleStringProperty("None");
+    private final BooleanProperty programLoadedProperty       = new SimpleBooleanProperty(false);
+    private final StringProperty  selectedProgramNameProperty = new SimpleStringProperty("");
+    private final StringProperty  programPathProperty         = new SimpleStringProperty("");
 
     private final ObservableList<String> avaliablePrograms = FXCollections.observableArrayList();
 
@@ -132,7 +133,10 @@ public class PrimaryController implements Initializable {
             dialog.setScene(dialogScene);
 
             HistoryTableController controller = loader.getController();
-            controller.setItems(engine.getExecutionHistoryOfCurrent());
+            controller.setItems(
+                    executionTabController.getRunHistory()
+                            .getExecutionsOf(selectedProgramNameProperty.get())
+            );
             controller.addReRunButtonListener(e -> {
                 dialog.close();
                 executionTabController.reset();
@@ -148,7 +152,6 @@ public class PrimaryController implements Initializable {
         }
     }
 
-
     public void setEngine(SLanguageEngine engine) {
         if(engine == null)
             throw new AssertionError("engine is null");
@@ -158,12 +161,13 @@ public class PrimaryController implements Initializable {
     }
 
     // ===================== private =======================
+
     private void initExpansionDegreeSelection() {
         // what happens on expansion degree change
         expansionDegreeProperty.bind(expansionChoiceBox.getSelectionModel().selectedItemProperty());
         expansionChoiceBox.getSelectionModel().selectedItemProperty().addListener(
                 (v, old, now) ->{
-                    if(engine.programNotLoaded()) return;
+                    if(engine.programNotLoaded(selectedProgramNameProperty.get())) return;
                     showCurrentProgramWithSelectedExpansion();
                 }
         );
@@ -175,12 +179,16 @@ public class PrimaryController implements Initializable {
         programChoiceBox.setItems(avaliablePrograms);
         programChoiceBox.getSelectionModel().selectedIndexProperty().addListener(
                 (v, old, now) ->{
-                    if(engine.programNotLoaded() || now.intValue() < 0) return;
+                    if(now.intValue() < 0) return; // no selection
+
+                    selectedProgramNameProperty.set(
+                            engine.getAvaliablePrograms()
+                                    // select by index.
+                                    .get(now.intValue())
+                                    .name()
+                    );
+
                     resetProgramView();
-
-                    // select by index.
-                    engine.setCurrentProgram(engine.getAvaliablePrograms().get(now.intValue()));
-
                     showCurrentProgramWithSelectedExpansion();
                 }
         );
@@ -190,7 +198,7 @@ public class PrimaryController implements Initializable {
         highlightChoiceBox.setValue(null);
         highlightChoiceBox.getSelectionModel().selectedItemProperty().addListener(
                 (v, old, now) ->{
-                    if(engine.programNotLoaded()) return;
+                    if(engine.programNotLoaded(selectedProgramNameProperty.get())) return;
 
                     if(now == null) {
                         mainInstructionTableController.resetLinesHighlight();
@@ -198,7 +206,11 @@ public class PrimaryController implements Initializable {
                     }
 
                     mainInstructionTableController.setLinesHighlight(
-                            engine.getInstructionsIdsThatUse(now, expansionDegreeProperty.get())
+                            engine.getInstructionsIdsThatUse(
+                                    selectedProgramNameProperty.get(),
+                                    expansionDegreeProperty.get(),
+                                    now
+                            )
                     );
                 }
         );
@@ -241,6 +253,9 @@ public class PrimaryController implements Initializable {
     }
 
     private void bindToProgramLoaded(){
+        // other program name properties
+        executionTabController.bindProgramNameProperty(selectedProgramNameProperty);
+
         // file name label
         filenameLabel.textProperty().bind(
                 Bindings.format("Loaded file: %s", programPathProperty)
@@ -252,7 +267,8 @@ public class PrimaryController implements Initializable {
                         () -> {
                             ObservableList<Integer> degrees = FXCollections.observableArrayList();
                             if (programLoadedProperty.get()) {
-                                for (int i = 0; i <= engine.getMaxExpansionDegree(); i++)
+                                int maxDegree = engine.getMaxExpansionDegree(selectedProgramNameProperty.get());
+                                for (int i = 0; i <= maxDegree; i++)
                                     degrees.add(i);
                             }
 
@@ -272,7 +288,10 @@ public class PrimaryController implements Initializable {
                             ObservableList<String> symbols = FXCollections.observableArrayList();
                             if (programLoadedProperty.get()) {
                                 symbols.add(null); // null highlight, meaning dont highlight
-                                ProgramPeek programPeek = engine.getExpandedProgramPeek(expansionDegreeProperty.get());
+                                ProgramPeek programPeek = engine.getProgramPeek(
+                                        selectedProgramNameProperty.get(),
+                                        expansionDegreeProperty.get()
+                                );
 
                                 symbols.addAll(
                                         programPeek.inputVariables()
@@ -325,7 +344,12 @@ public class PrimaryController implements Initializable {
 
                         mainInstructionTableController.clear();
 
-                        mainInstructionTableController.setInstructions(engine.getProgramPeek().instructions());
+                        mainInstructionTableController.setInstructions(
+                                engine.getProgramPeek(
+                                        selectedProgramNameProperty.get(),
+                                        expansionDegreeProperty.get()
+                                ).instructions()
+                        );
                         summaryLineField.setText(buildSummaryLine());
                     }
                 }
@@ -334,7 +358,10 @@ public class PrimaryController implements Initializable {
 
     private void showCurrentProgramWithSelectedExpansion() {
         mainInstructionTableController.setInstructions(
-                engine.getExpandedProgramPeek(expansionDegreeProperty.get()).instructions());
+                engine.getProgramPeek(
+                        selectedProgramNameProperty.get(),
+                        expansionDegreeProperty.get()
+                ).instructions());
 
         expansionTableController.clear(); // reset the bottom table
         summaryLineField.setText(buildSummaryLine());
@@ -377,13 +404,15 @@ public class PrimaryController implements Initializable {
                 rootBorderPane.setDisable(false);
                 dialog.close();
             });
+
+            selectedProgramNameProperty.set(loaderTask.getValue()); // main program name
             programLoadedProperty.set(true); // succeeded to load program
             programPathProperty.setValue(fileChosen.getAbsolutePath());
         }));
 
         // when the task failed
         loaderTask.setOnFailed(e -> {
-            if(!engine.programNotLoaded()){
+            if(!engine.programNotLoaded(selectedProgramNameProperty.get())){
                 programLoadedProperty.set(true); // if we failed but engine had a program loaded before
             }
 

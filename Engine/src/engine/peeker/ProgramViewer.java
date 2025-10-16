@@ -1,7 +1,7 @@
 package engine.peeker;
 
-import engine.api.dto.InstructionPeek;
-import engine.api.dto.ProgramPeek;
+import dto.InstructionPeek;
+import dto.ProgramPeek;
 import engine.expansion.ProgramExpander;
 import engine.instruction.Instruction;
 import engine.instruction.utility.InstructionReference;

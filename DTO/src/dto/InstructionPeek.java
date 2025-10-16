@@ -1,4 +1,4 @@
-package engine.api.dto;
+package dto;
 
 
 public record InstructionPeek(

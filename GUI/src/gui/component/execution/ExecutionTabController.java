@@ -1,10 +1,11 @@
 package gui.component.execution;
 
+import dto.ProgramExecutionResult;
+import dto.debug.DebugEndResult;
+import dto.debug.DebugStepPeek;
+import engine.api.RunHistory;
 import engine.api.SLanguageEngine;
-import engine.api.dto.debug.DebugEndResult;
-import engine.api.dto.debug.DebugHandle;
-import engine.api.dto.ProgramExecutionResult;
-import engine.api.dto.debug.DebugStepPeek;
+import engine.api.debug.DebugHandle;
 import gui.component.execution.event.DebugStateChange;
 import gui.component.execution.event.DebugStopOnLine;
 import gui.component.variable.table.VariableTableController;
@@ -56,9 +57,13 @@ public class ExecutionTabController implements Initializable {
     private List<Button> debugControls;
 
     private SLanguageEngine engine;
+    private final RunHistory runHistory = new RunHistory();
+
     private final Map<String, TextField> inputFields = new LinkedHashMap<>();
     private final BooleanProperty inputsValidProperty = new SimpleBooleanProperty(true);
     private final IntegerProperty expansionDegreeProperty = new SimpleIntegerProperty(0);
+
+    private final StringProperty programNameProperty = new SimpleStringProperty("");
 
     private enum RunMode {
         EXECUTION("Execution"),
@@ -84,6 +89,7 @@ public class ExecutionTabController implements Initializable {
 
     private final Set<Integer> breakpoints = new HashSet<>();
 
+    // ========================= for initialization =========================
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         inputVariableGrid.getChildren().clear();
@@ -105,6 +111,11 @@ public class ExecutionTabController implements Initializable {
         this.engine = engine;
     }
 
+    public void bindProgramNameProperty(StringProperty otherProperty) {
+        programNameProperty.bind(otherProperty);
+    }
+// ==========================================================================
+
     public void runProgramAction() {
         validateInputs();
         if(!inputsValidProperty.get()) return;
@@ -115,18 +126,22 @@ public class ExecutionTabController implements Initializable {
         ProgramExecutionResult result;
         if(runMode == RunMode.EXECUTION){
             result = engine.runProgram(
-                    getInputsFromTextFields(),
+                    programNameProperty.get(),
                     expansionDegreeProperty.get(),
-                    true
+                    getInputsFromTextFields(),
+                    true,
+                    runHistory
             );
             variableTableController.setVariableEntries(result.variableMap());
             cyclesLabel.setText("Cycles: " + result.cycles());
         }
         else if(runMode == RunMode.DEBUG){
-            debugHandle = engine.debugProgram(
-                    getInputsFromTextFields(),
+            debugHandle = engine.startDebugSession(
+                    programNameProperty.get(),
                     expansionDegreeProperty.get(),
-                    true
+                    getInputsFromTextFields(),
+                    true,
+                    runHistory
             );
 
             breakpoints.forEach(
@@ -206,6 +221,10 @@ public class ExecutionTabController implements Initializable {
             debugStateMachine.transitionTo(DebugState.ON_INSTRUCTION);
     }
 
+    public RunHistory getRunHistory() {
+        return runHistory;
+    }
+
     public void addDebugLineChangeListener(EventHandler<DebugStopOnLine> listener){
         debugLineChangeListeners.add(listener);
     }
@@ -240,41 +259,6 @@ public class ExecutionTabController implements Initializable {
 
     public IntegerProperty getExpansionDegreeProperty() {
         return expansionDegreeProperty;
-    }
-
-    public void buildInputGrid() {
-        List<String> variableNames = engine.getProgramPeek().inputVariables();
-
-        inputVariableGrid.getChildren().clear();
-        inputVariableGrid.getRowConstraints().clear();
-        inputFields.clear(); // reset storage
-
-        int row = 0;
-        for (String varName : variableNames) {
-            Label label = new Label(varName);
-            GridPane.setRowIndex(label, row);
-            GridPane.setColumnIndex(label, 0);
-            GridPane.setMargin(label, new Insets(0, 0, 0, 10));
-
-            TextField textField = new TextField("0");
-            GridPane.setRowIndex(textField, row);
-            GridPane.setColumnIndex(textField, 1);
-            GridPane.setMargin(textField, new Insets(0, 0, 0, 5));
-
-            inputVariableGrid.getChildren().addAll(label, textField);
-
-            // keep reference
-            inputFields.put(varName, textField);
-
-            row++;
-        }
-
-        // add row constraint
-        RowConstraints rc = new RowConstraints();
-        rc.setMinHeight(10);
-        rc.setPrefHeight(30);
-        rc.setVgrow(Priority.SOMETIMES);
-        inputVariableGrid.getRowConstraints().add(rc);
     }
 
     public void setInputsInTextFields(List<Long> inputs){
@@ -318,7 +302,6 @@ public class ExecutionTabController implements Initializable {
     private void initDebugRelated() {
         // define debug controls
         debugControls = List.of(stepOverButton, continueButton);
-        debugControls = List.of(stepOverButton, continueButton);
 
         // when debug finishes:
         debugStateMachine.addListener(
@@ -333,6 +316,44 @@ public class ExecutionTabController implements Initializable {
 
     private void setDebugControlsDisabled(boolean disabled) {
         debugControls.forEach(control -> control.setDisable(disabled));
+    }
+
+    private void buildInputGrid() {
+        List<String> variableNames = engine.getProgramPeek(
+                programNameProperty.get(),
+                expansionDegreeProperty.get()
+        ).inputVariables();
+
+        inputVariableGrid.getChildren().clear();
+        inputVariableGrid.getRowConstraints().clear();
+        inputFields.clear(); // reset storage
+
+        int row = 0;
+        for (String varName : variableNames) {
+            Label label = new Label(varName);
+            GridPane.setRowIndex(label, row);
+            GridPane.setColumnIndex(label, 0);
+            GridPane.setMargin(label, new Insets(0, 0, 0, 10));
+
+            TextField textField = new TextField("0");
+            GridPane.setRowIndex(textField, row);
+            GridPane.setColumnIndex(textField, 1);
+            GridPane.setMargin(textField, new Insets(0, 0, 0, 5));
+
+            inputVariableGrid.getChildren().addAll(label, textField);
+
+            // keep reference
+            inputFields.put(varName, textField);
+
+            row++;
+        }
+
+        // add row constraint
+        RowConstraints rc = new RowConstraints();
+        rc.setMinHeight(10);
+        rc.setPrefHeight(30);
+        rc.setVgrow(Priority.SOMETIMES);
+        inputVariableGrid.getRowConstraints().add(rc);
     }
 
     private void validateInputs() {
@@ -363,8 +384,8 @@ public class ExecutionTabController implements Initializable {
         inputFields.values().forEach(inputField -> inputField.setDisable(disable));
     }
 
-    private void onInputsValidityChange(Boolean now) {
-        if (now) {
+    private void onInputsValidityChange(Boolean valid) {
+        if (valid) {
             String DEFAULT_LABEL_TEXT = "Input Variables (pos. integers)";
             inputVarsLabel.setText(DEFAULT_LABEL_TEXT);
             inputVarsLabel.getStyleClass().remove(CssClasses.ERROR_FIELD);
@@ -407,9 +428,7 @@ public class ExecutionTabController implements Initializable {
 
                 variableTableController.resetHighlight();
             }
-            case null, default -> {
-                throw new IllegalArgumentException("Illegal state passed: " + newValue);
-            }
+            case null, default -> throw new IllegalArgumentException("Illegal state passed: " + newValue);
         }
     }
 

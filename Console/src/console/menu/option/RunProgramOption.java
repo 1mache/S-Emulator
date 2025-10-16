@@ -1,8 +1,10 @@
 package console.menu.option;
 
+import console.menu.option.helper.GlobalExecutionHistory;
+import console.menu.option.helper.ProgramName;
+import dto.ProgramExecutionResult;
+import dto.ProgramPeek;
 import engine.api.SLanguageEngine;
-import engine.api.dto.ProgramExecutionResult;
-import engine.api.dto.ProgramPeek;
 import engine.execution.exception.SProgramNotLoadedException;
 
 import java.util.*;
@@ -13,18 +15,26 @@ public class RunProgramOption extends AbstractExpandingOption {
     }
 
     @Override
-    public void execute(SLanguageEngine engine) {
+    public void execute(SLanguageEngine engine, ProgramName programName) {
         try {
-            int expansionDegree = getExpansionDegree(engine.getMaxExpansionDegree());
-            ProgramPeek program = engine.getProgramPeek();
+            int expansionDegree = getExpansionDegree(engine.getMaxExpansionDegree(programName.get()));
+            ProgramPeek program = engine.getProgramPeek(
+                    programName.get(), 0
+            );
+
+            ProgramPeek expanded = engine.getProgramPeek(
+                    programName.get(), expansionDegree
+            );
 
             System.out.println("The inputs that the program uses are: " + program.inputVariables());
             List<Long> inputs = getInputValues();
 
             System.out.println("Running program:");
-            printProgramPeek(engine.getExpandedProgramPeek(expansionDegree), expansionDegree, false);
+            printProgramPeek(expanded, expansionDegree, false);
 
-            ProgramExecutionResult result = engine.runProgram(inputs, expansionDegree, false);
+            ProgramExecutionResult result = engine.runProgram(
+                programName.get(), expansionDegree, inputs, false, GlobalExecutionHistory.get()
+            );
             System.out.println("Program execution result: " + result.outputValue());
             System.out.println("Variables that were used:");
             result.variableMap().forEach((key, value) -> System.out.println(key + "= " + value));

@@ -14,6 +14,7 @@ import engine.instruction.utility.Instructions;
 import jakarta.xml.bind.JAXBException;
 
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,6 +33,16 @@ public class FromXMLProgramLoader {
             translator = new JaxbTranslator();
             program = translator.getProgram(sProgram, listener);
         } catch (JAXBException e) { // should never happen
+            throw new SProgramXMLException("Failed to marshal XML.", e);
+        }
+    }
+
+    public void loadXML(InputStream inputStream, LoadingListener listener) {
+        try {
+            SProgram sProgram = JaxbLoader.loadProgramFromXML(inputStream);
+            translator = new JaxbTranslator();
+            program = translator.getProgram(sProgram, listener);
+        } catch (JAXBException e) {
             throw new SProgramXMLException("Failed to marshal XML.", e);
         }
     }

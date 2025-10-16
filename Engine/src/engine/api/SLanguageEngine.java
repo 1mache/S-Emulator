@@ -1,9 +1,9 @@
 package engine.api;
 
-import engine.api.dto.FunctionIdentifier;
-import engine.api.dto.debug.DebugHandle;
-import engine.api.dto.ProgramExecutionResult;
-import engine.api.dto.ProgramPeek;
+import dto.FunctionIdentifier;
+import dto.ProgramExecutionResult;
+import dto.ProgramPeek;
+import engine.api.debug.DebugHandle;
 import engine.debugger.ProgramDebugger;
 import engine.execution.ProgramRunner;
 import engine.execution.exception.SProgramNotLoadedException;
@@ -23,17 +23,12 @@ import engine.variable.Variable;
 import engine.variable.VariableType;
 
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class SLanguageEngine {
-    private String mainProgramName;
-    private Program currentProgram;
     private final Map<String,Program> avaliablePrograms = new HashMap<>();
-    private ProgramExpander programExpander;
-
-    // history
-    private Map<String, List<ProgramExecutionResult>> previousExecutions;
 
     private SLanguageEngine(){}
     // Singleton
@@ -43,56 +38,77 @@ public class SLanguageEngine {
         return instance;
     }
 
-    public void loadProgram(String path, LoadingListener listener)
+    // returns the names of the loaded programs and functions, main program is first in list
+    public List<String> loadProgram(String path, LoadingListener listener)
             throws NotXMLException, FileNotFoundException, UnknownLabelException, UnknownFunctionException {
         FromXMLProgramLoader loader = new FromXMLProgramLoader();
         loader.loadXML(path, listener);
+        return loadProgram(loader);
+    }
+
+    // returns the names of the loaded programs and functions, main program is first in list
+    public List<String> loadProgram(InputStream inputStream, LoadingListener listener)
+            throws UnknownLabelException, UnknownFunctionException {
+        FromXMLProgramLoader loader = new FromXMLProgramLoader();
+        loader.loadXML(inputStream, listener);
+        return loadProgram(loader);
+    }
+
+    // helper for internal use
+    private List<String> loadProgram(FromXMLProgramLoader loader) throws UnknownLabelException, UnknownFunctionException {
         loader.validateProgram();
-        currentProgram = loader.getProgram();
+        var mainProgram = loader.getProgram();
+        Set<Program> allFunctions = new HashSet<>(loader.getFunctions());
+        allFunctions.add(mainProgram);
 
-        mainProgramName = currentProgram.getName();
-        avaliablePrograms.clear();
-        avaliablePrograms.put(currentProgram.getName(), currentProgram);
-        avaliablePrograms.putAll(
-                loader.getFunctions().stream()
-                        .collect(Collectors.toMap(
-                                Program::getName, program -> program
-                        ))
-        );
-
-        programExpander = new ProgramExpander(currentProgram);
-
-        previousExecutions = new LinkedHashMap<>();
-    }
-
-    public boolean programNotLoaded(){
-        return currentProgram == null;
-    }
-
-    public int getMaxExpansionDegree() {
-        if(programNotLoaded())
-            throw new SProgramNotLoadedException("Program has not been loaded");
-        return currentProgram.getMaxExpansionDegree();
-    }
-
-    public ProgramPeek getProgramPeek() {
-        return getExpandedProgramPeek(0) ;
-    }
-
-    public ProgramPeek getExpandedProgramPeek(int expansionDegree) {
-        if(expansionDegree > getMaxExpansionDegree())
-            throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + currentProgram.getMaxExpansionDegree());
-        if(programNotLoaded()) {
-            throw new SProgramNotLoadedException("Program is not loaded");
+        synchronized (this) {
+            avaliablePrograms.put(mainProgram.getName(), mainProgram);
+            avaliablePrograms.putAll(
+                    loader.getFunctions().stream()
+                            .collect(Collectors.toMap(
+                                    Program::getName, program -> program
+                            ))
+            );
         }
 
-        return new ProgramViewer(currentProgram).getProgramPeek(expansionDegree, programExpander);
+        return getFunctionIdentifiers(allFunctions).stream()
+                .map(FunctionIdentifier::name)
+                .toList();
     }
 
-    public ProgramExecutionResult runProgram(List<Long> inputs, int expansionDegree, boolean specificInputs) {
+    public boolean programNotLoaded(String programName) {
+        return !avaliablePrograms.containsKey(programName);
+    }
+
+    public int getMaxExpansionDegree(String programName) {
+        if(programNotLoaded(programName))
+            throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
+
+        var program = getProgramByName(programName);
+
+        return program.getMaxExpansionDegree();
+    }
+
+    public ProgramPeek getProgramPeek(String programName, int expansionDegree) {
+        if(programNotLoaded(programName))
+            throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
+
+        var program = getProgramByName(programName);
+        if(expansionDegree > getMaxExpansionDegree(programName)) {
+            throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + program.getMaxExpansionDegree());
+        }
+
+        return new ProgramViewer(program).getProgramPeek(expansionDegree);
+    }
+
+    public ProgramExecutionResult runProgram(String programName,
+                                             int expansionDegree,
+                                             List<Long> inputs,
+                                             boolean specificInputs,
+                                             RunHistory history) {
         validateInputs(inputs);
 
-        var expandedProgram = createExpandedProgram(expansionDegree);
+        Program expandedProgram = createExpandedProgram(programName, expansionDegree);
         var runner = new ProgramRunner(expandedProgram);
 
         initializeInputs(runner, inputs, specificInputs);
@@ -107,79 +123,58 @@ public class SLanguageEngine {
                 runner.getCycles()
         );
 
-        addExecutionToHistory(executionResult);
+        history.addExecution(programName, executionResult);
 
         return executionResult;
     }
 
-    public DebugHandle debugProgram(List<Long> inputs, int expansionDegree, boolean specificInputs) {
-       validateInputs(inputs);
+    // ========================== Debug ===========================
+    public DebugHandle startDebugSession(String programName,
+                                         int expansionDegree,
+                                         List<Long> inputs,
+                                         boolean specificInputs,
+                                         RunHistory history) {
+        validateInputs(inputs);
 
-        var expandedProgram = createExpandedProgram(expansionDegree);
+        Program expandedProgram = createExpandedProgram(programName, expansionDegree);
         var debugger = new ProgramDebugger(expandedProgram);
 
         initializeInputs(debugger, inputs, specificInputs);
 
         return new DebugHandle(
                 debugger,
-                debugResult -> {
-                    addExecutionToHistory(
-                            new ProgramExecutionResult(
-                                    debugResult.output(),
-                                    debugResult.variableMap(),
-                                    inputs,
-                                    expansionDegree,
-                                    debugger.getCycles()
-                            )
-                    );
-                }
+                debugResult -> history.addExecution(
+                        programName,
+                        new ProgramExecutionResult(
+                                debugResult.output(),
+                                debugResult.variableMap(),
+                                inputs,
+                                expansionDegree,
+                                debugger.getCycles()
+                        )
+                )
         );
     }
+    // =============================================================
 
-
-    // returns all the functions names that the program uses including the main program. the main is first in list
+    // returns all the functions names that the program uses including the main programs. the programs are first in list
     public List<FunctionIdentifier> getAvaliablePrograms() {
-        var functionStringsList = new ArrayList<>(avaliablePrograms.values().stream()
-                .filter(program -> !program.getName().equals(mainProgramName))
-                // everyone except main is a function (if not something's wrong)
-                .map(program -> {
-                    var function = (Function) program;
-                    return new FunctionIdentifier(function.getName(), function.getUserString());
-                })
-                .toList());
-        // main program comes first, then functions
-        functionStringsList.addFirst(new FunctionIdentifier(mainProgramName, mainProgramName));
-
-        return functionStringsList;
+        return getFunctionIdentifiers(avaliablePrograms.values());
     }
 
-    public void setCurrentProgram(FunctionIdentifier programName) {
-        Program requested = avaliablePrograms.get(programName.name());
-        if(requested == null)
-            throw new IllegalArgumentException("File does not contain program: " + programName);
+    public List<Integer> getInstructionsIdsThatUse(String programName, int expansionDegree, String symbolStr){
+        var expandedProgram = createExpandedProgram(programName, expansionDegree);
 
-        currentProgram = requested;
-        programExpander = new ProgramExpander(currentProgram);
-    }
-
-    public List<ProgramExecutionResult> getExecutionHistoryOfCurrent(){
-        List<ProgramExecutionResult> results = previousExecutions.get(currentProgram.getName());
-
-        // if no history for this function, return empty list
-        return Objects.requireNonNullElseGet(results, List::of);
-    }
-
-    public List<Integer> getInstructionsIdsThatUse(String symbolStr, int expansionDegree){
         Variable maybeVariable = str2Variable(symbolStr);
         if(maybeVariable != null)
             return ProgramViewer.idsOfInstructionsThatUse(
-                    programExpander.expand(expansionDegree),
+                    expandedProgram,
                     maybeVariable
             );
         Label maybeLabel = str2Label(symbolStr);
         if(maybeLabel != null)
             return ProgramViewer.idsOfInstructionsThatUse(
-                    programExpander.expand(expansionDegree),
+                    expandedProgram,
                     maybeLabel
             );
 
@@ -188,19 +183,30 @@ public class SLanguageEngine {
 
     // =============== private ===============
 
+    private Program getProgramByName(String programName) {
+        var program = avaliablePrograms.get(programName);
+        if(program == null)
+            throw new IllegalArgumentException("File does not contain program: " + programName);
+        return program;
+    }
+
     private void validateInputs(List<Long> inputs) {
         for (var input : inputs) {
             if (input < 0)
                 throw new IllegalArgumentException("Input values must be non-negative");
         }
-        if (programNotLoaded())
-            throw new SProgramNotLoadedException("Program is not loaded");
     }
 
-    private Program createExpandedProgram(int expansionDegree) {
-        if (expansionDegree > currentProgram.getMaxExpansionDegree())
-            throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + currentProgram.getMaxExpansionDegree());
-        return programExpander.expand(expansionDegree);
+    private Program createExpandedProgram(String programName, int expansionDegree) {
+        if(programNotLoaded(programName))
+            throw new SProgramNotLoadedException("Program " + programName + " has not been loaded");
+
+        var program = getProgramByName(programName);
+
+        if (expansionDegree > program.getMaxExpansionDegree())
+            throw new IllegalArgumentException("Expansion degree exceeds maximum allowed. Which is " + program.getMaxExpansionDegree());
+
+        return new ProgramExpander(program).expand(expansionDegree);
     }
 
     private void initializeInputs(ProgramRunner runner, List<Long> inputs, boolean specificInputs) {
@@ -208,19 +214,6 @@ public class SLanguageEngine {
             runner.initInputVariablesSpecific(inputs);
         else
             runner.initInputVariables(inputs);
-    }
-
-    private void addExecutionToHistory(ProgramExecutionResult executionResult) {
-        List<ProgramExecutionResult> executionResults = previousExecutions.get(currentProgram.getName());
-        if (executionResults == null) {
-            // key does not exist, create a new list with the item
-            executionResults = new ArrayList<>();
-            executionResults.add(executionResult);
-            previousExecutions.put(currentProgram.getName(), executionResults);
-        } else {
-            // key exists, add the item to the existing list
-            executionResults.add(executionResult);
-        }
     }
 
     private Variable str2Variable(String str){
@@ -254,5 +247,23 @@ public class SLanguageEngine {
 
         // take only the lineId part and construct a numeric label
         return new NumericLabel(numberPart);
+    }
+
+    private List<FunctionIdentifier> getFunctionIdentifiers(Collection<Program> functions) {
+        var functionStringsList = new ArrayList<>(functions.stream()
+                .filter(program -> program instanceof Function)
+                .map(program -> {
+                    var function = (Function) program;
+                    return new FunctionIdentifier(function.getName(), function.getUserString());
+                })
+                .toList());
+
+        // programs are first in the list
+        avaliablePrograms.values().stream()
+                .filter(program -> !(program instanceof Function))
+                .map(program -> new FunctionIdentifier(program.getName(), program.getName()))
+                .forEach(functionStringsList::addFirst);
+
+        return functionStringsList;
     }
 }

@@ -15,6 +15,11 @@ public class JaxbLoader {
     public static SProgram loadProgramFromXML(String xmlPath)
             throws JAXBException, FileNotFoundException {
         InputStream inputStream = new FileInputStream(xmlPath);
+        return loadProgramFromXML(inputStream);
+    }
+
+    public static SProgram loadProgramFromXML(InputStream inputStream)
+            throws JAXBException {
         return deserializeFrom(inputStream);
     }
 

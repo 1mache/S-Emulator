@@ -1,7 +1,8 @@
 package console.menu.option;
 
+import console.menu.option.helper.ProgramName;
+import dto.ProgramPeek;
 import engine.api.SLanguageEngine;
-import engine.api.dto.ProgramPeek;
 import engine.execution.exception.SProgramNotLoadedException;
 
 public class ExpandProgramOption extends AbstractExpandingOption {
@@ -11,10 +12,12 @@ public class ExpandProgramOption extends AbstractExpandingOption {
     }
 
     @Override
-    public void execute(SLanguageEngine engine) {
+    public void execute(SLanguageEngine engine, ProgramName programName) {
         try{
-            int expansionDegree = getExpansionDegree(engine.getMaxExpansionDegree());
-            ProgramPeek programPeek = engine.getExpandedProgramPeek(expansionDegree);
+            int expansionDegree = getExpansionDegree(engine.getMaxExpansionDegree(programName.get()));
+            ProgramPeek programPeek = engine.getProgramPeek(
+                    programName.get(), expansionDegree
+            );
             System.out.println("Program name: " + programPeek.name());
             System.out.println("Input variables used: " + programPeek.inputVariables());
             System.out.println("Labels used: " + programPeek.labelsUsed());
