@@ -9,28 +9,28 @@ import javafx.scene.control.*;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class usersTableInfoController implements Initializable {
+public class usersTableInfoController {
 
+    // Won't Use
+    @FXML private ScrollPane users;
+    @FXML private Label usersInformation;
+
+    // Buttons
+    @FXML private Button unselectButton;
+
+    // Users Table
+    @FXML private TableView<?> usersTable;
     @FXML private TableColumn<?, ?> currentCredit;
     @FXML private TableColumn<?, ?> name;
     @FXML private TableColumn<?, ?> numberOfNewFunctions;
     @FXML private TableColumn<?, ?> numberOfNewPrograms;
     @FXML private TableColumn<?, ?> runs;
-    @FXML private Button unselectButton;
     @FXML private TableColumn<?, ?> usedCredit;
-    @FXML private ScrollPane users;
-    @FXML private Label usersInformation;
-    @FXML private TableView<?> usersTable;
-
 
     @FXML void UnselectButtonListener(ActionEvent event) {
 
     }
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-
-    }
 
 }
 

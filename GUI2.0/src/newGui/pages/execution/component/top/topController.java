@@ -8,24 +8,24 @@ import javafx.scene.control.ScrollPane;
 
 public class topController {
 
-    @FXML
-    private Label availableCredits;
+    // Won't Use
+    @FXML private ScrollPane top;
+
+    @FXML private Label userName;
+    @FXML private Label availableCredits;
+
+    @FXML private ComboBox<String> degreeSelection;
+    @FXML private ComboBox<String> highlightSelection;
 
     @FXML
-    private ComboBox<?> degreeSelection;
-
-    @FXML
-    private ComboBox<?> highlightSelection;
-
-    @FXML
-    private ScrollPane top;
-
-    @FXML
-    private Label userName;
-
-    @FXML
-    void selectionListener(ActionEvent event) {
+    void degreeSelectionListener(ActionEvent event) {
 
     }
+
+    @FXML
+    void highlightSelectionListener(ActionEvent event) {
+
+    }
+
 
 }

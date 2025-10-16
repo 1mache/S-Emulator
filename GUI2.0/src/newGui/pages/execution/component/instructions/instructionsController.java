@@ -10,50 +10,31 @@ import javafx.scene.layout.VBox;
 
 public class instructionsController {
 
-    @FXML
-    private Label SelectedInstructionHistoryChain;
+    // Won't Use
+    @FXML private VBox left;
+    @FXML private Label SelectedInstructionHistoryChain;
 
-    @FXML
-    private TextField SummaryLine;
 
-    @FXML
-    private TableColumn<?, ?> colBS;
+    // Instructions Table
+    @FXML private TableView<?> instructionsTable;
+    @FXML private TextField SummaryLine;
+    @FXML private TableColumn<?, ?> colBS;
+    @FXML private TableColumn<?, ?> colCycles;
+    @FXML private TableColumn<?, ?> colArchitecture;
+    @FXML private TableColumn<?, ?> colInstruction;
+    @FXML private TableColumn<?, ?> colLabel;
+    @FXML private TableColumn<?, ?> colNumber;
 
-    @FXML
-    private TableColumn<?, ?> colCycles;
 
-    @FXML
-    private TableColumn<?, ?> colHistoryBS;
+    // History Chain Table
+    @FXML private TableView<?> instructionsHistoryTable;
+    @FXML private TableColumn<?, ?> colHistoryLabel;
+    @FXML private TableColumn<?, ?> colHistoryNumber;
+    @FXML private TableColumn<?, ?> colHistoryBS;
+    @FXML private TableColumn<?, ?> colHistoryCycles;
+    @FXML private TableColumn<?, ?> colHistoryInstruction;
+    @FXML private TableColumn<?, ?> colHistoryArchitecture;
 
-    @FXML
-    private TableColumn<?, ?> colHistoryCycles;
-
-    @FXML
-    private TableColumn<?, ?> colHistoryInstruction;
-
-    @FXML
-    private TableColumn<?, ?> colHistoryLabel;
-
-    @FXML
-    private TableColumn<?, ?> colHistoryNumber;
-
-    @FXML
-    private TableColumn<?, ?> colInstruction;
-
-    @FXML
-    private TableColumn<?, ?> colLabel;
-
-    @FXML
-    private TableColumn<?, ?> colNumber;
-
-    @FXML
-    private TableView<?> instructionsHistoryTable;
-
-    @FXML
-    private TableView<?> instructionsTable;
-
-    @FXML
-    private VBox left;
 
     @FXML
     void showHistoryChain(MouseEvent event) {

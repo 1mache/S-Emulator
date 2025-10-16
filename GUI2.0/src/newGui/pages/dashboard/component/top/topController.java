@@ -26,16 +26,26 @@ import java.util.ResourceBundle;
 
 public class topController implements Initializable {
 
-    @FXML private Label availableCredits;
+
+    // Won't Use
+    @FXML private ScrollPane top;
+
+    // Buttons
     @FXML private Button chargeCreditsButton;
+    @FXML private Button loadFileButton;
+
+    // Text Fields and Labels that will change dynamically
+    @FXML private Label statusLabel;
+    @FXML private Label userName;
+    @FXML private Label availableCredits;
     @FXML private TextField creditsAmount;
     @FXML private TextField currentlyLoadedFilePath;
-    @FXML private Button loadFileButton;
-    @FXML private ProgressBar progressBar;
-    @FXML private Label statusLabel;
-    @FXML private ScrollPane top;
-    @FXML private Label userName;
 
+    // Effect
+    @FXML private ProgressBar progressBar;
+
+
+    // Last directory visited
     private File lastDir = new File(System.getProperty("user.home"));
     private PauseTransition clearStatusLater;
 
