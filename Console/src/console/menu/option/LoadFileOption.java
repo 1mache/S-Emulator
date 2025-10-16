@@ -25,7 +25,7 @@ public class LoadFileOption extends MenuPage {
         }
 
         try{
-            programName.set(engine.loadProgram(path, null));
+            programName.set(engine.loadProgram(path, null).getFirst());
             System.out.println("Program loaded successfully");
         }
         catch (FileNotFoundException | NotXMLException | UnknownLabelException | UnknownFunctionException e) {

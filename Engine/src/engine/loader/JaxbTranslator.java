@@ -64,7 +64,6 @@ public class JaxbTranslator {
     public Program getProgram(SProgram sProgram, LoadingListener listener) {
         List<SInstruction> sInstructions = sProgram.getSInstructions().getSInstruction();
 
-
         var sFunctions = sProgram.getSFunctions();
         if(sFunctions != null){
             for (SFunction sFunction: sFunctions.getSFunction()){

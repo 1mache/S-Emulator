@@ -23,6 +23,7 @@ import engine.variable.Variable;
 import engine.variable.VariableType;
 
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,23 +38,42 @@ public class SLanguageEngine {
         return instance;
     }
 
-    public String loadProgram(String path, LoadingListener listener)
+    // returns the names of the loaded programs and functions, main program is first in list
+    public List<String> loadProgram(String path, LoadingListener listener)
             throws NotXMLException, FileNotFoundException, UnknownLabelException, UnknownFunctionException {
         FromXMLProgramLoader loader = new FromXMLProgramLoader();
         loader.loadXML(path, listener);
+        return loadProgram(loader);
+    }
+
+    // returns the names of the loaded programs and functions, main program is first in list
+    public List<String> loadProgram(InputStream inputStream, LoadingListener listener)
+            throws UnknownLabelException, UnknownFunctionException {
+        FromXMLProgramLoader loader = new FromXMLProgramLoader();
+        loader.loadXML(inputStream, listener);
+        return loadProgram(loader);
+    }
+
+    // helper for internal use
+    private List<String> loadProgram(FromXMLProgramLoader loader) throws UnknownLabelException, UnknownFunctionException {
         loader.validateProgram();
         var mainProgram = loader.getProgram();
+        Set<Program> allFunctions = new HashSet<>(loader.getFunctions());
+        allFunctions.add(mainProgram);
 
-        avaliablePrograms.clear();
-        avaliablePrograms.put(mainProgram.getName(), mainProgram);
-        avaliablePrograms.putAll(
-                loader.getFunctions().stream()
-                        .collect(Collectors.toMap(
-                                Program::getName, program -> program
-                        ))
-        );
+        synchronized (this) {
+            avaliablePrograms.put(mainProgram.getName(), mainProgram);
+            avaliablePrograms.putAll(
+                    loader.getFunctions().stream()
+                            .collect(Collectors.toMap(
+                                    Program::getName, program -> program
+                            ))
+            );
+        }
 
-        return mainProgram.getName();
+        return getFunctionIdentifiers(allFunctions).stream()
+                .map(FunctionIdentifier::name)
+                .toList();
     }
 
     public boolean programNotLoaded(String programName) {
@@ -139,21 +159,7 @@ public class SLanguageEngine {
 
     // returns all the functions names that the program uses including the main programs. the programs are first in list
     public List<FunctionIdentifier> getAvaliablePrograms() {
-        var functionStringsList = new ArrayList<>(avaliablePrograms.values().stream()
-                .filter(program -> program instanceof Function)
-                .map(program -> {
-                    var function = (Function) program;
-                    return new FunctionIdentifier(function.getName(), function.getUserString());
-                })
-                .toList());
-
-        // programs are first in the list
-        avaliablePrograms.values().stream()
-                .filter(program -> !(program instanceof Function))
-                .map(program -> new FunctionIdentifier(program.getName(), program.getName()))
-                .forEach(functionStringsList::addFirst);
-
-        return functionStringsList;
+        return getFunctionIdentifiers(avaliablePrograms.values());
     }
 
     public List<Integer> getInstructionsIdsThatUse(String programName, int expansionDegree, String symbolStr){
@@ -177,8 +183,7 @@ public class SLanguageEngine {
 
     // =============== private ===============
 
-    private synchronized Program getProgramByName(String programName) {
-        // synchronized because avaliablePrograms map is accessed
+    private Program getProgramByName(String programName) {
         var program = avaliablePrograms.get(programName);
         if(program == null)
             throw new IllegalArgumentException("File does not contain program: " + programName);
@@ -242,5 +247,23 @@ public class SLanguageEngine {
 
         // take only the lineId part and construct a numeric label
         return new NumericLabel(numberPart);
+    }
+
+    private List<FunctionIdentifier> getFunctionIdentifiers(Collection<Program> functions) {
+        var functionStringsList = new ArrayList<>(functions.stream()
+                .filter(program -> program instanceof Function)
+                .map(program -> {
+                    var function = (Function) program;
+                    return new FunctionIdentifier(function.getName(), function.getUserString());
+                })
+                .toList());
+
+        // programs are first in the list
+        avaliablePrograms.values().stream()
+                .filter(program -> !(program instanceof Function))
+                .map(program -> new FunctionIdentifier(program.getName(), program.getName()))
+                .forEach(functionStringsList::addFirst);
+
+        return functionStringsList;
     }
 }
