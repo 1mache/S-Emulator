@@ -11,15 +11,18 @@ import javafx.scene.control.TableView;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class availableProgramsController implements Initializable {
+public class availableProgramsController {
 
+    // Functions Table
+    @FXML private TableView<?> programsTable;
     @FXML private TableColumn<?, ?> averageCreditCost;
     @FXML private TableColumn<?, ?> maxLevel;
     @FXML private TableColumn<?, ?> name;
     @FXML private TableColumn<?, ?> numberOfInstructions;
-    @FXML private TableView<?> programsTable;
     @FXML private TableColumn<?, ?> runs;
     @FXML private TableColumn<?, ?> uploadBy;
+
+    // Buttons
     @FXML private Button executeProgram;
 
 
@@ -28,8 +31,4 @@ public class availableProgramsController implements Initializable {
 
     }
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-
-    }
 }

@@ -28,9 +28,11 @@ public class loginController {
 
     private mainClientAppController mainClientAppController;
 
+    // Won't Use - Bottom
+    @FXML private Button loginButton;
+
     @FXML private TextField userNameTextField;
     @FXML private Label errorMessageLabel;
-    @FXML private Button loginButton;
 
     private final StringProperty errorMessageProperty = new SimpleStringProperty();
 
