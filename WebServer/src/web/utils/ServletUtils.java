@@ -17,6 +17,7 @@ public class ServletUtils {
             appContext = (AppContext) servletContext.getAttribute(APP_CONTEXT_ATR_NAME);
             if(appContext == null) {
                 servletContext.setAttribute(APP_CONTEXT_ATR_NAME, new AppContext());
+                appContext = (AppContext) servletContext.getAttribute(APP_CONTEXT_ATR_NAME);
             }
         }
 
