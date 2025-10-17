@@ -16,6 +16,7 @@ public class AppContext {
     private UserManager userManager;
 
     private final Map<String, String> function2User = new HashMap<>();
+    private final Map<String, Long> spentCredits = new HashMap<>();
 
     private static final Object ENGINE_LOCK = new Object();
     private static final Object USER_MANAGER_LOCK = new Object();
@@ -53,11 +54,27 @@ public class AppContext {
         }
     }
 
-    public List<String> getUserFunctions(String user) {
+    public List<String> getAllUserFunctions(String user) {
         synchronized (this) {
             return function2User.entrySet().stream()
                     .filter(entry -> entry.getValue().equals(user))
                     .map(Map.Entry::getKey)
+                    .toList();
+        }
+    }
+
+    public List<String> getUserFunctions(String user) {
+        synchronized (this) {
+            return getAllUserFunctions(user).stream()
+                    .filter(funcName -> !getEngine().getFunctionIdentifier(funcName).isProgram())
+                    .toList();
+        }
+    }
+
+    public List<String> getUserPrograms(String user) {
+        synchronized (this) {
+            return getAllUserFunctions(user).stream()
+                    .filter(funcName -> getEngine().getFunctionIdentifier(funcName).isProgram())
                     .toList();
         }
     }

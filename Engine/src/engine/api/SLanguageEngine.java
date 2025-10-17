@@ -205,6 +205,18 @@ public class SLanguageEngine {
         throw new IllegalArgumentException("Illegal symbol: " + symbolStr);
     }
 
+    public FunctionIdentifier getFunctionIdentifier(String programName) {
+        if (programNotLoaded(programName))
+            throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
+
+        var program = getProgramByName(programName);
+        if (program instanceof Function function) {
+            return new FunctionIdentifier(function.getName(), function.getUserString(), false);
+        } else {
+            return new FunctionIdentifier(program.getName(), program.getName(), true);
+        }
+    }
+
     // =============== private ===============
 
     private Program getProgramByName(String programName) {
