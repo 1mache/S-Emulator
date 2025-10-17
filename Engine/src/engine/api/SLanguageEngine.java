@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 public class SLanguageEngine {
     private final Map<String,Program> avaliablePrograms = new HashMap<>();
+    private final Map<String, Integer> programRunCounts = new HashMap<>();
 
     private SLanguageEngine(){}
     // Singleton
@@ -133,6 +134,8 @@ public class SLanguageEngine {
 
         history.addExecution(programName, executionResult);
 
+        incrementRunCount(programName);
+
         return executionResult;
     }
 
@@ -140,8 +143,7 @@ public class SLanguageEngine {
         if(programNotLoaded(programName))
             throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
 
-        var program = getProgramByName(programName);
-        return 0; // TODO: proper logic
+        return programRunCounts.get(programName);
     }
 
     // ========================== Debug ===========================
@@ -156,6 +158,8 @@ public class SLanguageEngine {
         var debugger = new ProgramDebugger(expandedProgram);
 
         initializeInputs(debugger, inputs, specificInputs);
+
+        incrementRunCount(programName); // TODO: what to do here
 
         return new DebugHandle(
                 debugger,
@@ -254,6 +258,15 @@ public class SLanguageEngine {
             runner.initInputVariablesSpecific(inputs);
         else
             runner.initInputVariables(inputs);
+    }
+
+    private void incrementRunCount(String programName) {
+        synchronized (this){
+            programRunCounts.put(
+                    programName,
+                    programRunCounts.getOrDefault(programName, 0) + 1
+            );
+        }
     }
 
     private Variable str2Variable(String str){
