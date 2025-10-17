@@ -1,6 +1,6 @@
 package newGui.pages.login.component.login;
 
-import com.google.gson.Gson;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -10,19 +10,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import newGui.pages.primary.mainClientAppController;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.HttpUrl;
-import okhttp3.Response;
+import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
+import requests.LoginRequest;
 import util.http.HttpClientUtil;
-
-
 import javafx.scene.control.Button;
-
 import java.io.IOException;
-
-import static util.Constants.LOGIN_PAGE;
 
 public class loginController {
 
@@ -41,6 +34,10 @@ public class loginController {
         errorMessageLabel.textProperty().bind(errorMessageProperty);
     }
 
+    public void setMainClientAppController(mainClientAppController mainAppController) {
+        this.mainClientAppController = mainAppController;
+    }
+
     @FXML
     private void loginButtonClicked(ActionEvent event) {
 
@@ -50,18 +47,9 @@ public class loginController {
             return;
         }
 
-        //noinspection ConstantConditions
-        String finalUrl = HttpUrl
-                .parse(LOGIN_PAGE)
-                .newBuilder()
-                .addQueryParameter("username", userName)
-                .build()
-                .toString();
+        Request request = LoginRequest.build(userName);
+        HttpClientUtil.runAsync(request, new Callback() {
 
-
-        HttpClientUtil.runAsync(finalUrl, new Callback() {
-
-            // Failed to connect to the server
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() ->
@@ -69,40 +57,12 @@ public class loginController {
                 );
             }
 
-
-
-
-
-//                    @Override
-//                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-//                        String responseBody = response.body().string();
-//                        if (response.code() != 200) {
-//                            Platform.runLater(() ->
-//                                    errorMessageProperty.set("Something went wrong: " + responseBody)
-//                            );
-//                        } else {
-//                            // Parse the response body into Information object
-//                            Information info = GSON_INSTANCE.fromJson(responseBody, Information.class);
-//
-//                            Platform.runLater(() -> {
-//                                // Print the Information object using toString()
-//                                System.out.println(info.toString());
-//
-//                                mainClientAppController.updateUserName(userName);
-//                                mainClientAppController.switchToDashboard();
-//                            });
-//
-
-
-
-
-            // Succeeded to connect the server and get response
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            errorMessageProperty.set("Something went wrong: " + responseBody)
+                            errorMessageProperty.set("Something went wrong " + responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
@@ -125,89 +85,4 @@ public class loginController {
         errorMessageProperty.set("");
     }
 
-
-    public void setMainClientAppController(mainClientAppController mainAppController) {
-        this.mainClientAppController = mainAppController;
-    }
-
-
 }
-
-//    @FXML public TextField userNameTextField;
-//    @FXML public Label errorMessageLabel;
-//
-//    @FXML private dashboardController SEmulatorDashboardController;
-//
-//    private final StringProperty errorMessageProperty = new SimpleStringProperty();
-//
-//    @FXML
-//    public void initialize() {
-//        errorMessageLabel.textProperty().bind(errorMessageProperty);
-//        HttpClientUtil.setCookieManagerLoggingFacility(line ->
-//                Platform.runLater(() ->
-//                        updateHttpStatusLine(line)));
-//    }
-//
-//    @FXML
-//    private void loginButtonClicked(ActionEvent event) {
-//
-//        String userName = userNameTextField.getText();
-//        if (userName.isEmpty()) {
-//            errorMessageProperty.set("User name is empty. You can't login with empty user name");
-//            return;
-//        }
-//
-//        //noinspection ConstantConditions
-//        String finalUrl = HttpUrl
-//                        .parse(Constants.LOGIN_PAGE)
-//                        .newBuilder()
-//                        .addQueryParameter("username", userName)
-//                        .build()
-//                        .toString();
-//
-//        updateHttpStatusLine("New request is launched for: " + finalUrl);
-//
-//        HttpClientUtil.runAsync(finalUrl, new Callback() {
-//
-//            @Override
-//            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-//                Platform.runLater(() ->
-//                        errorMessageProperty.set("Something went wrong: " + e.getMessage())
-//                );
-//            }
-//
-//            @Override
-//            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-//                if (response.code() != 200) {
-//                    String responseBody = response.body().string();
-//                    Platform.runLater(() ->
-//                            errorMessageProperty.set("Something went wrong: " + responseBody)
-//                    );
-//                } else {
-//                    Platform.runLater(() -> {
-//                            chatAppMainController.updateUserName(userName);
-//                            chatAppMainController.switchToChatRoom();
-//                    });
-//                }
-//            }
-//        });
-//    }
-//
-//    @FXML
-//    private void userNameKeyTyped(KeyEvent event) {
-//        errorMessageProperty.set("");
-//    }
-//
-//    @FXML
-//    private void quitButtonClicked(ActionEvent e) {
-//        Platform.exit();
-//    }
-//
-//    private void updateHttpStatusLine(String data) {
-//        chatAppMainController.updateHttpLine(data);
-//    }
-//
-//    public void setChatAppMainController(ChatAppMainController chatAppMainController) {
-//        this.chatAppMainController = chatAppMainController;
-//    }
-
