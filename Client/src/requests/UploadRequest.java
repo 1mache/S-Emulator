@@ -8,7 +8,7 @@ import java.io.File;
 
 public class UploadRequest {
 
-    public static Request build(String userName, File xmlFile) {
+    public static Request build( File xmlFile) {
 
         // Create file body (content type: application/xml)
         RequestBody fileBody = RequestBody.create(xmlFile, Constants.MEDIA_TYPE_XML);
@@ -16,7 +16,6 @@ public class UploadRequest {
         // Build multipart body
         RequestBody requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                //.addFormDataPart("username", userName)
                 .addFormDataPart("file", xmlFile.getName(), fileBody)
                 .build();
 

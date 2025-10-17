@@ -15,14 +15,12 @@ public class Constants {
     public final static String MAIN_PAGE_FXML_RESOURCE_LOCATION = "/newGui/pages/primary/mainClientApp.fxml";
     public final static String MAIN_PAGE_STYLE_RESOURCE_LOCATION = "/newGui/pages/primary/mainClientApp.css";
 
-
     public final static String LOGIN_PAGE_FXML_RESOURCE_LOCATION = "/newGui/pages/login/component/login/login.fxml";
     public final static String LOGIN_PAGE_STYLE_RESOURCE_LOCATION = "/newGui/pages/login/component/login/login.css";
 
     public final static String DASHBOARD_PAGE_FXML_RESOURCE_LOCATION = "/newGui/pages/dashboard/component/primary/dashboard.fxml";
     public final static String DASHBOARD_PAGE_STYLE_RESOURCE_LOCATION = "/newGui/pages/dashboard/component/primary/dashboard_styling.css";
 
-    public final static String CHAT_ROOM_FXML_RESOURCE_LOCATION = "/newGui/pages/execution/primary/main.fxml";
 
     // Server resources locations
     public final static String BASE_DOMAIN = "localhost";
@@ -30,15 +28,21 @@ public class Constants {
     private final static String CONTEXT_PATH = "/webServer_Web_exploded";
     private final static String FULL_SERVER_PATH = BASE_URL + CONTEXT_PATH;
 
-    public final static String LOGIN_PAGE = FULL_SERVER_PATH + "/login";
+    // Login
+    public final static String LOGIN = FULL_SERVER_PATH + "/login";
+    public final static String FUNCTION_LIST = FULL_SERVER_PATH + "/dashboard/function-list";
+
+
+    // Dashboard
     public final static String UPLOAD = FULL_SERVER_PATH + "/upload";
+    public final static String ADD_CREDIT = FULL_SERVER_PATH + "/addCredit";
+
 
 
 
     public final static String DASHBOARD_PAGE = FULL_SERVER_PATH + "/dashboard";
 
 
-    public static final String LOAD_FILE_PAGE = FULL_SERVER_PATH + "/load-file";
 
 
 

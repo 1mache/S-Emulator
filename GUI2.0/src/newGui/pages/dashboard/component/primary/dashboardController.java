@@ -38,7 +38,7 @@ public class dashboardController {
     }
 
     public void activate() {
-        topController.bindUserName(mainClientAppController.getUserNameProperty());
+        topController.init(mainClientAppController.getUserNameProperty());
 
     }
 

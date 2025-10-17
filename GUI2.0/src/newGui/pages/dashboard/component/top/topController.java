@@ -1,5 +1,6 @@
 package newGui.pages.dashboard.component.top;
 
+import Alerts.Alerts;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -18,6 +19,7 @@ import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
+import requests.LoadCreditRequest;
 import requests.UploadRequest;
 import util.http.HttpClientUtil;
 
@@ -40,7 +42,7 @@ public class topController {
     @FXML private Label statusLabel;
     @FXML private Label userName;
     @FXML private TextField availableCredits;
-    IntegerProperty credits = new SimpleIntegerProperty(1000);
+    private IntegerProperty credits = new SimpleIntegerProperty(1000);
 
     @FXML private TextField creditsAmount;
     @FXML private TextField currentlyLoadedFilePath;
@@ -53,20 +55,63 @@ public class topController {
     private File lastDir = new File(System.getProperty("user.home"));
     private PauseTransition clearStatusLater;
 
+    public void init(StringProperty name) {
+        bindUserName(name);
+        bindCredits();
+    }
 
     public void bindUserName(StringProperty name) {
         userName.textProperty().bind(Bindings.concat("Hello ", name));
-        availableCredits.setText(String.valueOf(credits));
-
     }
 
-    public void bindCredits(IntegerProperty credits) {
-        this.credits = credits;
+    public void bindCredits() {
         availableCredits.textProperty().bind(Bindings.convert(credits));
     }
 
     @FXML
     void ChargeListener(ActionEvent event) {
+        try {
+            Integer.parseInt(creditsAmount.getText());
+            if (Integer.parseInt(creditsAmount.getText()) <= 0) {
+                throw new NumberFormatException();
+            }
+            if (creditsAmount.getText().isEmpty()) {
+                throw new NumberFormatException();
+            }
+            } catch (NumberFormatException e) {
+            Alerts.invalidInput();
+            return;
+        }
+
+        int amount = Integer.parseInt(creditsAmount.getText());
+        credits.set(credits.get() + amount);
+        creditsAmount.clear();
+
+        // new request to server to charge credits
+        Request request = LoadCreditRequest.build(credits.get());
+        HttpClientUtil.runAsync(request, new Callback()  {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                Platform.runLater(() -> {
+                    setBusy(false);
+                    Alerts.loadField(e.getMessage());
+                });
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                setBusy(false);
+                if (response.code() != 200) {
+                    String responseBody = response.body().string();
+                    Platform.runLater(() -> {
+                        Alerts.loadField(responseBody);
+                    });
+                } else {
+                    Platform.runLater(Alerts::creditLoadSucceeded);
+                }
+            }
+        });
 
     }
 
@@ -101,22 +146,23 @@ public class topController {
             validateXmlFileOrThrow(file);
         } catch (IllegalArgumentException ex) {
             currentlyLoadedFilePath.clear();
-            loadField(ex.getMessage());
+            Alerts.loadField(ex.getMessage());
             return;
         }
 
         setBusy(true);
         setStatus("Loading file…", true);
 
-        Request request = UploadRequest.build(userName.getText(), file);
+        Request request = UploadRequest.build(file);
         HttpClientUtil.runAsync(request, new Callback()  {
 
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() -> {
                     setBusy(false);
-                    loadField(e.getMessage());
+                    Alerts.loadField(e.getMessage());
                     currentlyLoadedFilePath.clear();
+                    setStatus("", true);
                 });
             }
 
@@ -124,16 +170,18 @@ public class topController {
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 setBusy(false);
                 if (response.code() != 200) {
+                    assert response.body() != null;
                     String responseBody = response.body().string();
                     Platform.runLater(() -> {
-                        loadField(responseBody);
+                        Alerts.loadField(responseBody);
+                        setStatus("", true);
                     });
                 } else {
-                    Platform.runLater(() -> {
-                        loadSucceeded();
-                    });
+                    Platform.runLater(Alerts::loadSucceeded);
+                    setStatus("Finish", true);
                 }
-                currentlyLoadedFilePath.clear();
+                currentlyLoadedFilePath.setText("Currently Loaded File");
+
             }
         });
     }
@@ -174,21 +222,6 @@ public class topController {
         loadFileButton.setDisable(busy);
     }
 
-    private void loadField(String ex) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Load Error");
-        alert.setHeaderText(null);
-        alert.setContentText("Load Error: " + ex);
-        alert.showAndWait();
-    }
-
-    private void loadSucceeded() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Load Completed Successfully");
-        alert.setHeaderText(null);
-        alert.setContentText("Load Completed Successfully");
-        alert.showAndWait();
-    }
 }
 
 
