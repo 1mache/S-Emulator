@@ -1,6 +1,5 @@
 package engine.loader;
 
-import engine.function.Function;
 import engine.function.FunctionCall;
 import engine.jaxb.generated.SProgram;
 import engine.loader.event.LoadingListener;
@@ -16,6 +15,7 @@ import jakarta.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,11 +37,11 @@ public class FromXMLProgramLoader {
         }
     }
 
-    public void loadXML(InputStream inputStream, LoadingListener listener) {
+    public void loadXML(InputStream inputStream, LoadingListener listener, Map<String, Program> availableExternalPrograms){
         try {
             SProgram sProgram = JaxbLoader.loadProgramFromXML(inputStream);
             translator = new JaxbTranslator();
-            program = translator.getProgram(sProgram, listener);
+            program = translator.getProgram(sProgram, listener, availableExternalPrograms);
         } catch (JAXBException e) {
             throw new SProgramXMLException("Failed to marshal XML.", e);
         }
@@ -81,7 +81,7 @@ public class FromXMLProgramLoader {
         return program;
     }
 
-    public Set<Function> getFunctions() {
+    public Set<Program> getFunctions() {
         if(program == null)
             throw new IllegalStateException("Program has not been loaded");
         if(!validated)

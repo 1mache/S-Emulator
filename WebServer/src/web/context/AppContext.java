@@ -51,7 +51,7 @@ public class AppContext {
         }
 
         synchronized (this){
-            List<String> addedFunctions = getEngine().loadProgram(inputStream, null);
+            List<String> addedFunctions = getEngine().loadProgramIncremental(inputStream, null);
             addedFunctions.forEach(function -> function2User.put(function, user));
         }
     }

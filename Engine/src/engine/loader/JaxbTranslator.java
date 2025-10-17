@@ -61,7 +61,7 @@ public class JaxbTranslator {
     // keeps references for functions by name until we processed them
     private final Set<FunctionCall> toBeResolved = new HashSet<>();
 
-    public Program getProgram(SProgram sProgram, LoadingListener listener) {
+    public Program getProgram(SProgram sProgram, LoadingListener listener, Map<String, Program> availableExternalPrograms) {
         List<SInstruction> sInstructions = sProgram.getSInstructions().getSInstruction();
 
         var sFunctions = sProgram.getSFunctions();
@@ -82,9 +82,15 @@ public class JaxbTranslator {
 
         // resolve all the function references, because now we processed all of them
         toBeResolved.forEach(
-                functionCall -> functionCall.resolveFunction(
-                        name2Function.get(functionCall.getReferralName())
-                )
+                functionCall -> {
+                    Program avalableExternalProgram =
+                            availableExternalPrograms.get(functionCall.getReferralName());
+
+                    if(avalableExternalProgram != null)
+                        functionCall.resolveFunction(avalableExternalProgram);
+                    else
+                        functionCall.resolveFunction(name2Function.get(functionCall.getReferralName()));
+                }
         );
         // Note: some of them may be null here, this will be checked in the validation process
 
@@ -93,6 +99,10 @@ public class JaxbTranslator {
         }
 
         return new StandardProgram(sProgram.getName(), instructions);
+    }
+
+    public Program getProgram(SProgram sProgram, LoadingListener listener) {
+        return getProgram(sProgram, listener, Map.of());
     }
 
     public Set<FunctionCall> getFunctionReferences() {
