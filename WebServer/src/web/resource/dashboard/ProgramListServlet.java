@@ -34,7 +34,7 @@ public class ProgramListServlet extends HttpServlet {
                             return new FunctionData(
                                     name,
                                     functionIdentifier.userString(),
-                                    functionIdentifier.isProgram(),
+                                    functionIdentifier.isMain(),
                                     context.getFunctionOwner(name),
                                     engine.instructionCountOf(name),
                                     engine.getMaxExpansionDegree(name),

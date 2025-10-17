@@ -1,6 +1,6 @@
 package engine.api;
 
-import dto.FunctionIdentifier;
+import dto.ProgramIdentifier;
 import dto.ProgramExecutionResult;
 import dto.ProgramPeek;
 import engine.api.debug.DebugHandle;
@@ -72,7 +72,7 @@ public class SLanguageEngine {
         }
 
         return getFunctionIdentifiers(allFunctions).stream()
-                .map(FunctionIdentifier::name)
+                .map(ProgramIdentifier::name)
                 .toList();
     }
 
@@ -182,7 +182,7 @@ public class SLanguageEngine {
     }
 
     // returns all the functions names that the program uses including the main programs. the programs are first in list
-    public synchronized List<FunctionIdentifier> getAvaliablePrograms() {
+    public synchronized List<ProgramIdentifier> getAvaliablePrograms() {
         return getFunctionIdentifiers(avaliablePrograms.values());
     }
 
@@ -205,15 +205,15 @@ public class SLanguageEngine {
         throw new IllegalArgumentException("Illegal symbol: " + symbolStr);
     }
 
-    public FunctionIdentifier getFunctionIdentifier(String programName) {
+    public ProgramIdentifier getFunctionIdentifier(String programName) {
         if (programNotLoaded(programName))
             throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
 
         var program = getProgramByName(programName);
         if (program instanceof Function function) {
-            return new FunctionIdentifier(function.getName(), function.getUserString(), false);
+            return new ProgramIdentifier(function.getName(), function.getUserString(), false);
         } else {
-            return new FunctionIdentifier(program.getName(), program.getName(), true);
+            return new ProgramIdentifier(program.getName(), program.getName(), true);
         }
     }
 
@@ -289,19 +289,19 @@ public class SLanguageEngine {
         return new NumericLabel(numberPart);
     }
 
-    private List<FunctionIdentifier> getFunctionIdentifiers(Collection<Program> functions) {
+    private List<ProgramIdentifier> getFunctionIdentifiers(Collection<Program> functions) {
         var functionStringsList = new ArrayList<>(functions.stream()
                 .filter(program -> program instanceof Function)
                 .map(program -> {
                     var function = (Function) program;
-                    return new FunctionIdentifier(function.getName(), function.getUserString(), false);
+                    return new ProgramIdentifier(function.getName(), function.getUserString(), false);
                 })
                 .toList());
 
         // programs are first in the list
         functions.stream()
                 .filter(program -> !(program instanceof Function))
-                .map(program -> new FunctionIdentifier(program.getName(), program.getName(), true))
+                .map(program -> new ProgramIdentifier(program.getName(), program.getName(), true))
                 .forEach(functionStringsList::addFirst);
 
         return functionStringsList;
