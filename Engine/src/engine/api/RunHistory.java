@@ -27,4 +27,16 @@ public class RunHistory {
         return Objects.requireNonNullElseGet(results, List::of);
     }
 
+    public int runCount() {
+        int count = 0;
+        for (List<ProgramExecutionResult> results : name2Runs.values()) {
+            count += results.size();
+        }
+        return count;
+    }
+
+    public int runCount(String programName) {
+        List<ProgramExecutionResult> results = name2Runs.get(programName);
+        return results == null ? 0 : results.size();
+    }
 }

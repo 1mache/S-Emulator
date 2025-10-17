@@ -2,10 +2,13 @@ package web.utils;
 
 import com.google.gson.Gson;
 import jakarta.servlet.ServletContext;
-import web.resource.context.AppContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import web.context.AppContext;
 
 public class ServletUtils {
     private static final String APP_CONTEXT_ATR_NAME = "appContext";
+    public static final String USERNAME_ATR_NAME = "username";
 
     private static final Object APP_CONTEXT_LOCK = new Object();
 
@@ -22,5 +25,13 @@ public class ServletUtils {
         }
 
         return appContext;
+    }
+
+    public static String getUsernameFromRequest(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return null;
+        }
+        return (String) session.getAttribute(ServletUtils.USERNAME_ATR_NAME);
     }
 }

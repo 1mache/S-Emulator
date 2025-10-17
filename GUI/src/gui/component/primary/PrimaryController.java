@@ -1,6 +1,6 @@
 package gui.component.primary;
 
-import dto.FunctionIdentifier;
+import dto.ProgramIdentifier;
 import dto.InstructionPeek;
 import dto.ProgramExecutionResult;
 import dto.ProgramPeek;
@@ -321,7 +321,7 @@ public class PrimaryController implements Initializable {
                         programControlsHbox.setDisable(false);
                         avaliablePrograms.setAll(
                                 engine.getAvaliablePrograms().stream()
-                                        .map(FunctionIdentifier::userString)
+                                        .map(ProgramIdentifier::userString)
                                         .toList()
                         );
                         String first = avaliablePrograms.getFirst();

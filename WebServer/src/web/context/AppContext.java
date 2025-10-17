@@ -1,5 +1,6 @@
-package web.resource.context;
+package web.context;
 
+import engine.api.RunHistory;
 import engine.api.SLanguageEngine;
 import engine.loader.exception.UnknownFunctionException;
 import engine.loader.exception.UnknownLabelException;
@@ -14,8 +15,10 @@ import java.util.Map;
 public class AppContext {
     private SLanguageEngine engine;
     private UserManager userManager;
+    private RunHistory runHistory;
 
-    private final Map<String, String> function2User = new HashMap<String, String>();
+    private final Map<String, String> function2User = new HashMap<>();
+    private final Map<String, Long> spentCredits = new HashMap<>();
 
     private static final Object ENGINE_LOCK = new Object();
     private static final Object USER_MANAGER_LOCK = new Object();
@@ -47,18 +50,40 @@ public class AppContext {
             throw new InvalidUserException("User does not exist: " + user);
         }
 
-        List<String> addedFunctions = engine.loadProgram(inputStream, null);
         synchronized (this){
+            List<String> addedFunctions = getEngine().loadProgram(inputStream, null);
             addedFunctions.forEach(function -> function2User.put(function, user));
         }
     }
 
-    public List<String> getUserFunctions(String user) {
+    public List<String> getAllUserFunctions(String user) {
         synchronized (this) {
             return function2User.entrySet().stream()
                     .filter(entry -> entry.getValue().equals(user))
                     .map(Map.Entry::getKey)
                     .toList();
+        }
+    }
+
+    public List<String> getUserFunctions(String user) {
+        synchronized (this) {
+            return getAllUserFunctions(user).stream()
+                    .filter(funcName -> !getEngine().getFunctionIdentifier(funcName).isMain())
+                    .toList();
+        }
+    }
+
+    public List<String> getUserPrograms(String user) {
+        synchronized (this) {
+            return getAllUserFunctions(user).stream()
+                    .filter(funcName -> getEngine().getFunctionIdentifier(funcName).isMain())
+                    .toList();
+        }
+    }
+
+    public String getFunctionOwner(String functionName){
+        synchronized (this) {
+            return function2User.get(functionName);
         }
     }
 }

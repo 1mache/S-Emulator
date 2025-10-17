@@ -2,11 +2,11 @@ package dto;
 
 import java.util.Objects;
 
-public record FunctionIdentifier(String name, String userString) {
+public record ProgramIdentifier(String name, String userString, boolean isMain) {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        FunctionIdentifier that = (FunctionIdentifier) o;
+        ProgramIdentifier that = (ProgramIdentifier) o;
         return Objects.equals(name, that.name);
     }
 
