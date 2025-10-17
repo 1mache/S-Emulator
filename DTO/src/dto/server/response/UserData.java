@@ -5,5 +5,5 @@ public record UserData(
         long totalCredits,
         long usedCredits,
         int programsUploaded,
-        int functionsUploaded)
-{}
+        int functionsUploaded,
+        int runCount) {}

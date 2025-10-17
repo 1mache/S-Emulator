@@ -31,8 +31,7 @@ public class FileUploadServlet extends HttpServlet {
 
         Collection<Part> parts = request.getParts();
 
-        HttpSession session = request.getSession(false);
-        String username = (String) session.getAttribute(ServletUtils.USERNAME_ATR_NAME);
+        String username = ServletUtils.getUsernameFromRequest(request);
 
         // get all InputStreams from uploaded parts
         List<InputStream> inputStreams = new ArrayList<>();

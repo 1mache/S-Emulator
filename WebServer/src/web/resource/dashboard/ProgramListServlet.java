@@ -7,7 +7,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import web.context.AppContext;
 import web.utils.ServletUtils;
 
@@ -18,9 +17,7 @@ public class ProgramListServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         AppContext context = ServletUtils.getAppContext(getServletContext());
-        HttpSession session = req.getSession(true);
-
-        String username = (String) session.getAttribute(ServletUtils.USERNAME_ATR_NAME);
+        String username = ServletUtils.getUsernameFromRequest(req);
         if(username == null || !context.getUserManager().userExists(username)){
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
@@ -28,7 +25,7 @@ public class ProgramListServlet extends HttpServlet {
 
         SLanguageEngine engine = context.getEngine();
         
-        var functionsData = context.getEngine().getAvaliablePrograms().stream()
+        var programsData = context.getEngine().getAvaliablePrograms().stream()
                 .map(functionIdentifier -> {
                             String name = functionIdentifier.name();
                             return new FunctionData(
@@ -45,9 +42,7 @@ public class ProgramListServlet extends HttpServlet {
                 )
                 .toList();
 
-        String json = ServletUtils.GsonInstance.toJson(functionsData);
         resp.setContentType("application/json");
-        resp.getWriter().write(json);
-        resp.setStatus(HttpServletResponse.SC_OK);
+        ServletUtils.GsonInstance.toJson(programsData, resp.getWriter());
     }
 }

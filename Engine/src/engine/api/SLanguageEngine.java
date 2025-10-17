@@ -143,7 +143,7 @@ public class SLanguageEngine {
         if(programNotLoaded(programName))
             throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
 
-        return programRunCounts.get(programName);
+        return programRunCounts.getOrDefault(programName, 0);
     }
 
     // ========================== Debug ===========================

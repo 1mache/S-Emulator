@@ -24,13 +24,13 @@ public class UserListServlet extends HttpServlet {
                             user.getTotalCredits(),
                             user.getUsedCredits(),
                             appContext.getUserPrograms(username).size(),
-                            appContext.getUserFunctions(username).size()
+                            appContext.getUserFunctions(username).size(),
+                            user.getRunCount()
                     );
                 }
                 ).toList();
 
-        String json = ServletUtils.GsonInstance.toJson(userData);
         resp.setContentType("application/json");
-        resp.getWriter().write(json);
+        ServletUtils.GsonInstance.toJson(userData, resp.getWriter());
     }
 }

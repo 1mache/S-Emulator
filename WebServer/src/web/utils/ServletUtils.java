@@ -2,6 +2,8 @@ package web.utils;
 
 import com.google.gson.Gson;
 import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import web.context.AppContext;
 
 public class ServletUtils {
@@ -23,5 +25,13 @@ public class ServletUtils {
         }
 
         return appContext;
+    }
+
+    public static String getUsernameFromRequest(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return null;
+        }
+        return (String) session.getAttribute(ServletUtils.USERNAME_ATR_NAME);
     }
 }

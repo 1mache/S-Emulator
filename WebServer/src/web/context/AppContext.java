@@ -1,5 +1,6 @@
 package web.context;
 
+import engine.api.RunHistory;
 import engine.api.SLanguageEngine;
 import engine.loader.exception.UnknownFunctionException;
 import engine.loader.exception.UnknownLabelException;
@@ -14,6 +15,7 @@ import java.util.Map;
 public class AppContext {
     private SLanguageEngine engine;
     private UserManager userManager;
+    private RunHistory runHistory;
 
     private final Map<String, String> function2User = new HashMap<>();
     private final Map<String, Long> spentCredits = new HashMap<>();
