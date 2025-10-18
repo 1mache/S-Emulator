@@ -1,6 +1,5 @@
 package engine.instruction.concrete;
 
-import engine.execution.ProgramRunner;
 import engine.execution.context.RunContext;
 import engine.function.Function;
 import engine.function.FunctionCall;
@@ -46,13 +45,18 @@ public class JumpFunctionInstruction extends AbstractJumpInstruction {
 
     @Override
     public String stringRepresentation() {
-        Function quotedFunc = quotedFunctionCall.getFunction();
+        var quotedFunc = quotedFunctionCall.getFunction();
         StringBuilder sb = new StringBuilder();
         var functionParams = quotedFunctionCall.getParamList();
 
         sb.append("IF ").append(getVariable().stringRepresentation()).append(" = ");
 
-        var funcUserString = quotedFunc.getUserString();
+        String funcUserString;
+        if(quotedFunc instanceof Function f)
+            funcUserString = f.getUserString();
+        else
+            funcUserString = quotedFunctionCall.getReferralName();
+
         if(functionParams.params().isEmpty()){
             sb.append(String.format("(%s)", funcUserString));
         }

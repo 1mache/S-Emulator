@@ -1,7 +1,6 @@
 package engine.resolver;
 
 import engine.expansion.SymbolRegistry;
-import engine.function.Function;
 import engine.function.FunctionCall;
 import engine.function.parameter.FunctionParamList;
 import engine.instruction.Instruction;
@@ -10,6 +9,7 @@ import engine.instruction.utility.Instructions;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.numeric.constant.NumericConstant;
+import engine.program.Program;
 import engine.program.generator.LabelVariableGenerator;
 import engine.variable.Variable;
 import engine.variable.VariableType;
@@ -64,7 +64,7 @@ public class SymbolResolver {
     }
 
     public static SymbolResolver forFunctionExpansion(
-            Function quotedFunc,
+            Program quotedFunc,
             SymbolRegistry additionalUsedSymbols,
             List<Variable> inputSubstitutions,
             Variable resultSubstitution,

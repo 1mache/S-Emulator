@@ -6,6 +6,7 @@ import engine.function.parameter.FunctionParam;
 import engine.function.parameter.FunctionParamList;
 import engine.instruction.argument.InstructionArgument;
 import engine.instruction.argument.InstructionArgumentType;
+import engine.program.Program;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,7 +17,7 @@ import java.util.stream.Stream;
  * instantiation of the Function itself and hold a reference to it until then by name
  */
 public class FunctionCall implements InstructionArgument, FunctionParam {
-    private Function function;
+    private Program function;
     private final String referralName;
     private FunctionParamList paramList;
 
@@ -29,7 +30,7 @@ public class FunctionCall implements InstructionArgument, FunctionParam {
         this.paramList = paramList;
     }
 
-    public FunctionCall(Function function, String referralName, FunctionParamList paramList) {
+    public FunctionCall(Program function, String referralName, FunctionParamList paramList) {
         this.function = function;
         this.referralName = referralName;
         this.paramList = paramList;
@@ -44,12 +45,12 @@ public class FunctionCall implements InstructionArgument, FunctionParam {
         return referralName;
     }
 
-    public Function getFunction() {
+    public Program getFunction() {
         return function;
     }
 
     // when we found and processed the function we call this to resolve the reference
-    public void resolveFunction(Function function) {
+    public void resolveFunction(Program function) {
         this.function = function;
     }
 
@@ -83,7 +84,11 @@ public class FunctionCall implements InstructionArgument, FunctionParam {
     @Override
     public String stringRepresentation() {
         StringBuilder sb = new StringBuilder();
-        var funcUserString = function.getUserString();
+        String funcUserString;
+        if(function instanceof Function func)
+            funcUserString = func.getUserString();
+        else
+            funcUserString = referralName;
 
         if(paramList.params().isEmpty()){
             sb.append(String.format("(%s)", funcUserString));

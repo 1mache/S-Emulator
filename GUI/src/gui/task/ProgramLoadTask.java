@@ -38,6 +38,6 @@ public class ProgramLoadTask extends Task<String> {
     protected String call()
             throws NotXMLException, FileNotFoundException, UnknownLabelException, UnknownFunctionException {
 
-        return engine.loadProgram(programPath, loadingListener).getFirst();
+        return engine.loadProgramFromFile(programPath, loadingListener).getFirst();
     }
 }

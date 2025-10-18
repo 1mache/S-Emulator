@@ -40,41 +40,19 @@ public class SLanguageEngine {
     }
 
     // returns the names of the loaded programs and functions, main program is first in list
-    public List<String> loadProgram(String path, LoadingListener listener)
+    public List<String> loadProgramFromFile(String path, LoadingListener listener)
             throws NotXMLException, FileNotFoundException, UnknownLabelException, UnknownFunctionException {
         FromXMLProgramLoader loader = new FromXMLProgramLoader();
         loader.loadXML(path, listener);
-        return loadProgram(loader);
+        return loadProgram(loader, true);
     }
 
     // returns the names of the loaded programs and functions, main program is first in list
-    public List<String> loadProgram(InputStream inputStream, LoadingListener listener)
+    public List<String> loadProgramIncremental(InputStream inputStream, LoadingListener listener)
             throws UnknownLabelException, UnknownFunctionException {
         FromXMLProgramLoader loader = new FromXMLProgramLoader();
-        loader.loadXML(inputStream, listener);
-        return loadProgram(loader);
-    }
-
-    // helper for internal use
-    private List<String> loadProgram(FromXMLProgramLoader loader) throws UnknownLabelException, UnknownFunctionException {
-        loader.validateProgram();
-        var mainProgram = loader.getProgram();
-        Set<Program> allFunctions = new HashSet<>(loader.getFunctions());
-        allFunctions.add(mainProgram);
-
-        synchronized (this) {
-            avaliablePrograms.put(mainProgram.getName(), mainProgram);
-            avaliablePrograms.putAll(
-                    loader.getFunctions().stream()
-                            .collect(Collectors.toMap(
-                                    Program::getName, program -> program
-                            ))
-            );
-        }
-
-        return getFunctionIdentifiers(allFunctions).stream()
-                .map(ProgramIdentifier::name)
-                .toList();
+        loader.loadXML(inputStream, listener, avaliablePrograms);
+        return loadProgram(loader, false);
     }
 
     public synchronized boolean programNotLoaded(String programName) {
@@ -133,7 +111,6 @@ public class SLanguageEngine {
         );
 
         history.addExecution(programName, executionResult);
-
         incrementRunCount(programName);
 
         return executionResult;
@@ -232,6 +209,45 @@ public class SLanguageEngine {
         if(program == null)
             throw new IllegalArgumentException("File does not contain program: " + programName);
         return program;
+    }
+
+    // helper for internal use
+    private List<String> loadProgram(FromXMLProgramLoader loader, boolean clearExisting)
+            throws UnknownLabelException, UnknownFunctionException {
+
+        loader.validateProgram();
+        if(clearExisting) {
+            synchronized (this) {
+                avaliablePrograms.clear();
+            }
+        }
+
+        var mainProgram = loader.getProgram();
+        Set<Program> newPrograms = new HashSet<>();
+
+        // only add program if not already present
+        if(!avaliablePrograms.containsKey(mainProgram.getName())){
+            newPrograms.add(mainProgram);
+        }
+        newPrograms.addAll(
+                loader.getFunctions().stream()
+                        // only add functions that are not already present
+                        .filter(func -> !avaliablePrograms.containsKey(func.getName()))
+                        .collect(Collectors.toSet())
+        );
+
+        synchronized (this) {
+            avaliablePrograms.putAll(
+                    newPrograms.stream()
+                            .collect(Collectors.toMap(
+                                    Program::getName, program -> program
+                            ))
+            );
+        }
+
+        return getFunctionIdentifiers(newPrograms).stream()
+                .map(ProgramIdentifier::name)
+                .toList();
     }
 
     private void validateInputs(List<Long> inputs) {

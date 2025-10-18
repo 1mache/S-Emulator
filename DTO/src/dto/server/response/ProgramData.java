@@ -1,10 +1,10 @@
 package dto.server.response;
 
 // comes back as a HTTP response
-public record FunctionData(
+public record ProgramData(
         String name,
         String userString,
-        boolean isProgram,
+        boolean isMain,
         String uploadedBy,
         int instructionCount,
         int maxExpansionDegree,
