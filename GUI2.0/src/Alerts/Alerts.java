@@ -37,4 +37,22 @@ public class Alerts {
         alert.setContentText("Credit Load Completed Successfully");
         alert.showAndWait();
     }
+
+    public static Runnable dtoTranslate(String ex) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Server Error");
+        alert.setHeaderText(null);
+        alert.setContentText("DTO isn't valid : " + ex);
+        alert.showAndWait();
+        return null;
+    }
+
+    public static Runnable serverProblamResponse(String ex) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Server Error");
+        alert.setHeaderText(null);
+        alert.setContentText("Server Bad Response : " + ex);
+        alert.showAndWait();
+        return null;
+    }
 }

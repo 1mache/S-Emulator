@@ -1,30 +1,59 @@
 package requests;
 
+import dto.server.response.ProgramData;
+import javafx.application.Platform;
+import Alerts.Alerts;
+import okhttp3.HttpUrl;
 import okhttp3.Request;
-import okhttp3.RequestBody;
+import okhttp3.Response;
 import util.Constants;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import static util.Constants.GSON_INSTANCE;
+import java.io.IOException;
+import java.util.List;
 
 public class functionListRequest {
 
     public static Request build() {
 
-//        Map<String, Object> jsonMap = new LinkedHashMap<>();
-//        jsonMap.put("creditamount", creditAmount);
-//        String json = GSON_INSTANCE.toJson(jsonMap);
-//
-//        RequestBody body = RequestBody.create(json, Constants.MEDIA_TYPE_JSON);
+        HttpUrl url = HttpUrl.parse(Constants.FUNCTION_LIST)
+                .newBuilder()
+                .build();
+
 
         return new Request.Builder()
-                .url(Constants.FUNCTION_LIST)
+                .url(url)
                 .get()
                 .build();
-                //.post(body);
 
 
+    }
+
+    public List<ProgramData> onResponse(Response response) {
+        String responseBody;
+        try {
+            responseBody = response.body().string();
+        } catch (Exception e) {
+            Platform.runLater(() ->
+                    Alerts.dtoTranslate(e.getMessage())
+            );
+            return null;
+        }
+
+        if (response.code() != 200) {
+            Platform.runLater(() -> {
+                Alerts.loadField(responseBody);
+            });
+            return null;
+        } else {
+
+        ProgramData[] programDataArray = Constants.GSON_INSTANCE.fromJson(responseBody, ProgramData[].class);
+        return List.of(programDataArray);
+        }
+    }
+
+    public void onFailure(IOException e) {
+        Platform.runLater(() -> {
+            Alerts.serverProblamResponse(e.getMessage());
+        });
     }
 }
