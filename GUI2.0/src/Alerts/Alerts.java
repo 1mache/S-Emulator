@@ -4,12 +4,13 @@ import javafx.scene.control.Alert;
 
 public class Alerts {
 
-    public static void loadField(String ex) {
+    public static Runnable loadField(String ex) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Load Error");
         alert.setHeaderText(null);
         alert.setContentText("Load Error: " + ex);
         alert.showAndWait();
+        return null;
     }
 
     public static void loadSucceeded() {
@@ -20,12 +21,13 @@ public class Alerts {
         alert.showAndWait();
     }
 
-    public static void invalidInput() {
+    public static Runnable invalidInput() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Invalid Input");
         alert.setHeaderText(null);
         alert.setContentText("plaese enter valid input (integer number)");
         alert.showAndWait();
+        return null;
     }
 
     public static void creditLoadSucceeded() {

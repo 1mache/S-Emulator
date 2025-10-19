@@ -140,31 +140,31 @@ public class mainClientAppController {
     public void switchToDashboard() {
         loadDashboardPage();
 
-        Request request = functionListRequest.build();
-
-        HttpClientUtil.runAsync(request, new Callback() {
-
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                Platform.runLater(() ->
-                        errorMessageProperty.set("Something went wrong: " + e.getMessage())
-                );
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                if (response.code() != 200) {
-                    String responseBody = response.body().string();
-                    Platform.runLater(() ->
-                            errorMessageProperty.set("Something went wrong " + responseBody)
-                    );
-                } else {
-                    Platform.runLater(() -> {
-                        mainClientAppController.updateUserName(userName);
-                        mainClientAppController.switchToDashboard();
-                    });
-                }
-            }
-        });
+//        Request request = functionListRequest.build();
+//
+//        HttpClientUtil.runAsync(request, new Callback() {
+//
+//            @Override
+//            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+//                Platform.runLater(() ->
+//                        errorMessageProperty.set("Something went wrong: " + e.getMessage())
+//                );
+//            }
+//
+//            @Override
+//            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+//                if (response.code() != 200) {
+//                    String responseBody = response.body().string();
+//                    Platform.runLater(() ->
+//                            errorMessageProperty.set("Something went wrong " + responseBody)
+//                    );
+//                } else {
+//                    Platform.runLater(() -> {
+//                        mainClientAppController.updateUserName(userName);
+//                        mainClientAppController.switchToDashboard();
+//                    });
+//                }
+//            }
+//        });
     }
 }

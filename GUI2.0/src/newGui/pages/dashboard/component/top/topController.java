@@ -79,7 +79,7 @@ public class topController {
                 throw new NumberFormatException();
             }
             } catch (NumberFormatException e) {
-            Alerts.invalidInput();
+            Platform.runLater(Alerts.invalidInput());
             return;
         }
 
@@ -101,7 +101,9 @@ public class topController {
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                setBusy(false);
+                Platform.runLater(() -> {
+                    setBusy(false);
+                });
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() -> {
@@ -146,12 +148,13 @@ public class topController {
             validateXmlFileOrThrow(file);
         } catch (IllegalArgumentException ex) {
             currentlyLoadedFilePath.clear();
-            Alerts.loadField(ex.getMessage());
+            Platform.runLater(Alerts.loadField(ex.getMessage()));
             return;
         }
 
-        setBusy(true);
-        setStatus("Loading file…", true);
+        Platform.runLater(() -> {
+            setBusy(true);
+        });
 
         Request request = UploadRequest.build(file);
         HttpClientUtil.runAsync(request, new Callback()  {
@@ -163,25 +166,36 @@ public class topController {
                     Alerts.loadField(e.getMessage());
                     currentlyLoadedFilePath.clear();
                     setStatus("", true);
+                    currentlyLoadedFilePath.setText("Currently Loaded File");
                 });
             }
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                setBusy(false);
+                Platform.runLater(() -> {
+                    setBusy(false);
+                });
                 if (response.code() != 200) {
                     assert response.body() != null;
                     String responseBody = response.body().string();
                     Platform.runLater(() -> {
                         Alerts.loadField(responseBody);
                         setStatus("", true);
+                        currentlyLoadedFilePath.setText("Currently Loaded File");
                     });
                 } else {
-                    Platform.runLater(Alerts::loadSucceeded);
-                    setStatus("Finish", true);
-                }
-                currentlyLoadedFilePath.setText("Currently Loaded File");
+                    String responseBody = response.body().string();
+                    Platform.runLater(() -> {
+                        if (responseBody != null && !responseBody.isEmpty()) {
+                           Alerts.loadField(responseBody);
+                        } else {
+                            Alerts.loadSucceeded();
+                        }
+                        setStatus("Finish", true);
+                        currentlyLoadedFilePath.setText("Currently Loaded File");
 
+                    });
+                }
             }
         });
     }
@@ -396,4 +410,3 @@ public class topController {
 ////            }
 ////        });
 ////    }
-
