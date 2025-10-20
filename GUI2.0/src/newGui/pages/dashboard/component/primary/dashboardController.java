@@ -78,4 +78,7 @@ public class dashboardController {
         mainClientAppController.switchToExecution(name);
     }
 
+    public long getCredits() {
+        return topController.getCredits();
+    }
 }

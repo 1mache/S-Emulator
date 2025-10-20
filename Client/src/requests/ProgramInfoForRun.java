@@ -50,7 +50,9 @@ public class ProgramInfoForRun {
             });
         } else {
             ProgramPeek programPeek = Constants.GSON_INSTANCE.fromJson(responseBody, ProgramPeek.class);
-
+            Platform.runLater(() -> {
+                executionController.setProgramPeek(programPeek);
+            });
         }
     }
 

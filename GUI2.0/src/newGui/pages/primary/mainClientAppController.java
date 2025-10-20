@@ -207,7 +207,7 @@ public class mainClientAppController {
             loadExecutionStyles(executionComponent);
             executionController = fxmlLoader.getController();
             executionController.setMainClientAppController(this);
-            executionController.activate();
+            executionController.activate(dashboardController.getCredits());
 
             // Get the current stage
             Stage stage = (Stage) mainPanel.getScene().getWindow();
