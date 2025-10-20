@@ -20,8 +20,7 @@ import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
-import requests.FunctionListRequest;
-import requests.ProgramInfoForRun;
+import requests.ProgramListRequest;
 import requests.UsersInfoListRequest;
 import util.http.HttpClientUtil;
 
@@ -112,17 +111,17 @@ public class mainClientAppController {
     public void switchToDashboard() {
         loadDashboardPage();
 
-        Request functionsRequest = FunctionListRequest.build();
+        Request functionsRequest = ProgramListRequest.build();
         HttpClientUtil.runAsync(functionsRequest, new Callback() {
 
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                FunctionListRequest.onFailure(e);
+                ProgramListRequest.onFailure(e);
             }
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                FunctionListRequest.onResponse(response, dashboardController);
+                ProgramListRequest.onResponse(response, dashboardController);
             }
         });
 

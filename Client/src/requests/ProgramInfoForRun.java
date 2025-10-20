@@ -14,22 +14,39 @@ import util.http.HttpClientUtil;
 
 import java.io.IOException;
 
+import static java.lang.String.valueOf;
+
 public class ProgramInfoForRun {
 
     public static Request build(String programName, int expansionDegree) {
 
-        // Build JSON body
-        String json = Constants.GSON_INSTANCE.toJson(
-                new ProgramViewRequest(programName, expansionDegree)
-        );
 
-        // Create request body with proper media type
-        RequestBody body = RequestBody.create(json, Constants.MEDIA_TYPE_JSON);
+
+        HttpUrl url = HttpUrl.parse(Constants.PROGRAM_VIEW)
+                .newBuilder()
+                .addQueryParameter("programName",programName)
+                .addQueryParameter("expansionDegree",valueOf(expansionDegree))
+                .build();
+
 
         return new Request.Builder()
-                .url(Constants.PROGRAM_VIEW)
-                .method("GET", body)
+                .url(url)
+                .get()
                 .build();
+
+
+//        // Build JSON body
+//        String json = Constants.GSON_INSTANCE.toJson(
+//                new ProgramViewRequest(programName, expansionDegree)
+//        );
+//
+//        // Create request body with proper media type
+//        RequestBody body = RequestBody.create(json, Constants.MEDIA_TYPE_JSON);
+//
+//        return new Request.Builder()
+//                .url(Constants.PROGRAM_VIEW)
+//                .method("GET", body)
+//                .build();
     }
 
     public static ProgramPeek onResponse(Response response) {

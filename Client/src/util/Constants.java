@@ -33,7 +33,7 @@ public class Constants {
 
     // Login
     public final static String LOGIN = FULL_SERVER_PATH + "/login";
-    public final static String FUNCTIONS_LIST = FULL_SERVER_PATH + "/dashboard/function-list";
+    public final static String PROGRAM_LIST = FULL_SERVER_PATH + "/dashboard/program-list";
     public final static String USERS_LIST = FULL_SERVER_PATH + "/dashboard/user-list";
 
 

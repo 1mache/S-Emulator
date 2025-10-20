@@ -12,11 +12,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FunctionListRequest {
+public class ProgramListRequest {
 
     public static Request build() {
 
-        HttpUrl url = HttpUrl.parse(Constants.FUNCTIONS_LIST)
+        HttpUrl url = HttpUrl.parse(Constants.PROGRAM_LIST)
                 .newBuilder()
                 .build();
 
