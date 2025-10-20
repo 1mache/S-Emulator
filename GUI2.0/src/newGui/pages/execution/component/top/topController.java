@@ -1,6 +1,7 @@
 package newGui.pages.execution.component.top;
 
 import dto.ProgramPeek;
+import dto.server.response.ProgramData;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -45,16 +46,23 @@ public class topController {
         highlightOptions.addAll(programPeek.workVariables());
         highlightOptions.addAll(programPeek.labelsUsed());
 
-
+        highlightSelection.setPromptText("Choose Highlight");
+        highlightSelection.getItems().addAll(highlightOptions);
     }
 
-    public void set(ProgramPeek programPeek) {
+    public void set(ProgramPeek programPeek, ProgramData moreData) {
         setHighlight(programPeek);
-        setDegree();
+        setDegree(moreData.getMaxExpansionDegree());
 
     }
 
-    private void setDegree() {
+    private void setDegree(int maxDegree) {
+        int capped = Math.max(0, maxDegree);
 
+        degreeSelection.setPromptText("Choose expansion degree");
+        degreeSelection.getItems().clear();
+        for (int i = 0; i <= capped; i++) {
+            degreeSelection.getItems().add(String.valueOf(i));
+        }
     }
 }

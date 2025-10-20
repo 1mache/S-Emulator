@@ -14,6 +14,7 @@ import newGui.pages.dashboard.component.availablePrograms.availableProgramsContr
 import newGui.pages.dashboard.component.history.historyTableController;
 import newGui.pages.dashboard.component.top.topController;
 import newGui.pages.dashboard.component.usersInfo.usersTableInfoController;
+import newGui.pages.execution.component.primary.mainExecutionController;
 import newGui.pages.primary.mainClientAppController;
 
 import javax.swing.*;
@@ -81,4 +82,6 @@ public class dashboardController {
     public long getCredits() {
         return topController.getCredits();
     }
+
+
 }

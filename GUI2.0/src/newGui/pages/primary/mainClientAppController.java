@@ -180,21 +180,7 @@ public class mainClientAppController {
     // Execution Page
     public void switchToExecution(String programName) {
         loadExecutionPage();
-
-        Request programRequest = ProgramInfoForRun.build(programName,0);
-        HttpClientUtil.runAsync(programRequest, new Callback() {
-
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                ProgramInfoForRun.onFailure(e);
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                ProgramInfoForRun.onResponse(response,executionController);
-            }
-        });
-
+        executionController.set(programName);
 
     }
 

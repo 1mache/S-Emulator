@@ -11,9 +11,16 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import newGui.pages.dashboard.component.primary.dashboardController;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.Request;
+import okhttp3.Response;
+import org.jetbrains.annotations.NotNull;
 import requests.ProgramInfoForRun;
+import requests.ProgramInfoRequest;
+import util.http.HttpClientUtil;
 
+import java.io.IOException;
 import java.util.List;
 
 public class availableProgramsController {
@@ -21,18 +28,25 @@ public class availableProgramsController {
     private dashboardController dashboardController;
 
 
-
     // Programs Table
-    @FXML private TableView<ProgramData> programsTable;
-    @FXML private TableColumn<ProgramData, String> uploadBy;
-    @FXML private TableColumn<ProgramData, String> name;
-    @FXML private TableColumn<ProgramData, Integer> maxLevel;
-    @FXML private TableColumn<ProgramData, Integer> numberOfInstructions;
-    @FXML private TableColumn<ProgramData, Integer> runs;
-    @FXML private TableColumn<ProgramData, Long> averageCreditCost;
+    @FXML
+    private TableView<ProgramData> programsTable;
+    @FXML
+    private TableColumn<ProgramData, String> uploadBy;
+    @FXML
+    private TableColumn<ProgramData, String> name;
+    @FXML
+    private TableColumn<ProgramData, Integer> maxLevel;
+    @FXML
+    private TableColumn<ProgramData, Integer> numberOfInstructions;
+    @FXML
+    private TableColumn<ProgramData, Integer> runs;
+    @FXML
+    private TableColumn<ProgramData, Long> averageCreditCost;
 
     // Buttons
-    @FXML private Button executeProgram;
+    @FXML
+    private Button executeProgram;
 
     public void setDashboardController(dashboardController dashboardController) {
         this.dashboardController = dashboardController;
@@ -41,10 +55,23 @@ public class availableProgramsController {
     @FXML
     void executeProgramListener(ActionEvent event) {
         ProgramData selected = programsTable.getSelectionModel().getSelectedItem();
-        Request programRequest = ProgramInfoForRun.build(selected.getName());
+        Request programRequest = ProgramInfoForRun.build(selected.getName(), 0);
+        HttpClientUtil.runAsync(programRequest, new Callback() {
 
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                ProgramInfoForRun.onFailure(e);
+            }
 
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                ProgramInfoForRun.onResponse(response);
+            }
+        });
     }
+
+
+
 
     public void updateFunctionList(List<ProgramData> funcList) {
         List<ProgramData> filtered = funcList.stream()

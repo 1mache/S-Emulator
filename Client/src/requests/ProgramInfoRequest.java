@@ -4,35 +4,33 @@ import Alerts.Alerts;
 import dto.ProgramPeek;
 import dto.server.request.ProgramViewRequest;
 import dto.server.response.ProgramData;
-import dto.server.response.UserData;
 import javafx.application.Platform;
 import newGui.pages.execution.component.primary.mainExecutionController;
-import okhttp3.*;
-import org.jetbrains.annotations.NotNull;
+import okhttp3.HttpUrl;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import util.Constants;
-import util.http.HttpClientUtil;
 
 import java.io.IOException;
 
-public class ProgramInfoForRun {
+public class ProgramInfoRequest {
 
-    public static Request build(String programName, int expansionDegree) {
+    public static Request build(String programName) {
 
-        // Build JSON body
-        String json = Constants.GSON_INSTANCE.toJson(
-                new ProgramViewRequest(programName, expansionDegree)
-        );
+        HttpUrl url = HttpUrl.parse(Constants.MORE_PROGRAM_INFO)
+                .newBuilder()
+                .addQueryParameter("programName",programName)
+                .build();
 
-        // Create request body with proper media type
-        RequestBody body = RequestBody.create(json, Constants.MEDIA_TYPE_JSON);
 
         return new Request.Builder()
-                .url(Constants.PROGRAM_VIEW)
-                .method("GET", body)
+                .url(url)
+                .get()
                 .build();
     }
 
-    public static ProgramPeek onResponse(Response response) {
+    public static ProgramData onResponse(Response response) {
         String responseBody;
         try {
             responseBody = response.body().string();
@@ -50,8 +48,8 @@ public class ProgramInfoForRun {
             });
             return null;
         } else {
-            ProgramPeek programPeek = Constants.GSON_INSTANCE.fromJson(responseBody, ProgramPeek.class);
-            return programPeek;
+            ProgramData moreData = Constants.GSON_INSTANCE.fromJson(responseBody, ProgramData.class);
+            return moreData;
         }
     }
 
@@ -60,4 +58,6 @@ public class ProgramInfoForRun {
             Alerts.serverProblamResponse(e.getMessage());
         });
     }
+
+
 }
