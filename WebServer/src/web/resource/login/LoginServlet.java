@@ -1,7 +1,6 @@
 package web.resource.login;
 
 import dto.server.request.LoginForm;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +14,7 @@ import java.io.IOException;
 @WebServlet(urlPatterns = {"/login"})
 public class LoginServlet extends HttpServlet {
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         var appContext = ServletUtils.getAppContext(getServletContext());
         var userManager = appContext.getUserManager();
 

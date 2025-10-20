@@ -1,7 +1,6 @@
 package web.resource.execution;
 
 import dto.server.request.ProgramViewRequest;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,7 +12,7 @@ import java.io.IOException;
 @WebServlet(urlPatterns = {"/execution/view-program"})
 public class ViewProgramServlet extends HttpServlet {
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String username = ServletUtils.getUsernameFromRequest(req);
         var appContext = ServletUtils.getAppContext(getServletContext());
         if(username == null || !appContext.getUserManager().userExists(username)){
@@ -23,9 +22,11 @@ public class ViewProgramServlet extends HttpServlet {
         var viewRequest = ServletUtils.GsonInstance.fromJson(req.getReader(), ProgramViewRequest.class);
 
         resp.setContentType("application/json");
-        ServletUtils.GsonInstance.toJson(
-                appContext.getEngine().getProgramPeek(viewRequest.programName(), viewRequest.expansionDegree()),
-                resp.getWriter()
-        );
+        synchronized (getServletContext()) {
+            ServletUtils.GsonInstance.toJson(
+                    appContext.getEngine().getProgramPeek(viewRequest.programName(), viewRequest.expansionDegree()),
+                    resp.getWriter()
+            );
+        }
     }
 }

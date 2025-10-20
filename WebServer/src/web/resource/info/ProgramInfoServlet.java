@@ -1,6 +1,5 @@
 package web.resource.info;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +13,7 @@ public class ProgramInfoServlet extends HttpServlet {
     private static final String PROGRAM_NAME_PARAM = "programName";
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String programName = req.getParameter(PROGRAM_NAME_PARAM);
         var appContext = ServletUtils.getAppContext(getServletContext());
         if(programName == null) {
@@ -23,16 +22,19 @@ public class ProgramInfoServlet extends HttpServlet {
             return;
         }
 
-        if (appContext.getEngine().programNotLoaded(programName)){
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().println("Program " +  programName + " has not been loaded");
-            return;
+        synchronized (getServletContext()) {
+            if (appContext.getEngine().programNotLoaded(programName)) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().println("Program " + programName + " has not been loaded");
+                return;
+            }
         }
-
         resp.setContentType("application/json");
-        ServletUtils.GsonInstance.toJson(
-                ServletUtils.buildProgramDataObject(appContext.getEngine().getProgramIdentifier(programName), appContext),
-                resp.getWriter()
-        );
+        synchronized (getServletContext()) {
+            ServletUtils.GsonInstance.toJson(
+                    ServletUtils.buildProgramDataObject(appContext.getEngine().getProgramIdentifier(programName), appContext),
+                    resp.getWriter()
+            );
+        }
     }
 }
