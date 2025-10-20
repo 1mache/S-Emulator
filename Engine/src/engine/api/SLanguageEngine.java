@@ -136,7 +136,7 @@ public class SLanguageEngine {
 
         initializeInputs(debugger, inputs, specificInputs);
 
-        incrementRunCount(programName); // TODO: what to do here
+        incrementRunCount(programName);
 
         return new DebugHandle(
                 debugger,
