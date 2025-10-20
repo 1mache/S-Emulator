@@ -1,6 +1,7 @@
 package requests;
 
 import Alerts.Alerts;
+import dto.server.response.UserData;
 import javafx.application.Platform;
 import newGui.pages.dashboard.component.primary.dashboardController;
 import okhttp3.HttpUrl;
@@ -8,12 +9,14 @@ import okhttp3.Request;
 import okhttp3.Response;
 import util.Constants;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class usersInfoListRequest {
+public class UsersInfoListRequest {
 
     public static Request build() {
 
-    HttpUrl url = HttpUrl.parse(Constants.FUNCTION_LIST)
+    HttpUrl url = HttpUrl.parse(Constants.USERS_LIST)
             .newBuilder()
             .build();
 
@@ -41,9 +44,9 @@ public class usersInfoListRequest {
         });
     } else {
 
-//        ProgramData[] programDataArray = Constants.GSON_INSTANCE.fromJson(responseBody, ProgramData[].class);
-//        List<ProgramData> programDataList = new ArrayList<>(List.of(programDataArray));
-//        dashboardController.updateFunctionList(programDataList);
+        UserData[] programDataArray = Constants.GSON_INSTANCE.fromJson(responseBody, UserData[].class);
+        List<UserData> UsersDataList = new ArrayList<>(List.of(programDataArray));
+        dashboardController.updateUsersList(UsersDataList);
     }
 }
 
