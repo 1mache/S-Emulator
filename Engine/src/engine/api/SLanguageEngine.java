@@ -128,11 +128,13 @@ public class SLanguageEngine {
                                          int expansionDegree,
                                          List<Long> inputs,
                                          boolean specificInputs,
-                                         RunHistory history) {
+                                         RunHistory history,
+                                         List<Integer> breakpoints) {
         validateInputs(inputs);
 
         Program expandedProgram = createExpandedProgram(programName, expansionDegree);
         var debugger = new ProgramDebugger(expandedProgram);
+        breakpoints.forEach(debugger::addBreakpoint); // add breakpoints
 
         initializeInputs(debugger, inputs, specificInputs);
 
