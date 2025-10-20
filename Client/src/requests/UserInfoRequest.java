@@ -14,7 +14,7 @@ public class UserInfoRequest {
 
     public static Request build(String userName) {
 
-        HttpUrl url = HttpUrl.parse(Constants.USER_INFO)
+        HttpUrl url = HttpUrl.parse(Constants.USER_HISTORY)
                 .newBuilder()
                 .addQueryParameter("username",userName)
                 .build();
@@ -25,9 +25,6 @@ public class UserInfoRequest {
                 .get()
                 .build();
     }
-
-
-
 
     public static void onResponse(Response response, dashboardController dashboardController) {
         String responseBody;
@@ -50,7 +47,7 @@ public class UserInfoRequest {
 //            List<UserData> UsersDataList = new ArrayList<>(List.of(programDataArray));
 
             // need to see what dto it get into
-        //    dashboardController.updateUserHistoryTable();
+            //    dashboardController.updateUserHistoryTable();
 
         }
     }

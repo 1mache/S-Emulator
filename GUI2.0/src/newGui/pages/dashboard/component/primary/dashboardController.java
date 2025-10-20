@@ -14,6 +14,7 @@ import newGui.pages.dashboard.component.availablePrograms.availableProgramsContr
 import newGui.pages.dashboard.component.history.historyTableController;
 import newGui.pages.dashboard.component.top.topController;
 import newGui.pages.dashboard.component.usersInfo.usersTableInfoController;
+import newGui.pages.execution.component.primary.mainExecutionController;
 import newGui.pages.primary.mainClientAppController;
 
 import javax.swing.*;
@@ -53,7 +54,6 @@ public class dashboardController {
 
     public void activate() {
         topController.init(mainClientAppController.getUserNameProperty());
-
     }
 
     public void updateFunctionList(List<ProgramData> funcList) {
@@ -75,16 +75,13 @@ public class dashboardController {
         historyTableController.clearHistoryTable();
     }
 
+    public void loadExecutionPage(String name) {
+        mainClientAppController.switchToExecution(name);
+    }
 
-////        private void onActivated(String st) {
-////        if (topController != null)                topController.refresh();
-////        if (availableProgramsController != null)  availableProgramsController.loadPrograms();
-////        if (availableFunctionsController != null) availableFunctionsController.loadFunctions();
-////        if (userTableInfoController != null)     usersTableInfoController.reloadUsers();
-////        if (historyTableController != null)       historyTableController.reloadHistory();
-////    }
-
-
+    public long getCredits() {
+        return topController.getCredits();
+    }
 
 
 }

@@ -21,6 +21,9 @@ public class Constants {
     public final static String DASHBOARD_PAGE_FXML_RESOURCE_LOCATION = "/newGui/pages/dashboard/component/primary/dashboard.fxml";
     public final static String DASHBOARD_PAGE_STYLE_RESOURCE_LOCATION = "/newGui/pages/dashboard/component/primary/dashboard_styling.css";
 
+    public final static String EXECUTION_PAGE_FXML_RESOURCE_LOCATION = "/newGui/pages/execution/component/primary/mainExecution.fxml";
+    public final static String EXECUTION_PAGE_STYLE_RESOURCE_LOCATION = "/newGui/pages/dashboard/component/primary/main_styling.css";
+
 
     // Server resources locations
     public final static String BASE_DOMAIN = "localhost";
@@ -30,7 +33,7 @@ public class Constants {
 
     // Login
     public final static String LOGIN = FULL_SERVER_PATH + "/login";
-    public final static String FUNCTIONS_LIST = FULL_SERVER_PATH + "/dashboard/function-list";
+    public final static String PROGRAM_LIST = FULL_SERVER_PATH + "/dashboard/program-list";
     public final static String USERS_LIST = FULL_SERVER_PATH + "/dashboard/user-list";
 
 
@@ -39,8 +42,15 @@ public class Constants {
     // Dashboard
     public final static String UPLOAD = FULL_SERVER_PATH + "/upload";
     public final static String ADD_CREDIT = FULL_SERVER_PATH + "/addCredit";
-    public final static String USER_INFO = FULL_SERVER_PATH + "/user-info";
+    public final static String USER_HISTORY = FULL_SERVER_PATH + "/user-history";
+    public final static String PROGRAM_VIEW = FULL_SERVER_PATH + "/execution/view-program";
+    public final static String MORE_PROGRAM_INFO = FULL_SERVER_PATH + "/info/program-info";
 
+
+
+
+
+    // Execution
 
 
 
