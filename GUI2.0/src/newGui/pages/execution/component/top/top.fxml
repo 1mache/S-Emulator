@@ -54,9 +54,9 @@
                   <Insets />
                </GridPane.margin>
                <children>
-                  <ComboBox fx:id="degreeSelection" maxHeight="35.0" maxWidth="120.0" minHeight="26.0" minWidth="120.0" onAction="#selectionListener" prefHeight="26.0" prefWidth="120.0" promptText="Degree" />
+                  <ComboBox fx:id="degreeSelection" maxHeight="35.0" maxWidth="120.0" minHeight="26.0" minWidth="120.0" onAction="#degreeSelectionListener" prefHeight="26.0" prefWidth="120.0" promptText="Degree" />
                   <Region prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
-                  <ComboBox fx:id="highlightSelection" maxHeight="35.0" maxWidth="120.0" minHeight="26.0" minWidth="120.0" onAction="#selectionListener" prefHeight="26.0" prefWidth="120.0" promptText="Highlight selection" />
+                  <ComboBox fx:id="highlightSelection" maxHeight="35.0" maxWidth="120.0" minHeight="26.0" minWidth="120.0" onAction="#highlightSelectionListener" prefHeight="26.0" prefWidth="120.0" promptText="Highlight" />
                </children>
             </HBox>
          </children>

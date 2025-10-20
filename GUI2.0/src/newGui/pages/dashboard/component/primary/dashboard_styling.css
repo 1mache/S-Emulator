@@ -1,69 +1,69 @@
-Label, Button, TextField, TextArea, .combo-box, .text-field, .combo-box, .text {
-    -fx-text-fill: black;
-    -fx-font-family: "Lucida Console";
-    -fx-font-size: 13px;
-}
+/*Label, Button, TextField, TextArea, .combo-box, .text-field, .combo-box, .text {*/
+/*    -fx-text-fill: black;*/
+/*    -fx-font-family: "Lucida Console";*/
+/*    -fx-font-size: 13px;*/
+/*}*/
 
-.label.title {
-    -fx-border-color: #4a90e2; /* soft blue */
-    -fx-border-width: 0 0 3 0; /* bottom border only */
-    -fx-border-style: solid;
-    -fx-padding: 4 8 4 8;
-    -fx-font-weight: bold;
-    -fx-font-size: 16px;
-    -fx-text-fill: #2c3e50; /* dark slate */
-    -fx-background-color: rgba(74, 144, 226, 0.1); /* light blue transparent background */
-    -fx-background-radius: 5;
-}
+/*.label.title {*/
+/*    -fx-border-color: #4a90e2; !* soft blue *!*/
+/*    -fx-border-width: 0 0 3 0; !* bottom border only *!*/
+/*    -fx-border-style: solid;*/
+/*    -fx-padding: 4 8 4 8;*/
+/*    -fx-font-weight: bold;*/
+/*    -fx-font-size: 16px;*/
+/*    -fx-text-fill: #2c3e50; !* dark slate *!*/
+/*    -fx-background-color: rgba(74, 144, 226, 0.1); !* light blue transparent background *!*/
+/*    -fx-background-radius: 5;*/
+/*}*/
 
-.text-field.summary {
-    -fx-border-color: #fbbf24; /* yellow */
-    -fx-border-width: 2;        /* border on all sides */
-    -fx-border-style: solid;
-    -fx-padding: 8 12 8 12;
-    -fx-text-fill: black;
-    -fx-background-color: rgba(251, 191, 36, 0.1); /* light yellow transparent */
-    -fx-background-radius: 5;
-    -fx-border-radius: 5;
-}
+/*.text-field.summary {*/
+/*    -fx-border-color: #fbbf24; !* yellow *!*/
+/*    -fx-border-width: 2;        !* border on all sides *!*/
+/*    -fx-border-style: solid;*/
+/*    -fx-padding: 8 12 8 12;*/
+/*    -fx-text-fill: black;*/
+/*    -fx-background-color: rgba(251, 191, 36, 0.1); !* light yellow transparent *!*/
+/*    -fx-background-radius: 5;*/
+/*    -fx-border-radius: 5;*/
+/*}*/
 
-.button.control-button {
-    -fx-background-color: #3b82f6; /* bright blue */
-    -fx-text-fill: white;
-    -fx-background-radius: 5;
-    -fx-padding: 6 12 6 12;
-    -fx-font-weight: bold;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.2) , 2, 0.5 , 0 , 1 );
-}
+/*.button.control-button {*/
+/*    -fx-background-color: #3b82f6; !* bright blue *!*/
+/*    -fx-text-fill: white;*/
+/*    -fx-background-radius: 5;*/
+/*    -fx-padding: 6 12 6 12;*/
+/*    -fx-font-weight: bold;*/
+/*    -fx-cursor: hand;*/
+/*    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.2) , 2, 0.5 , 0 , 1 );*/
+/*}*/
 
-.button.control-button:hover {
-    -fx-background-color: #2563eb; /* slightly darker blue */
-}
+/*.button.control-button:hover {*/
+/*    -fx-background-color: #2563eb; !* slightly darker blue *!*/
+/*}*/
 
-.button.control-button:pressed {
-    -fx-background-color: #1d4ed8; /* even darker blue */
-    -fx-effect: none;
-}
+/*.button.control-button:pressed {*/
+/*    -fx-background-color: #1d4ed8; !* even darker blue *!*/
+/*    -fx-effect: none;*/
+/*}*/
 
-.choice-box, .combo-box {
-    -fx-background-color: #26a69a;
-    -fx-border-color: #1e7e74;
-    -fx-border-radius: 5;
-    -fx-background-radius: 5;
-    -fx-padding: 4 10 4 10;
-    -fx-font-weight: bold;
-    -fx-text-fill: white;
-    -fx-cursor: hand;
-}
+/*.choice-box, .combo-box {*/
+/*    -fx-background-color: #26a69a;*/
+/*    -fx-border-color: #1e7e74;*/
+/*    -fx-border-radius: 5;*/
+/*    -fx-background-radius: 5;*/
+/*    -fx-padding: 4 10 4 10;*/
+/*    -fx-font-weight: bold;*/
+/*    -fx-text-fill: white;*/
+/*    -fx-cursor: hand;*/
+/*}*/
 
-/* Hover state */
-.choice-box:hover, .combo-box:hover {
-    -fx-background-color: #1e7e74; /* darker cyan */
-}
+/*!* Hover state *!*/
+/*.choice-box:hover, .combo-box:hover {*/
+/*    -fx-background-color: #1e7e74; !* darker cyan *!*/
+/*}*/
 
-/* Pressed/active state */
-.choice-box:pressed, .combo-box:pressed {
-    -fx-background-color: #14594f; /* darkest cyan */
-    -fx-border-color: #0f3a33;
-}
+/*!* Pressed/active state *!*/
+/*.choice-box:pressed, .combo-box:pressed {*/
+/*    -fx-background-color: #14594f; !* darkest cyan *!*/
+/*    -fx-border-color: #0f3a33;*/
+/*}*/
