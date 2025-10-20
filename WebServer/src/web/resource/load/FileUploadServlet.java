@@ -30,9 +30,10 @@ public class FileUploadServlet extends HttpServlet {
 
         Collection<Part> parts = request.getParts();
 
+        var appContext = ServletUtils.getAppContext(getServletContext());
         String username = ServletUtils.getUsernameFromRequest(request);
 
-        if(username == null) {
+        if(username == null || !appContext.getUserManager().userExists(username)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("User not logged in.");
             return;
@@ -48,7 +49,6 @@ public class FileUploadServlet extends HttpServlet {
         // combine all InputStreams into one
         InputStream fileContent = new SequenceInputStream(Collections.enumeration(inputStreams));
 
-        var appContext = ServletUtils.getAppContext(getServletContext());
         var engine = appContext.getEngine();
         try {
             synchronized (getServletContext()) {
