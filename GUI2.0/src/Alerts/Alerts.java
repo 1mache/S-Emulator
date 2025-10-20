@@ -47,6 +47,7 @@ public class Alerts {
         return null;
     }
 
+    // On Failure Alerts
     public static Runnable serverProblamResponse(String ex) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Server Error");
@@ -55,4 +56,25 @@ public class Alerts {
         alert.showAndWait();
         return null;
     }
+
+    // On response bad answer Alerts
+    public static Runnable serverBadAnswer(String ex) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Server Error");
+        alert.setHeaderText(null);
+        alert.setContentText("Server Bad Response : " + ex);
+        alert.showAndWait();
+        return null;
+    }
+
+
+    public static Runnable badBody(String ex) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Server Error");
+        alert.setHeaderText(null);
+        alert.setContentText("Server Missing Body : " + ex);
+        alert.showAndWait();
+        return null;
+    }
+
 }

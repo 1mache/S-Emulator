@@ -1,5 +1,6 @@
 package newGui.pages.primary;
 
+import dto.server.response.ProgramData;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -14,8 +15,20 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import newGui.pages.dashboard.component.primary.dashboardController;
 import newGui.pages.login.component.login.loginController;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Request;
+import okhttp3.Response;
+import org.jetbrains.annotations.NotNull;
+import requests.LoginRequest;
+import requests.functionListRequest;
+import requests.usersInfoListRequest;
+import util.http.HttpClientUtil;
+
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
+
 import static util.Constants.*;
 
 public class mainClientAppController {
@@ -130,31 +143,32 @@ public class mainClientAppController {
     public void switchToDashboard() {
         loadDashboardPage();
 
-//        Request request = functionListRequest.build();
-//
-//        HttpClientUtil.runAsync(request, new Callback() {
-//
-//            @Override
-//            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-//                Platform.runLater(() ->
-//                        errorMessageProperty.set("Something went wrong: " + e.getMessage())
-//                );
-//            }
-//
-//            @Override
-//            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-//                if (response.code() != 200) {
-//                    String responseBody = response.body().string();
-//                    Platform.runLater(() ->
-//                            errorMessageProperty.set("Something went wrong " + responseBody)
-//                    );
-//                } else {
-//                    Platform.runLater(() -> {
-//                        mainClientAppController.updateUserName(userName);
-//                        mainClientAppController.switchToDashboard();
-//                    });
-//                }
-//            }
-//        });
+        Request functionsRequest = functionListRequest.build();
+        HttpClientUtil.runAsync(functionsRequest, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                functionListRequest.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                functionListRequest.onResponse(response, dashboardController);
+            }
+        });
+
+        Request usersRequest = usersInfoListRequest.build();
+        HttpClientUtil.runAsync(usersRequest, new Callback() {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                usersInfoListRequest.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                usersInfoListRequest.onResponse(response, dashboardController);
+            }
+        });
     }
 }

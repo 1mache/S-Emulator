@@ -29,7 +29,7 @@
                   <Insets bottom="5.0" top="5.0" />
                </VBox.margin>
             </HBox>
-            <TableView fx:id="historyTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+            <TableView fx:id="programsTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
                <columns>
                   <TableColumn fx:id="name" editable="false" prefWidth="100.0" sortable="false" style="-fx-alignment: CENTER;" text="Name" />
                   <TableColumn fx:id="uploadBy" editable="false" prefWidth="100.0" style="-fx-alignment: CENTER;" text="Upload By" />

@@ -1,6 +1,8 @@
 package newGui.pages.dashboard.component.primary;
 
 
+import dto.server.response.ProgramData;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,6 +17,7 @@ import newGui.pages.primary.mainClientAppController;
 
 import javax.swing.*;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import static util.Constants.*;
 
@@ -39,6 +42,14 @@ public class dashboardController {
 
     public void activate() {
         topController.init(mainClientAppController.getUserNameProperty());
+
+    }
+
+    public void updateFunctionList(List<ProgramData> funcList) {
+        Platform.runLater(() -> {
+        availableFunctionsController.updateFunctionList(funcList);
+        availableProgramsController.updateFunctionList(funcList);
+        });
 
     }
 
