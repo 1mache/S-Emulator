@@ -53,7 +53,6 @@ public class dashboardController {
 
     public void activate() {
         topController.init(mainClientAppController.getUserNameProperty());
-
     }
 
     public void updateFunctionList(List<ProgramData> funcList) {
@@ -75,16 +74,8 @@ public class dashboardController {
         historyTableController.clearHistoryTable();
     }
 
-
-////        private void onActivated(String st) {
-////        if (topController != null)                topController.refresh();
-////        if (availableProgramsController != null)  availableProgramsController.loadPrograms();
-////        if (availableFunctionsController != null) availableFunctionsController.loadFunctions();
-////        if (userTableInfoController != null)     usersTableInfoController.reloadUsers();
-////        if (historyTableController != null)       historyTableController.reloadHistory();
-////    }
-
-
-
+    public void loadExecutionPage(String name) {
+        mainClientAppController.switchToExecution(name);
+    }
 
 }

@@ -40,6 +40,10 @@ public class availableFunctionsController {
 
     @FXML
     void executeProgramListener(ActionEvent event) {
+        ProgramData selectedProgram = programsTable.getSelectionModel().getSelectedItem();
+        if (selectedProgram != null) {
+            dashboardController.loadExecutionPage(selectedProgram.getName());
+        }
     }
 
     public void updateFunctionList(List<ProgramData> funcList) {
