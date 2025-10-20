@@ -55,7 +55,7 @@ public class SLanguageEngine {
         return loadProgram(loader, false);
     }
 
-    public synchronized boolean programNotLoaded(String programName) {
+    public boolean programNotLoaded(String programName) {
         return !avaliablePrograms.containsKey(programName);
     }
 
@@ -163,7 +163,7 @@ public class SLanguageEngine {
     }
 
     // returns all the functions names that the program uses including the main programs. the programs are first in list
-    public synchronized List<ProgramIdentifier> getAvaliablePrograms() {
+    public List<ProgramIdentifier> getAvaliablePrograms() {
         return getFunctionIdentifiers(avaliablePrograms.values());
     }
 
@@ -202,9 +202,7 @@ public class SLanguageEngine {
 
     private Program getProgramByName(String programName) {
         Program program;
-        synchronized (this){
-            program = avaliablePrograms.get(programName);
-        }
+        program = avaliablePrograms.get(programName);
 
         if(program == null)
             throw new IllegalArgumentException("File does not contain program: " + programName);
@@ -217,9 +215,7 @@ public class SLanguageEngine {
 
         loader.validateProgram();
         if(clearExisting) {
-            synchronized (this) {
-                avaliablePrograms.clear();
-            }
+            avaliablePrograms.clear();
         }
 
         var mainProgram = loader.getProgram();
@@ -236,14 +232,12 @@ public class SLanguageEngine {
                         .collect(Collectors.toSet())
         );
 
-        synchronized (this) {
-            avaliablePrograms.putAll(
-                    newPrograms.stream()
-                            .collect(Collectors.toMap(
-                                    Program::getName, program -> program
-                            ))
-            );
-        }
+        avaliablePrograms.putAll(
+                newPrograms.stream()
+                        .collect(Collectors.toMap(
+                                Program::getName, program -> program
+                        ))
+        );
 
         return getFunctionIdentifiers(newPrograms).stream()
                 .map(ProgramIdentifier::name)
@@ -277,12 +271,10 @@ public class SLanguageEngine {
     }
 
     private void incrementRunCount(String programName) {
-        synchronized (this){
-            programRunCounts.put(
-                    programName,
-                    programRunCounts.getOrDefault(programName, 0) + 1
-            );
-        }
+        programRunCounts.put(
+                programName,
+                programRunCounts.getOrDefault(programName, 0) + 1
+        );
     }
 
     private Variable str2Variable(String str){
