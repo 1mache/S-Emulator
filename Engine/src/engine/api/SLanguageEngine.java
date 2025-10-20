@@ -76,8 +76,6 @@ public class SLanguageEngine {
         return program.getInstructions().size();
     }
 
-    public
-
     public ProgramPeek getProgramPeek(String programName, int expansionDegree) {
         if(programNotLoaded(programName))
             throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
