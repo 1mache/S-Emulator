@@ -30,12 +30,16 @@ public class Constants {
 
     // Login
     public final static String LOGIN = FULL_SERVER_PATH + "/login";
-    public final static String FUNCTION_LIST = FULL_SERVER_PATH + "/dashboard/function-list";
+    public final static String FUNCTIONS_LIST = FULL_SERVER_PATH + "/dashboard/function-list";
+    public final static String USERS_LIST = FULL_SERVER_PATH + "/dashboard/user-list";
+
+
 
 
     // Dashboard
     public final static String UPLOAD = FULL_SERVER_PATH + "/upload";
     public final static String ADD_CREDIT = FULL_SERVER_PATH + "/addCredit";
+    public final static String USER_INFO = FULL_SERVER_PATH + "/user-info";
 
 
 
@@ -50,11 +54,6 @@ public class Constants {
     public static final MediaType MEDIA_TYPE_XML = MediaType.get("application/xml");
     public static final MediaType MEDIA_TYPE_JSON = MediaType.get("application/json; charset=utf-8");
 
-
-    public final static String USERS_LIST = FULL_SERVER_PATH + "/userslist";
-    public final static String LOGOUT = FULL_SERVER_PATH + "/chat/logout";
-    public final static String SEND_CHAT_LINE = FULL_SERVER_PATH + "/pages/chatroom/sendChat";
-    public final static String CHAT_LINES_LIST = FULL_SERVER_PATH + "/chat";
 
     // GSON instance
     public final static Gson GSON_INSTANCE = new Gson();

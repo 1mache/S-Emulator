@@ -1,6 +1,9 @@
 package newGui.pages.dashboard.component.primary;
 
 
+import dto.server.response.ProgramData;
+import dto.server.response.UserData;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,6 +18,7 @@ import newGui.pages.primary.mainClientAppController;
 
 import javax.swing.*;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import static util.Constants.*;
 
@@ -33,6 +37,16 @@ public class dashboardController {
     @FXML private usersTableInfoController userTableInfoController; // top left
     @FXML private historyTableController historyTableController; // bottom left
 
+    @FXML
+    public void initialize() {
+    topController.setDashboardController(this);
+    availableProgramsController.setDashboardController(this);
+    availableFunctionsController.setDashboardController(this);
+    userTableInfoController.setDashboardController(this);
+    historyTableController.setDashboardController(this);
+    }
+
+
     public void setMainClientAppController(mainClientAppController mainAppController) {
         this.mainClientAppController = mainAppController;
     }
@@ -40,6 +54,25 @@ public class dashboardController {
     public void activate() {
         topController.init(mainClientAppController.getUserNameProperty());
 
+    }
+
+    public void updateFunctionList(List<ProgramData> funcList) {
+        Platform.runLater(() -> {
+        availableFunctionsController.updateFunctionList(funcList);
+        availableProgramsController.updateFunctionList(funcList);
+        });
+
+    }
+
+    public void updateUsersList(List<UserData> usersDataList) {
+        Platform.runLater(() -> {
+            userTableInfoController.updateUsersList(usersDataList);
+        });
+
+    }
+
+    public void clearUserInfo() {
+        historyTableController.clearHistoryTable();
     }
 
 

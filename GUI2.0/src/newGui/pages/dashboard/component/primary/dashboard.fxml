@@ -26,12 +26,12 @@
                           <items>
                               <AnchorPane minHeight="0.0" minWidth="0.0">
                                  <children>
-                                    <fx:include fx:id="users" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" source="../usersInfo/usersTableInfo.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <fx:include fx:id="userTableInfo" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" source="../usersInfo/usersTableInfo.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                  </children>
                               </AnchorPane>
                             <AnchorPane fx:id="History" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                  <children>
-                                    <fx:include fx:id="history" source="../history/historyTable.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <fx:include fx:id="historyTable" source="../history/historyTable.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                  </children>
                               </AnchorPane>
                           </items>
@@ -44,12 +44,12 @@
                            <items>
                               <AnchorPane minHeight="0.0" minWidth="0.0">
                                  <children>
-                                    <fx:include fx:id="programsMeneger" source="../availablePrograms/availablePrograms.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <fx:include fx:id="availablePrograms" source="../availablePrograms/availablePrograms.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                  </children>
                               </AnchorPane>
                               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                  <children>
-                                    <fx:include fx:id="functionsMeneger" source="../availableFunctions/availableFunctions.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <fx:include fx:id="availableFunctions" source="../availableFunctions/availableFunctions.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                  </children>
                               </AnchorPane>
                            </items>

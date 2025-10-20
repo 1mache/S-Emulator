@@ -4,9 +4,7 @@ import Alerts.Alerts;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -14,12 +12,14 @@ import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import newGui.pages.dashboard.component.primary.dashboardController;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import requests.LoadCreditRequest;
+import requests.LoginRequest;
 import requests.UploadRequest;
 import util.http.HttpClientUtil;
 
@@ -29,6 +29,9 @@ import java.nio.file.Files;
 
 
 public class topController {
+
+    private dashboardController dashboardController;
+
 
 
     // Won't Use
@@ -42,7 +45,7 @@ public class topController {
     @FXML private Label statusLabel;
     @FXML private Label userName;
     @FXML private TextField availableCredits;
-    private IntegerProperty credits = new SimpleIntegerProperty(1000);
+    private LongProperty credits = new SimpleLongProperty(1000);
 
     @FXML private TextField creditsAmount;
     @FXML private TextField currentlyLoadedFilePath;
@@ -56,8 +59,13 @@ public class topController {
     private PauseTransition clearStatusLater;
 
     public void init(StringProperty name) {
+        setupPlaceholder(creditsAmount);
         bindUserName(name);
         bindCredits();
+    }
+
+    public void setDashboardController(dashboardController dashboardController) {
+        this.dashboardController = dashboardController;
     }
 
     public void bindUserName(StringProperty name) {
@@ -68,6 +76,25 @@ public class topController {
         availableCredits.textProperty().bind(Bindings.convert(credits));
     }
 
+
+    private void setupPlaceholder(TextField textField) {
+        final String placeholderText = textField.getText();
+        textField.setStyle("-fx-text-fill: gray;");
+
+        textField.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                if (textField.getText().equals(placeholderText)) {
+                    textField.clear();
+                    textField.setStyle("-fx-text-fill: black;");
+                }
+            } else {
+                if (textField.getText().isEmpty()) {
+                    textField.setText(placeholderText);
+                    textField.setStyle("-fx-text-fill: gray;");
+                }
+            }
+        });
+    }
     @FXML
     void ChargeListener(ActionEvent event) {
         try {
@@ -79,11 +106,11 @@ public class topController {
                 throw new NumberFormatException();
             }
             } catch (NumberFormatException e) {
-            Platform.runLater(Alerts.invalidInput());
+            Alerts.invalidInput();
             return;
         }
 
-        int amount = Integer.parseInt(creditsAmount.getText());
+        long amount = Long.parseLong(creditsAmount.getText());
         credits.set(credits.get() + amount);
         creditsAmount.clear();
 
@@ -93,10 +120,7 @@ public class topController {
 
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                Platform.runLater(() -> {
-                    setBusy(false);
-                    Alerts.loadField(e.getMessage());
-                });
+                LoadCreditRequest.onFailure(e);
             }
 
             @Override
@@ -104,14 +128,7 @@ public class topController {
                 Platform.runLater(() -> {
                     setBusy(false);
                 });
-                if (response.code() != 200) {
-                    String responseBody = response.body().string();
-                    Platform.runLater(() -> {
-                        Alerts.loadField(responseBody);
-                    });
-                } else {
-                    Platform.runLater(Alerts::creditLoadSucceeded);
-                }
+                LoadCreditRequest.onResponse(response);
             }
         });
 
@@ -142,7 +159,7 @@ public class topController {
         }
 
         statusLabel.textProperty().unbind();
-        setStatus("", true);
+        setStatus("", true, statusLabel, clearStatusLater);
 
         try {
             validateXmlFileOrThrow(file);
@@ -163,10 +180,7 @@ public class topController {
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 Platform.runLater(() -> {
                     setBusy(false);
-                    Alerts.loadField(e.getMessage());
-                    currentlyLoadedFilePath.clear();
-                    setStatus("", true);
-                    currentlyLoadedFilePath.setText("Currently Loaded File");
+                    UploadRequest.onFailure(e, currentlyLoadedFilePath, statusLabel, clearStatusLater);
                 });
             }
 
@@ -175,36 +189,36 @@ public class topController {
                 Platform.runLater(() -> {
                     setBusy(false);
                 });
-                if (response.code() != 200) {
-                    assert response.body() != null;
-                    String responseBody = response.body().string();
-                    Platform.runLater(() -> {
-                        Alerts.loadField(responseBody);
-                        setStatus("", true);
-                        currentlyLoadedFilePath.setText("Currently Loaded File");
-                    });
-                } else {
-                    String responseBody = response.body().string();
-                    Platform.runLater(() -> {
-                        if (responseBody != null && !responseBody.isEmpty()) {
-                           Alerts.loadField(responseBody);
-                        } else {
-                            Alerts.loadSucceeded();
-                        }
-                        setStatus("Finish", true);
-                        currentlyLoadedFilePath.setText("Currently Loaded File");
-
-                    });
-                }
+                UploadRequest.onResponse( response, currentlyLoadedFilePath, statusLabel, clearStatusLater);
+//                if (response.code() != 200) {
+//                    assert response.body() != null;
+//                    String responseBody = response.body().string();
+//                    Platform.runLater(() -> {
+//                        Alerts.loadField(responseBody);
+//                        setStatus("", true);
+//                        currentlyLoadedFilePath.setText("Currently Loaded File");
+//                    });
+//                }
+//                else {
+//                    String responseBody = response.body().string();
+//                    Platform.runLater(() -> {
+//                        if (responseBody != null && !responseBody.isEmpty()) {
+//                           Alerts.loadField(responseBody);
+//                        } else {
+//                            Alerts.loadSucceeded();
+//                        }
+//                        setStatus("Finish", true);
+//                        currentlyLoadedFilePath.setText("Currently Loaded File");
+//
+//                    });
+//                }
             }
         });
     }
 
-    private void setStatus(String msg, boolean ok) {
+    public static void setStatus(String msg, boolean ok, Label statusLabel, PauseTransition clearStatusLater) {
         if (statusLabel != null) {
             statusLabel.setText(msg);
-            statusLabel.getStyleClass().removeAll("status-ok", "status-error");
-            statusLabel.getStyleClass().add(ok ? "status-ok" : "status-error");
 
             if (clearStatusLater != null) {
                 clearStatusLater.stop();
@@ -214,6 +228,7 @@ public class topController {
             clearStatusLater.setOnFinished(event -> statusLabel.setText(""));
             clearStatusLater.play();
         }
+
     }
 
     private void validateXmlFileOrThrow(File file) {

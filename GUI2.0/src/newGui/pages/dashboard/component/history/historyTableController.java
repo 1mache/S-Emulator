@@ -7,11 +7,15 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.VBox;
+import newGui.pages.dashboard.component.primary.dashboardController;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class historyTableController {
+
+    private dashboardController dashboardController;
+
 
     // Won't Use
     @FXML private ScrollPane mainHistory;
@@ -26,9 +30,12 @@ public class historyTableController {
     @FXML private TableColumn<?, ?> number;
     @FXML private TableColumn<?, ?> result;
 
+    public void setDashboardController(dashboardController dashboardController) {
+        this.dashboardController = dashboardController;
+    }
 
-//    public void initialize(URL url, ResourceBundle resourceBundle) {
-//        //historyTable.setPlaceholder(new Label("No history to display"));
-//
-//    }
+    public void clearHistoryTable() {
+        historyTable.getItems().clear();
+    }
+
 }

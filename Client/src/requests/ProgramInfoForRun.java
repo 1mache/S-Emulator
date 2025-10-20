@@ -2,7 +2,6 @@ package requests;
 
 import Alerts.Alerts;
 import javafx.application.Platform;
-import newGui.pages.dashboard.component.primary.dashboardController;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -11,21 +10,18 @@ import util.Constants;
 
 import java.io.IOException;
 
+public class ProgramInfoForRun {
 
-public class LoadCreditRequest {
-
-    public static Request build(long creditAmount) {
+    public static Request build(String programName) {
 
         HttpUrl url = HttpUrl.parse(Constants.ADD_CREDIT)
                 .newBuilder()
-                .addQueryParameter("creditamount", String.valueOf(creditAmount))
+                .addQueryParameter("programname", String.valueOf(programName))
                 .build();
-
-        RequestBody body = RequestBody.create(new byte[0], null);
 
         return new Request.Builder()
                 .url(url)
-                .post(body)
+                .get()
                 .build();
     }
 
