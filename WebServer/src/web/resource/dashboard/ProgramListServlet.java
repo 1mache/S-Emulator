@@ -1,6 +1,5 @@
 package web.resource.dashboard;
 
-import dto.server.response.ProgramData;
 import engine.api.SLanguageEngine;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -27,7 +26,7 @@ public class ProgramListServlet extends HttpServlet {
         
         var programsData = context.getEngine().getAvaliablePrograms().stream()
                 .map(functionIdentifier ->
-                        ServletUtils.buildProgramDataObject(functionIdentifier, context, engine)
+                        ServletUtils.buildProgramDataObject(functionIdentifier, context)
                 )
                 .toList();
 
