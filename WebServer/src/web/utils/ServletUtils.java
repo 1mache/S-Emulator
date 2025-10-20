@@ -1,6 +1,9 @@
 package web.utils;
 
 import com.google.gson.Gson;
+import dto.ProgramIdentifier;
+import dto.server.response.ProgramData;
+import engine.api.SLanguageEngine;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -33,5 +36,21 @@ public class ServletUtils {
             return null;
         }
         return (String) session.getAttribute(ServletUtils.USERNAME_ATR_NAME);
+    }
+
+    public static ProgramData buildProgramDataObject(ProgramIdentifier programIdentifier,
+                                                     AppContext context) {
+        String name = programIdentifier.name();
+        SLanguageEngine engine = context.getEngine();
+        return new ProgramData(
+                name,
+                programIdentifier.userString(),
+                programIdentifier.isMain(),
+                context.getFunctionOwner(name),
+                engine.instructionCountOf(name),
+                engine.getMaxExpansionDegree(name),
+                engine.getRunCountOf(name),
+                engine.getAverageCostOf(name)
+        );
     }
 }

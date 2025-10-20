@@ -76,6 +76,8 @@ public class SLanguageEngine {
         return program.getInstructions().size();
     }
 
+    public
+
     public ProgramPeek getProgramPeek(String programName, int expansionDegree) {
         if(programNotLoaded(programName))
             throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
@@ -186,7 +188,7 @@ public class SLanguageEngine {
         throw new IllegalArgumentException("Illegal symbol: " + symbolStr);
     }
 
-    public ProgramIdentifier getFunctionIdentifier(String programName) {
+    public ProgramIdentifier getProgramIdentifier(String programName) {
         if (programNotLoaded(programName))
             throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
 

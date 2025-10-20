@@ -68,7 +68,7 @@ public class AppContext {
     public List<String> getUserFunctions(String user) {
         synchronized (this) {
             return getAllUserFunctions(user).stream()
-                    .filter(funcName -> !getEngine().getFunctionIdentifier(funcName).isMain())
+                    .filter(funcName -> !getEngine().getProgramIdentifier(funcName).isMain())
                     .toList();
         }
     }
@@ -76,7 +76,7 @@ public class AppContext {
     public List<String> getUserPrograms(String user) {
         synchronized (this) {
             return getAllUserFunctions(user).stream()
-                    .filter(funcName -> getEngine().getFunctionIdentifier(funcName).isMain())
+                    .filter(funcName -> getEngine().getProgramIdentifier(funcName).isMain())
                     .toList();
         }
     }

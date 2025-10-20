@@ -12,7 +12,7 @@ import web.utils.ServletUtils;
 
 import java.io.IOException;
 
-@WebServlet(urlPatterns = {"/dashboard/function-list"})
+@WebServlet(urlPatterns = {"/dashboard/program-list"})
 public class ProgramListServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -26,19 +26,8 @@ public class ProgramListServlet extends HttpServlet {
         SLanguageEngine engine = context.getEngine();
         
         var programsData = context.getEngine().getAvaliablePrograms().stream()
-                .map(functionIdentifier -> {
-                            String name = functionIdentifier.name();
-                            return new ProgramData(
-                                    name,
-                                    functionIdentifier.userString(),
-                                    functionIdentifier.isMain(),
-                                    context.getFunctionOwner(name),
-                                    engine.instructionCountOf(name),
-                                    engine.getMaxExpansionDegree(name),
-                                    engine.getRunCountOf(name),
-                                    engine.getAverageCostOf(name)
-                            );
-                        }
+                .map(functionIdentifier ->
+                        ServletUtils.buildProgramDataObject(functionIdentifier, context, engine)
                 )
                 .toList();
 

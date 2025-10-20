@@ -22,6 +22,7 @@ public class ViewProgramServlet extends HttpServlet {
         }
         var viewRequest = ServletUtils.GsonInstance.fromJson(req.getReader(), ProgramViewRequest.class);
 
+        resp.setContentType("application/json");
         ServletUtils.GsonInstance.toJson(
                 appContext.getEngine().getProgramPeek(viewRequest.programName(), viewRequest.expansionDegree()),
                 resp.getWriter()
