@@ -2,9 +2,11 @@ package web.context;
 
 import engine.api.RunHistory;
 import engine.api.SLanguageEngine;
+import engine.api.debug.DebugHandle;
 import engine.loader.exception.UnknownFunctionException;
 import engine.loader.exception.UnknownLabelException;
 import web.exception.InvalidUserException;
+import web.exception.NotInDebugException;
 import web.user.UserManager;
 
 import java.io.InputStream;
@@ -18,7 +20,7 @@ public class AppContext {
     private RunHistory runHistory;
 
     private final Map<String, String> function2User = new HashMap<>();
-    private final Map<String, Long> spentCredits = new HashMap<>();
+    private final Map<String, DebugHandle> debugHandlesOfUsers = new HashMap<>();
 
     private static final Object ENGINE_LOCK = new Object();
     private static final Object USER_MANAGER_LOCK = new Object();
@@ -56,34 +58,46 @@ public class AppContext {
         }
     }
 
-    public List<String> getAllUserFunctions(String user) {
-        synchronized (this) {
-            return function2User.entrySet().stream()
-                    .filter(entry -> entry.getValue().equals(user))
-                    .map(Map.Entry::getKey)
-                    .toList();
-        }
+    public synchronized List<String> getAllUserFunctions(String user) {
+        return function2User.entrySet().stream()
+                .filter(entry -> entry.getValue().equals(user))
+                .map(Map.Entry::getKey)
+                .toList();
     }
 
-    public List<String> getUserFunctions(String user) {
-        synchronized (this) {
-            return getAllUserFunctions(user).stream()
-                    .filter(funcName -> !getEngine().getProgramIdentifier(funcName).isMain())
-                    .toList();
-        }
+    public synchronized List<String> getUserFunctions(String user) {
+        return getAllUserFunctions(user).stream()
+                .filter(funcName -> !getEngine().getProgramIdentifier(funcName).isMain())
+                .toList();
     }
 
-    public List<String> getUserPrograms(String user) {
-        synchronized (this) {
-            return getAllUserFunctions(user).stream()
-                    .filter(funcName -> getEngine().getProgramIdentifier(funcName).isMain())
-                    .toList();
-        }
+    public synchronized List<String> getUserPrograms(String user) {
+        return getAllUserFunctions(user).stream()
+                .filter(funcName -> getEngine().getProgramIdentifier(funcName).isMain())
+                .toList();
     }
 
-    public String getFunctionOwner(String functionName){
+    public synchronized String getFunctionOwner(String functionName){
+        return function2User.get(functionName);
+    }
+
+    public DebugHandle getDebugHandle(String username) throws NotInDebugException {
+        DebugHandle debugHandle;
         synchronized (this) {
-            return function2User.get(functionName);
+            debugHandle = debugHandlesOfUsers.get(username);
         }
+
+        if(debugHandle == null)
+            throw new NotInDebugException("User " + username + " is not in debug");
+
+        return debugHandle;
+    }
+
+    public synchronized void setDebugHandle(String username, DebugHandle debugHandle) {
+        debugHandlesOfUsers.put(username, debugHandle);
+    }
+
+    public synchronized void removeDebugHandle(String username) {
+        debugHandlesOfUsers.remove(username);
     }
 }
