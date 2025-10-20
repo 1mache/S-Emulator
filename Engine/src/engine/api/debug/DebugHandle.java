@@ -22,6 +22,7 @@ public class DebugHandle {
     public boolean startDebug() {return debugger.run();}
 
     public void stopDebug(){
+        onRunEnded.accept(getResult());
         debugger.reset();
     }
 

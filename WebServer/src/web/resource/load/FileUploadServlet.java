@@ -40,7 +40,6 @@ public class FileUploadServlet extends HttpServlet {
                 inputStreams.add(part.getInputStream());
             }
         }
-
         // combine all InputStreams into one
         InputStream fileContent = new SequenceInputStream(Collections.enumeration(inputStreams));
 
