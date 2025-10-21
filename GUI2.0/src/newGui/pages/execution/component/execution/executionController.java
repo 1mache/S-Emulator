@@ -14,11 +14,13 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import newGui.pages.execution.component.primary.mainExecutionController;
 
 import java.util.List;
 
 public class executionController {
 
+    private mainExecutionController mainExecutionController;
     // Won't Use
     @FXML private VBox right;
     @FXML private Label CyclesLabel;
@@ -62,7 +64,9 @@ public class executionController {
 
     @FXML private TextField CyclesCounter;
 
-
+    public void setMainExecutionController(mainExecutionController mainExecutionController) {
+        this.mainExecutionController = mainExecutionController;
+    }
 
     public void setProgramPeek(ProgramPeek programPeek) {
         List<InstructionPeek> instructions = programPeek.instructions();
@@ -99,6 +103,7 @@ public class executionController {
 
     @FXML
     void backListener(ActionEvent event) {
+        //mainExecutionController.getMainController().returnToDashboard(mainExecutionController.);
 
     }
 
@@ -141,6 +146,7 @@ public class executionController {
     void stopDebugListener(ActionEvent event) {
 
     }
+
 
 
 }

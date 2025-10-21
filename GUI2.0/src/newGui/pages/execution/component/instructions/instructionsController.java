@@ -10,10 +10,13 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import newGui.pages.execution.component.primary.mainExecutionController;
 
 import java.util.List;
 
 public class instructionsController {
+
+    mainExecutionController mainExecutionController;
 
     // Won't Use
     @FXML private VBox left;
@@ -41,6 +44,9 @@ public class instructionsController {
 
     @FXML private TextField SummaryLine;
 
+    public void setMainExecutionController(mainExecutionController mainExecutionController) {
+        this.mainExecutionController = mainExecutionController;
+    }
 
     @FXML
     void showHistoryChain(MouseEvent event) {
@@ -71,4 +77,6 @@ public class instructionsController {
 
         colArchitecture.setCellValueFactory(data -> new SimpleStringProperty(""));
     }
+
+
 }

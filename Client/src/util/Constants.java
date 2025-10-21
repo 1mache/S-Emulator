@@ -37,24 +37,15 @@ public class Constants {
     public final static String USERS_LIST = FULL_SERVER_PATH + "/dashboard/user-list";
 
 
-
-
     // Dashboard
     public final static String UPLOAD = FULL_SERVER_PATH + "/upload";
     public final static String ADD_CREDIT = FULL_SERVER_PATH + "/addCredit";
     public final static String USER_HISTORY = FULL_SERVER_PATH + "/user-history";
-    public final static String PROGRAM_VIEW = FULL_SERVER_PATH + "/execution/view-program";
-    public final static String MORE_PROGRAM_INFO = FULL_SERVER_PATH + "/info/program-info";
-
-
-
+    public final static String PROGRAM_VIEW = FULL_SERVER_PATH + "/execution/view-program"; // Go to execution page
+    public final static String MORE_PROGRAM_INFO = FULL_SERVER_PATH + "/info/program-info"; // Go to execution page
 
 
     // Execution
-
-
-
-    public final static String DASHBOARD_PAGE = FULL_SERVER_PATH + "/dashboard";
 
 
 

@@ -27,6 +27,12 @@ public class mainExecutionController {
     private instructionsController instructionsController;
     private topController topController;
 
+    @FXML
+    public void initialize() {
+        topController.setMainExecutionController(this);
+        instructionsController.setMainExecutionController(this);
+        executionController.setMainExecutionController(this);
+    }
 
     public void setMainClientAppController(mainClientAppController mainAppController) {
         this.mainClientAppController = mainAppController;
@@ -36,14 +42,13 @@ public class mainExecutionController {
         topController.init(mainClientAppController.getUserNameProperty(), credits);
     }
 
+
+
     public void setProgramPeek(ProgramPeek programPeek,  ProgramData moreData) {
 
         topController.set(programPeek, moreData);
         executionController.setProgramPeek(programPeek);
         instructionsController.setProgramPeek(programPeek.instructions());
-
-
-
     }
 
     public void set(String programName) {
@@ -82,4 +87,7 @@ public class mainExecutionController {
     }
 
 
+    public Object getMainController() {
+        return mainClientAppController;
+    }
 }

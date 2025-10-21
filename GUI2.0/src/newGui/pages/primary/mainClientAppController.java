@@ -219,4 +219,9 @@ public class mainClientAppController {
         }
     }
 
+    public void returnToDashboard() {
+
+        // need to load the dashboard with the name and credit
+
+    }
 }

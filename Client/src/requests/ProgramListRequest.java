@@ -44,6 +44,9 @@ public class ProgramListRequest {
             });
         } else {
 
+            System.out.println("Response code: " + response.code());
+            System.out.println("Response body: " + responseBody);
+
             ProgramData[] programDataArray = Constants.GSON_INSTANCE.fromJson(responseBody, ProgramData[].class);
             List<ProgramData> programDataList = new ArrayList<>(List.of(programDataArray));
             if (!programDataList.isEmpty() && programDataList != null) {
