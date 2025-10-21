@@ -27,22 +27,14 @@ public class availableProgramsController {
 
     private dashboardController dashboardController;
 
-
     // Programs Table
-    @FXML
-    private TableView<ProgramData> programsTable;
-    @FXML
-    private TableColumn<ProgramData, String> uploadBy;
-    @FXML
-    private TableColumn<ProgramData, String> name;
-    @FXML
-    private TableColumn<ProgramData, Integer> maxLevel;
-    @FXML
-    private TableColumn<ProgramData, Integer> numberOfInstructions;
-    @FXML
-    private TableColumn<ProgramData, Integer> runs;
-    @FXML
-    private TableColumn<ProgramData, Long> averageCreditCost;
+    @FXML private TableView<ProgramData> programsTable;
+    @FXML private TableColumn<ProgramData, String> uploadBy;
+    @FXML private TableColumn<ProgramData, String> name;
+    @FXML private TableColumn<ProgramData, Integer> maxLevel;
+    @FXML private TableColumn<ProgramData, Integer> numberOfInstructions;
+    @FXML private TableColumn<ProgramData, Integer> runs;
+    @FXML private TableColumn<ProgramData, Long> averageCreditCost;
 
     // Buttons
     @FXML
@@ -92,6 +84,4 @@ public class availableProgramsController {
         // Attach the data to the table
         programsTable.setItems(observableList);
     }
-
-
 }

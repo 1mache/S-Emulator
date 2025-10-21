@@ -10,7 +10,7 @@ import util.Constants;
 import java.io.IOException;
 
 
-public class UserInfoRequest {
+public class UserHistoryRequest {
 
     public static Request build(String userName) {
 

@@ -8,12 +8,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import newGui.pages.execution.component.primary.mainExecutionController;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class topController {
 
+    private mainExecutionController mainExecutionController;
     // Won't Use
     @FXML private ScrollPane top;
 
@@ -22,6 +24,10 @@ public class topController {
 
     @FXML private ComboBox<String> degreeSelection;
     @FXML private ComboBox<String> highlightSelection;
+
+    public void setMainExecutionController(mainExecutionController mainExecutionController) {
+        this.mainExecutionController = mainExecutionController;
+    }
 
     @FXML
     void degreeSelectionListener(ActionEvent event) {
@@ -65,4 +71,6 @@ public class topController {
             degreeSelection.getItems().add(String.valueOf(i));
         }
     }
+
+
 }
