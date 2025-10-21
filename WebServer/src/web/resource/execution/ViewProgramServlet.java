@@ -11,6 +11,9 @@ import java.io.IOException;
 
 @WebServlet(urlPatterns = {"/execution/view-program"})
 public class ViewProgramServlet extends HttpServlet {
+    private static final String PROGRAM_NAME_PARAM = "programName";
+    private static final String EXP_DEGREE_PARAM = "expansionDegree";
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String username = ServletUtils.getUsernameFromRequest(req);
@@ -19,12 +22,27 @@ public class ViewProgramServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
-        var viewRequest = ServletUtils.GsonInstance.fromJson(req.getReader(), ProgramViewRequest.class);
+
+        String programName = req.getParameter(PROGRAM_NAME_PARAM);
+        if(programName == null){
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().println("Please provide a program name at " + PROGRAM_NAME_PARAM);
+            return;
+        }
+
+        int expansionDegree;
+        try {
+            expansionDegree = Integer.parseInt(req.getParameter(EXP_DEGREE_PARAM));
+        } catch (NumberFormatException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().println("Please provide a number at " +  EXP_DEGREE_PARAM);
+            return;
+        }
 
         resp.setContentType("application/json");
         synchronized (getServletContext()) {
             ServletUtils.GsonInstance.toJson(
-                    appContext.getEngine().getProgramPeek(viewRequest.programName(), viewRequest.expansionDegree()),
+                    appContext.getEngine().getProgramPeek(programName, expansionDegree),
                     resp.getWriter()
             );
         }
