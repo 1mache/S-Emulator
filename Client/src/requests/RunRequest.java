@@ -21,10 +21,7 @@ import static util.Constants.GSON_INSTANCE;
 
 public class RunRequest {
     public static Request build(dto.server.request.RunRequest info ) {
-        Map<String, Object> jsonMap = new LinkedHashMap<>();
-        jsonMap.put("RunRequest", info);
-        String json = GSON_INSTANCE.toJson(jsonMap);
-
+        String json = GSON_INSTANCE.toJson(info);
         RequestBody body = RequestBody.create(json, Constants.MEDIA_TYPE_JSON);
 
         HttpUrl url = HttpUrl.parse(Constants.RUN)
