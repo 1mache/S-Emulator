@@ -6,6 +6,7 @@ import java.util.*;
 
 public class RunHistory {
     private final Map<String, List<ProgramExecutionResult>> name2Runs = new LinkedHashMap<>();
+    private final List<ProgramExecutionResult> runsInOrder = new ArrayList<>();
 
     public void addExecution(String programName, ProgramExecutionResult result) {
         List<ProgramExecutionResult> executionResults = name2Runs.get(programName);
@@ -18,6 +19,8 @@ public class RunHistory {
             // key exists, add the item to the existing list
             executionResults.add(result);
         }
+
+        runsInOrder.add(result);
     }
 
     public List<ProgramExecutionResult> getExecutionsOf(String programName) {
@@ -28,11 +31,11 @@ public class RunHistory {
     }
 
     public int runCount() {
-        int count = 0;
-        for (List<ProgramExecutionResult> results : name2Runs.values()) {
-            count += results.size();
-        }
-        return count;
+        return runsInOrder.size();
+    }
+
+    public List<ProgramExecutionResult> getAllExecutions() {
+        return List.copyOf(runsInOrder);
     }
 
     public int runCount(String programName) {
