@@ -8,7 +8,7 @@ public class RunHistory {
     private final Map<String, List<ProgramExecutionResult>> name2Runs = new LinkedHashMap<>();
     private final List<ProgramExecutionResult> runsInOrder = new ArrayList<>();
 
-    public void addExecution(String programName, ProgramExecutionResult result) {
+    public synchronized void addExecution(String programName, ProgramExecutionResult result) {
         List<ProgramExecutionResult> executionResults = name2Runs.get(programName);
         if (executionResults == null) {
             // key does not exist, create a new list with the item
@@ -23,22 +23,22 @@ public class RunHistory {
         runsInOrder.add(result);
     }
 
-    public List<ProgramExecutionResult> getExecutionsOf(String programName) {
+    public synchronized List<ProgramExecutionResult> getExecutionsOf(String programName) {
         List<ProgramExecutionResult> results = name2Runs.get(programName);
 
         // if no history for this function, return empty list
         return Objects.requireNonNullElseGet(results, List::of);
     }
 
-    public int runCount() {
+    public synchronized int runCount() {
         return runsInOrder.size();
     }
 
-    public List<ProgramExecutionResult> getAllExecutions() {
+    public synchronized List<ProgramExecutionResult> getAllExecutions() {
         return List.copyOf(runsInOrder);
     }
 
-    public int runCount(String programName) {
+    public synchronized int runCount(String programName) {
         List<ProgramExecutionResult> results = name2Runs.get(programName);
         return results == null ? 0 : results.size();
     }
