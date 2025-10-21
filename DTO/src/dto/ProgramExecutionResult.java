@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 public record ProgramExecutionResult(
+        String programName,
         Long outputValue,
         Map<String, Long> variableMap,
         List<Long> inputs,

@@ -103,6 +103,7 @@ public class SLanguageEngine {
         runner.run();
 
         var executionResult = new ProgramExecutionResult(
+                programName,
                 runner.getRunOutput(),
                 runner.getAllVariableValues(),
                 inputs,
@@ -145,6 +146,7 @@ public class SLanguageEngine {
                 debugResult -> history.addExecution(
                         programName,
                         new ProgramExecutionResult(
+                                programName,
                                 debugResult.output(),
                                 debugResult.variableMap(),
                                 inputs,
