@@ -2,12 +2,14 @@ package newGui.pages.execution.component.top;
 
 import dto.ProgramPeek;
 import dto.server.response.ProgramData;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import newGui.pages.execution.component.primary.mainExecutionController;
 
 import java.util.ArrayList;
@@ -16,12 +18,9 @@ import java.util.List;
 public class topController {
 
     private mainExecutionController mainExecutionController;
-    // Won't Use
-    @FXML private ScrollPane top;
 
     @FXML private Label userName;
-    @FXML private Label availableCredits;
-
+    @FXML private TextField availableCredits;
     @FXML private ComboBox<String> degreeSelection;
     @FXML private ComboBox<String> highlightSelection;
 
@@ -41,7 +40,7 @@ public class topController {
 
 
     public void init(StringProperty userNameProperty, long credits) {
-        userName.textProperty().bind(userNameProperty);
+        userName.textProperty().bind(Bindings.concat("Hello ", userNameProperty));
         availableCredits.setText(String.valueOf(credits));
     }
 

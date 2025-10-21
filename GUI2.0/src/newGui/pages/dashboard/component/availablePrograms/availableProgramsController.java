@@ -46,20 +46,10 @@ public class availableProgramsController {
 
     @FXML
     void executeProgramListener(ActionEvent event) {
-        ProgramData selected = programsTable.getSelectionModel().getSelectedItem();
-        Request programRequest = ProgramInfoForRun.build(selected.getName(), 0);
-        HttpClientUtil.runAsync(programRequest, new Callback() {
-
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                ProgramInfoForRun.onFailure(e);
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                ProgramInfoForRun.onResponse(response);
-            }
-        });
+        ProgramData selectedProgram = programsTable.getSelectionModel().getSelectedItem();
+        if (selectedProgram != null) {
+            dashboardController.loadExecutionPage(selectedProgram.getName());
+        }
     }
 
 

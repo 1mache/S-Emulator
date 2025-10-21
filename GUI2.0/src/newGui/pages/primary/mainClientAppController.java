@@ -1,5 +1,6 @@
 package newGui.pages.primary;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -42,13 +43,14 @@ public class mainClientAppController {
     private dashboardController dashboardController;
 
     // Execution
-     private ScrollPane executionComponent;
-     private mainExecutionController executionController;
+    private ScrollPane executionComponent;
+    private mainExecutionController executionController;
 
     @FXML private Label userGreetingLabel;
     @FXML private AnchorPane mainPanel;
 
     private final StringProperty currentUserName;
+    private Stage primaryStage;
 
     public mainClientAppController() {
         currentUserName = new SimpleStringProperty(START_NAME);
@@ -60,11 +62,19 @@ public class mainClientAppController {
 
         // prepare components
         loadLoginPage();
+
+        // Store the primary stage reference
+        Platform.runLater(() -> {
+            if (mainPanel.getScene() != null) {
+                primaryStage = (Stage) mainPanel.getScene().getWindow();
+            }
+        });
     }
 
     public StringProperty getUserNameProperty() {
         return currentUserName;
     }
+
     public void updateUserName(String userName) {
         currentUserName.set(userName);
     }
@@ -77,7 +87,6 @@ public class mainClientAppController {
         AnchorPane.setLeftAnchor(pane, 0.0);
         AnchorPane.setRightAnchor(pane, 0.0);
     }
-
 
     // Login Page
     private void loadLoginPage() {
@@ -97,7 +106,6 @@ public class mainClientAppController {
     }
 
     private void loadLoginStyles(Parent scene){
-
         var stylesUrl = getClass().getResource(LOGIN_PAGE_STYLE_RESOURCE_LOCATION);
         // Add the stylesheet to the scene if found`
         if (stylesUrl != null) {
@@ -151,14 +159,23 @@ public class mainClientAppController {
             dashboardController.setMainClientAppController(this);
             dashboardController.activate();
 
-            // Get the current stage
-            Stage stage = (Stage) mainPanel.getScene().getWindow();
-            stage.setMinHeight(800);
-            stage.setMinWidth(1000);
-            stage.setTitle("S-Emulator – Dashboard");
+            // Save the primary stage reference if not already saved
+            if (primaryStage == null) {
+                primaryStage = (Stage) mainPanel.getScene().getWindow();
+            }
 
-            Scene scene = stage.getScene();
+            // Set minimum size and title
+            primaryStage.setMinHeight(800);
+            primaryStage.setMinWidth(1000);
+            primaryStage.setTitle("S-Emulator – Dashboard");
+
+            // Change the root of the Scene
+            Scene scene = primaryStage.getScene();
             scene.setRoot(dashboradComponent);
+
+            // Ensure the component resizes with the window
+            dashboradComponent.prefWidthProperty().bind(scene.widthProperty());
+            dashboradComponent.prefHeightProperty().bind(scene.heightProperty());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -166,7 +183,6 @@ public class mainClientAppController {
     }
 
     private void loadDashboardStyles(Parent scene){
-
         var stylesUrl = getClass().getResource(DASHBOARD_PAGE_STYLE_RESOURCE_LOCATION);
         // Add the stylesheet to the scene if found`
         if (stylesUrl != null) {
@@ -178,12 +194,10 @@ public class mainClientAppController {
 
     // Execution Page
     public void switchToExecution(String programName) {
-        loadExecutionPage();
-        executionController.set(programName);
-
+        loadExecutionPage(programName);
     }
 
-    private void loadExecutionPage() {
+    private void loadExecutionPage(String programName) {
         URL executionPageUrl = getClass().getResource(EXECUTION_PAGE_FXML_RESOURCE_LOCATION);
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
@@ -194,14 +208,21 @@ public class mainClientAppController {
             executionController.setMainClientAppController(this);
             executionController.activate(dashboardController.getCredits());
 
-            // Get the current stage
-            Stage stage = (Stage) mainPanel.getScene().getWindow();
-            stage.setMinHeight(800);
-            stage.setMinWidth(1000);
-            stage.setTitle("S-Emulator – Execution");
+            // Call set with program name
+            executionController.set(programName);
 
-            Scene scene = stage.getScene();
+            // Use the existing primary stage reference
+            primaryStage.setMinHeight(800);
+            primaryStage.setMinWidth(1000);
+            primaryStage.setTitle("S-Emulator – Execution");
+
+            // Change the root of the Scene
+            Scene scene = primaryStage.getScene();
             scene.setRoot(executionComponent);
+
+            // Ensure the component resizes with the window
+            executionComponent.prefWidthProperty().bind(scene.widthProperty());
+            executionComponent.prefHeightProperty().bind(scene.heightProperty());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -209,7 +230,6 @@ public class mainClientAppController {
     }
 
     private void loadExecutionStyles(Parent scene){
-
         var stylesUrl = getClass().getResource(EXECUTION_PAGE_STYLE_RESOURCE_LOCATION);
         // Add the stylesheet to the scene if found`
         if (stylesUrl != null) {
@@ -219,9 +239,39 @@ public class mainClientAppController {
         }
     }
 
-    public void returnToDashboard() {
 
-        // need to load the dashboard with the name and credit
 
+    public void returnToDashboard(int credits) {
+        // Update credits in dashboard controller
+        /// need to reload the dashboard data with the name and credits
+//        // טען מחדש את ה-Dashboard
+//        loadDashboardPage();
+//
+//        // בצע בקשות לעדכון מידע
+//        Request functionsRequest = ProgramListRequest.build();
+//        HttpClientUtil.runAsync(functionsRequest, new Callback() {
+//            @Override
+//            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+//                ProgramListRequest.onFailure(e);
+//            }
+//
+//            @Override
+//            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+//                ProgramListRequest.onResponse(response, dashboardController);
+//            }
+//        });
+//
+//        Request usersRequest = UsersInfoListRequest.build();
+//        HttpClientUtil.runAsync(usersRequest, new Callback() {
+//            @Override
+//            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+//                UsersInfoListRequest.onFailure(e);
+//            }
+//
+//            @Override
+//            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+//                UsersInfoListRequest.onResponse(response, dashboardController);
+//            }
+//        });
     }
 }

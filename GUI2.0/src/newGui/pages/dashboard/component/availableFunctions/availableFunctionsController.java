@@ -23,7 +23,7 @@ public class availableFunctionsController {
     private dashboardController dashboardController;
 
     // Functions Table
-    @FXML private TableView<ProgramData> programsTable;
+    @FXML private TableView<ProgramData> functionsTable;
     @FXML private TableColumn<ProgramData, String> uploadBy;
     @FXML private TableColumn<ProgramData, String> name;
     @FXML private TableColumn<ProgramData, Integer> maxLevel;
@@ -39,10 +39,10 @@ public class availableFunctionsController {
     }
 
     @FXML
-    void executeProgramListener(ActionEvent event) {
-        ProgramData selectedProgram = programsTable.getSelectionModel().getSelectedItem();
-        if (selectedProgram != null) {
-            dashboardController.loadExecutionPage(selectedProgram.getName());
+    void executeFunctionListener(ActionEvent event) {
+        ProgramData selectedFunction = functionsTable.getSelectionModel().getSelectedItem();
+        if (selectedFunction != null) {
+            dashboardController.loadExecutionPage(selectedFunction.getName());
         }
     }
 
@@ -63,7 +63,7 @@ public class availableFunctionsController {
         averageCreditCost.setCellValueFactory(new PropertyValueFactory<>("avgCreditCost"));
 
         // Attach the data to the table
-        programsTable.setItems(observableList);
+        functionsTable.setItems(observableList);
     }
 
 }
