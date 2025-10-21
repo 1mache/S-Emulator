@@ -11,7 +11,7 @@ import web.utils.ServletUtils;
 
 import java.io.IOException;
 
-@WebServlet(urlPatterns = "debug/resume")
+@WebServlet(urlPatterns = "/debug/resume")
 public class ResumeDebugServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
