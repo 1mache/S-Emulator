@@ -22,7 +22,7 @@ public class Constants {
     public final static String DASHBOARD_PAGE_STYLE_RESOURCE_LOCATION = "/newGui/pages/dashboard/component/primary/dashboard_styling.css";
 
     public final static String EXECUTION_PAGE_FXML_RESOURCE_LOCATION = "/newGui/pages/execution/component/primary/mainExecution.fxml";
-    public final static String EXECUTION_PAGE_STYLE_RESOURCE_LOCATION = "/newGui/pages/dashboard/component/primary/main_styling.css";
+    public final static String EXECUTION_PAGE_STYLE_RESOURCE_LOCATION = "/newGui/pages/execution/component/primary/main_styling.css";
 
 
     // Server resources locations

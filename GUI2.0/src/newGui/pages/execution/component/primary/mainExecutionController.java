@@ -23,9 +23,10 @@ public class mainExecutionController {
 
     private mainClientAppController mainClientAppController;
 
-    private executionController executionController;
-    private instructionsController instructionsController;
-    private topController topController;
+
+    @FXML private topController topController;
+    @FXML private instructionsController instructionsController;
+    @FXML private executionController executionController;
 
     @FXML
     public void initialize() {

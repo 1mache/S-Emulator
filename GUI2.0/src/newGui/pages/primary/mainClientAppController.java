@@ -1,5 +1,6 @@
 package newGui.pages.primary;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -12,6 +13,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import newGui.pages.dashboard.component.primary.dashboardController;
 import newGui.pages.execution.component.primary.mainExecutionController;
 import newGui.pages.login.component.login.loginController;
@@ -77,7 +79,6 @@ public class mainClientAppController {
         AnchorPane.setLeftAnchor(pane, 0.0);
         AnchorPane.setRightAnchor(pane, 0.0);
     }
-
 
     // Login Page
     private void loadLoginPage() {
@@ -156,9 +157,9 @@ public class mainClientAppController {
             stage.setMinHeight(800);
             stage.setMinWidth(1000);
             stage.setTitle("S-Emulator – Dashboard");
-
             Scene scene = stage.getScene();
             scene.setRoot(dashboradComponent);
+
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -184,28 +185,63 @@ public class mainClientAppController {
     }
 
     private void loadExecutionPage() {
+
         URL executionPageUrl = getClass().getResource(EXECUTION_PAGE_FXML_RESOURCE_LOCATION);
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader();
-            fxmlLoader.setLocation(executionPageUrl);
-            executionComponent = fxmlLoader.load();
-            loadExecutionStyles(executionComponent);
-            executionController = fxmlLoader.getController();
-            executionController.setMainClientAppController(this);
-            executionController.activate(dashboardController.getCredits());
+        Platform.runLater(() -> {
 
-            // Get the current stage
-            Stage stage = (Stage) mainPanel.getScene().getWindow();
-            stage.setMinHeight(800);
-            stage.setMinWidth(1000);
-            stage.setTitle("S-Emulator – Execution");
+            try {
 
-            Scene scene = stage.getScene();
-            scene.setRoot(executionComponent);
+                FXMLLoader fxmlLoader = new FXMLLoader();
+                fxmlLoader.setLocation(executionPageUrl);
+                executionComponent = fxmlLoader.load();
+                loadExecutionStyles(executionComponent);
+                executionController = fxmlLoader.getController();
+                executionController.setMainClientAppController(this);
+                executionController.activate(dashboardController.getCredits());
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                // Get the current stage // Currently the problam is here !!!
+                Stage stage = (Stage) mainPanel.getScene().getWindow();
+                stage.setMinHeight(800);
+                stage.setMinWidth(1000);
+                stage.setTitle("S-Emulator – Execution");
+                Scene scene = stage.getScene();
+                scene.setRoot(executionComponent);
+                stage.show();
+
+
+//                Scene scene = mainPanel.getScene();
+//                if (scene == null) {
+//                   Window window = Window.getWindows()
+//                            .stream().filter(Window::isShowing).findFirst().orElse(null);
+//                    Stage stage = (window != null) ? (Stage) window : new Stage();
+//
+//                    scene = new Scene(executionComponent);
+//                    stage.setScene(scene);
+//                    stage.setTitle("S-Emulator – Execution");
+//                    stage.setMinHeight(800);
+//                    stage.setMinWidth(1000);
+//                    stage.show();
+//                }
+//                else {
+//                   Stage stage = (Stage) scene.getWindow();
+//                    stage.setMinHeight(800);
+//                    stage.setMinWidth(1000);
+//                    stage.setTitle("S-Emulator – Execution");
+//                    scene.setRoot(executionComponent);
+//                    stage.show();
+//                }
+
+
+
+
+
+
+                // Get the current stage
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
     }
 
     private void loadExecutionStyles(Parent scene){

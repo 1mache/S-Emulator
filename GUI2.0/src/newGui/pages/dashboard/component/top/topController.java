@@ -32,11 +32,6 @@ public class topController {
 
     private dashboardController dashboardController;
 
-
-
-    // Won't Use
-    @FXML private ScrollPane top;
-
     // Buttons
     @FXML private Button chargeCreditsButton;
     @FXML private Button loadFileButton;
