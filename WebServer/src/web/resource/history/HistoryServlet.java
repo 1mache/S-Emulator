@@ -12,6 +12,7 @@ import java.io.IOException;
 @WebServlet(urlPatterns = "/user-history")
 public class HistoryServlet extends HttpServlet {
     private static final String USERNAME_PARAM = "username";
+    private static final String PROGRAM_NAME_PARAM = "programName";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -28,8 +29,14 @@ public class HistoryServlet extends HttpServlet {
         }
 
         RunHistory userRunHistory = userManager.getUser(username).getRunHistory();
-
+        String programName = req.getParameter(PROGRAM_NAME_PARAM);
         resp.setContentType("application/json");
-        ServletUtils.GsonInstance.toJson(userRunHistory.getAllExecutions(), resp.getWriter());
+        if(programName == null) { // no program name specified, return all executions
+            ServletUtils.GsonInstance.toJson(userRunHistory.getAllExecutions(), resp.getWriter());
+        }
+        else { // return executions for the specified program
+            ServletUtils.GsonInstance.toJson(userRunHistory.getExecutionsOf(programName), resp.getWriter());
+        }
+
     }
 }
