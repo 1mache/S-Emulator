@@ -1,5 +1,6 @@
 package engine.debugger;
 
+import engine.debugger.exception.DebugStateException;
 import engine.execution.ProgramRunner;
 import engine.instruction.Instruction;
 import engine.label.FixedLabel;
@@ -28,7 +29,7 @@ public class ProgramDebugger extends ProgramRunner {
     @Override
     public boolean run() {
         if(state != DebuggerState.WAIT_FOR_START) // should be impossible to reach here
-            throw new IllegalStateException("Previous debug run in progress");
+            throw new DebugStateException("Previous debug run in progress");
 
         boolean reachedEnd = super.run();
         if(reachedEnd)
@@ -108,7 +109,7 @@ public class ProgramDebugger extends ProgramRunner {
 
     private void enforceOnInstructionState() {
         if(state != DebuggerState.ON_INSTRUCTION){
-            throw new IllegalStateException("Debugger state is " + state);
+            throw new DebugStateException("Debugger state is " + state);
         }
     }
 
