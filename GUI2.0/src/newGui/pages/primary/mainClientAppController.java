@@ -241,7 +241,8 @@ public class mainClientAppController {
 
 
 
-    public void returnToDashboard() {
+    public void returnToDashboard(int credits) {
+        // Update credits in dashboard controller
         /// need to reload the dashboard data with the name and credits
 //        // טען מחדש את ה-Dashboard
 //        loadDashboardPage();
