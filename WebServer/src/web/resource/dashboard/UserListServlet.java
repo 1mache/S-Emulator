@@ -1,7 +1,6 @@
 package web.resource.dashboard;
 
 import dto.server.response.UserData;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,7 +12,7 @@ import java.io.IOException;
 @WebServlet(urlPatterns = {"/dashboard/user-list"})
 public class UserListServlet extends HttpServlet {
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         var appContext = ServletUtils.getAppContext(getServletContext());
         var userManager = appContext.getUserManager();
         var userData = userManager.getUsers().stream()

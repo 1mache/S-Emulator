@@ -1,6 +1,5 @@
 package web.resource.credit;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +13,7 @@ public class AddCreditServlet extends HttpServlet {
     private static final String CREDIT_PARAM_NAME = "creditamount";
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String creditParam = req.getParameter(CREDIT_PARAM_NAME);
         if(creditParam == null){
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);

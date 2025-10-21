@@ -6,7 +6,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import web.exception.InvalidUserException;
 import web.utils.ServletUtils;
 
 import java.io.IOException;
@@ -31,7 +30,14 @@ public class FileUploadServlet extends HttpServlet {
 
         Collection<Part> parts = request.getParts();
 
+        var appContext = ServletUtils.getAppContext(getServletContext());
         String username = ServletUtils.getUsernameFromRequest(request);
+
+        if(username == null || !appContext.getUserManager().userExists(username)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("User not logged in.");
+            return;
+        }
 
         // get all InputStreams from uploaded parts
         List<InputStream> inputStreams = new ArrayList<>();
@@ -43,14 +49,14 @@ public class FileUploadServlet extends HttpServlet {
         // combine all InputStreams into one
         InputStream fileContent = new SequenceInputStream(Collections.enumeration(inputStreams));
 
-        var appContext = ServletUtils.getAppContext(getServletContext());
+        var engine = appContext.getEngine();
         try {
-            appContext.loadProgram(username, fileContent);
+            synchronized (getServletContext()) {
+                List<String> addedFunctions = engine.loadProgramIncremental(fileContent, null);
+                appContext.addProgramsFromUser(username, addedFunctions);
+            }
         } catch (UnknownFunctionException | UnknownLabelException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(e.getMessage());
-        } catch (InvalidUserException e){
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write(e.getMessage());
         }
     }

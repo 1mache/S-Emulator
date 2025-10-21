@@ -1,8 +1,8 @@
 package web.resource.execution;
 
+import dto.ProgramExecutionResult;
 import dto.server.request.RunRequest;
 import engine.api.SLanguageEngine;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +15,7 @@ import java.io.IOException;
 @WebServlet(urlPatterns = {"/execution/run"})
 public class RunProgramServlet extends HttpServlet {
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         var applicationContext = ServletUtils.getAppContext(req.getServletContext());
         var userManager = applicationContext.getUserManager();
         String username = ServletUtils.getUsernameFromRequest(req);
@@ -27,13 +27,17 @@ public class RunProgramServlet extends HttpServlet {
 
         SLanguageEngine engine = applicationContext.getEngine();
         RunRequest runRequest = ServletUtils.GsonInstance.fromJson(req.getReader(), RunRequest.class);
-        var result = engine.runProgram(
-                runRequest.programName(),
-                runRequest.expansionDegree(),
-                runRequest.inputs(),
-                true,
-                user.getRunHistory()
-        );
+
+        ProgramExecutionResult result;
+        synchronized (getServletContext()){
+            result = engine.runProgram(
+                    runRequest.programName(),
+                    runRequest.expansionDegree(),
+                    runRequest.inputs(),
+                    true,
+                    user.getRunHistory()
+            );
+        }
 
         resp.setContentType("application/json");
         ServletUtils.GsonInstance.toJson(result, resp.getWriter());

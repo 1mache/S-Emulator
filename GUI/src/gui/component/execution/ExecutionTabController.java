@@ -141,11 +141,8 @@ public class ExecutionTabController implements Initializable {
                     expansionDegreeProperty.get(),
                     getInputsFromTextFields(),
                     true,
-                    runHistory
-            );
-
-            breakpoints.forEach(
-                    lineId -> debugHandle.addBreakpoint(lineId)
+                    runHistory,
+                    breakpoints.stream().toList()
             );
 
             debugStateMachine.transitionTo(DebugState.RUNNING);

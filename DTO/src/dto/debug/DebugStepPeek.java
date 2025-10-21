@@ -3,7 +3,7 @@ package dto.debug;
 import java.util.Optional;
 
 public final class DebugStepPeek {
-    private final String variable; // can be null
+    private final String variable; // can be null if no variable was changed by the step
     private final Long newValue;
 
     public DebugStepPeek(String variable, Long newValue) {
