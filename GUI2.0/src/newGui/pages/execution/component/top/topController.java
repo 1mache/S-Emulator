@@ -72,4 +72,8 @@ public class topController {
     }
 
 
+    public long getCredits() {
+        String credits = availableCredits.getText();
+        return Long.parseLong(credits);
+    }
 }

@@ -2,15 +2,9 @@ package requests;
 
 import Alerts.Alerts;
 import dto.ProgramPeek;
-import dto.server.request.ProgramViewRequest;
-import dto.server.response.ProgramData;
-import dto.server.response.UserData;
 import javafx.application.Platform;
-import newGui.pages.execution.component.primary.mainExecutionController;
 import okhttp3.*;
-import org.jetbrains.annotations.NotNull;
 import util.Constants;
-import util.http.HttpClientUtil;
 
 import java.io.IOException;
 
@@ -34,19 +28,6 @@ public class ProgramInfoForRun {
                 .get()
                 .build();
 
-
-//        // Build JSON body
-//        String json = Constants.GSON_INSTANCE.toJson(
-//                new ProgramViewRequest(programName, expansionDegree)
-//        );
-//
-//        // Create request body with proper media type
-//        RequestBody body = RequestBody.create(json, Constants.MEDIA_TYPE_JSON);
-//
-//        return new Request.Builder()
-//                .url(Constants.PROGRAM_VIEW)
-//                .method("GET", body)
-//                .build();
     }
 
     public static ProgramPeek onResponse(Response response) {

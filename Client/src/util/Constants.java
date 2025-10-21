@@ -39,7 +39,7 @@ public class Constants {
 
     // Dashboard
     public final static String UPLOAD = FULL_SERVER_PATH + "/upload";
-    public final static String ADD_CREDIT = FULL_SERVER_PATH + "/addCredit";
+    public final static String ADD_CREDIT = FULL_SERVER_PATH + "/add-credit";
     public final static String USER_HISTORY = FULL_SERVER_PATH + "/user-history";
     public final static String PROGRAM_VIEW = FULL_SERVER_PATH + "/execution/view-program"; // Go to execution page
     public final static String MORE_PROGRAM_INFO = FULL_SERVER_PATH + "/info/program-info"; // Go to execution page

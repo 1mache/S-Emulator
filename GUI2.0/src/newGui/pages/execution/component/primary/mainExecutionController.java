@@ -87,4 +87,8 @@ public class mainExecutionController {
 
 //        setProgramPeek(programPeek[0], moreData[0]);
     }
+
+    public void returnToDashboard() {
+        mainClientAppController.returnToDashboard(topController.getCredits());
+    }
 }
