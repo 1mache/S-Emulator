@@ -2,7 +2,6 @@ package newGui.pages.dashboard.component.usersInfo;
 
 
 import dto.server.response.UserData;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -16,8 +15,7 @@ import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
-import requests.LoadCreditRequest;
-import requests.UserInfoRequest;
+import requests.UserHistoryRequest;
 import util.http.HttpClientUtil;
 
 import java.io.IOException;
@@ -72,17 +70,17 @@ public class usersTableInfoController {
     void onRowClicked(MouseEvent event) {
         UserData selected = usersTable.getSelectionModel().getSelectedItem();
 
-        Request userInfoRequest = UserInfoRequest.build(selected.getUsername());
+        Request userInfoRequest = UserHistoryRequest.build(selected.getUsername());
         HttpClientUtil.runAsync(userInfoRequest, new Callback()  {
 
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                UserInfoRequest.onFailure(e);
+                UserHistoryRequest.onFailure(e);
             }
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                UserInfoRequest.onResponse(response,dashboardController);
+                UserHistoryRequest.onResponse(response,dashboardController);
             }
         });
 

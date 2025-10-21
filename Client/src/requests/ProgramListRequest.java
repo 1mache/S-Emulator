@@ -1,22 +1,23 @@
 package requests;
 
-import Alerts.Alerts;
+import dto.server.response.ProgramData;
 import javafx.application.Platform;
+import Alerts.Alerts;
 import newGui.pages.dashboard.component.primary.dashboardController;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
 import util.Constants;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+public class ProgramListRequest {
 
-public class UserInfoRequest {
+    public static Request build() {
 
-    public static Request build(String userName) {
-
-        HttpUrl url = HttpUrl.parse(Constants.USER_INFO)
+        HttpUrl url = HttpUrl.parse(Constants.PROGRAM_LIST)
                 .newBuilder()
-                .addQueryParameter("username",userName)
                 .build();
 
 
@@ -25,9 +26,6 @@ public class UserInfoRequest {
                 .get()
                 .build();
     }
-
-
-
 
     public static void onResponse(Response response, dashboardController dashboardController) {
         String responseBody;
@@ -46,12 +44,15 @@ public class UserInfoRequest {
             });
         } else {
 
-//            UserData[] programDataArray = Constants.GSON_INSTANCE.fromJson(responseBody, UserData[].class);
-//            List<UserData> UsersDataList = new ArrayList<>(List.of(programDataArray));
+            System.out.println("Response code: " + response.code());
+            System.out.println("Response body: " + responseBody);
 
-            // need to see what dto it get into
-        //    dashboardController.updateUserHistoryTable();
+            ProgramData[] programDataArray = Constants.GSON_INSTANCE.fromJson(responseBody, ProgramData[].class);
+            List<ProgramData> programDataList = new ArrayList<>(List.of(programDataArray));
+            if (!programDataList.isEmpty() && programDataList != null) {
+                dashboardController.updateFunctionList(programDataList);
 
+            }
         }
     }
 

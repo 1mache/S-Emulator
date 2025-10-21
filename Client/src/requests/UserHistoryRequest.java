@@ -1,23 +1,22 @@
 package requests;
 
-import dto.server.response.ProgramData;
-import javafx.application.Platform;
 import Alerts.Alerts;
+import javafx.application.Platform;
 import newGui.pages.dashboard.component.primary.dashboardController;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
 import util.Constants;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-public class FunctionListRequest {
 
-    public static Request build() {
+public class UserHistoryRequest {
 
-        HttpUrl url = HttpUrl.parse(Constants.FUNCTIONS_LIST)
+    public static Request build(String userName) {
+
+        HttpUrl url = HttpUrl.parse(Constants.USER_HISTORY)
                 .newBuilder()
+                .addQueryParameter("username",userName)
                 .build();
 
 
@@ -44,12 +43,12 @@ public class FunctionListRequest {
             });
         } else {
 
-            ProgramData[] programDataArray = Constants.GSON_INSTANCE.fromJson(responseBody, ProgramData[].class);
-            List<ProgramData> programDataList = new ArrayList<>(List.of(programDataArray));
-            if (!programDataList.isEmpty() && programDataList != null) {
-                dashboardController.updateFunctionList(programDataList);
+//            UserData[] programDataArray = Constants.GSON_INSTANCE.fromJson(responseBody, UserData[].class);
+//            List<UserData> UsersDataList = new ArrayList<>(List.of(programDataArray));
 
-            }
+            // need to see what dto it get into
+            //    dashboardController.updateUserHistoryTable();
+
         }
     }
 

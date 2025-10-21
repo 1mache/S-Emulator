@@ -95,6 +95,7 @@ public class topController {
             }
         });
     }
+
     @FXML
     void ChargeListener(ActionEvent event) {
         try {
@@ -251,6 +252,9 @@ public class topController {
         loadFileButton.setDisable(busy);
     }
 
+    public long getCredits() {
+        return Long.parseLong(availableCredits.getText());
+    }
 }
 
 
