@@ -14,8 +14,6 @@ public class ProgramInfoForRun {
 
     public static Request build(String programName, int expansionDegree) {
 
-
-
         HttpUrl url = HttpUrl.parse(Constants.PROGRAM_VIEW)
                 .newBuilder()
                 .addQueryParameter("programName",programName)

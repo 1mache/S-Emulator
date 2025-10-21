@@ -47,6 +47,7 @@ public class Constants {
 
     // Execution
 
+    public final static String RUN = FULL_SERVER_PATH +"/execution/run";
 
 
 

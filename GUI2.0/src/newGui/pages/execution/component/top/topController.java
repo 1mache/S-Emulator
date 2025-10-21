@@ -2,6 +2,7 @@ package newGui.pages.execution.component.top;
 
 import dto.ProgramPeek;
 import dto.server.response.ProgramData;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
@@ -11,7 +12,16 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import newGui.pages.execution.component.primary.mainExecutionController;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Request;
+import okhttp3.Response;
+import org.jetbrains.annotations.NotNull;
+import requests.ProgramInfoForRun;
+import requests.ProgramInfoRequest;
+import util.http.HttpClientUtil;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +31,7 @@ public class topController {
 
     @FXML private Label userName;
     @FXML private TextField availableCredits;
-    @FXML private ComboBox<String> degreeSelection;
+    @FXML private ComboBox<Integer> degreeSelection;
     @FXML private ComboBox<String> highlightSelection;
 
     public void setMainExecutionController(mainExecutionController mainExecutionController) {
@@ -30,6 +40,40 @@ public class topController {
 
     @FXML
     void degreeSelectionListener(ActionEvent event) {
+//        final ProgramPeek[] programPeek = new ProgramPeek[1];
+//        final ProgramData[] moreData = new ProgramData[1];
+//
+//        String programName = mainExecutionController.getProgramName();
+//        Request programRequest = ProgramInfoForRun.build(programName, degreeSelection.getValue());
+//        HttpClientUtil.runAsync(programRequest, new Callback() {
+//
+//            @Override
+//            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+//                ProgramInfoForRun.onFailure(e);
+//            }
+//
+//            @Override
+//            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+//                programPeek[0] = ProgramInfoForRun.onResponse(response);
+//                Request moreInfoRequest = ProgramInfoRequest.build(programPeek[0].name());
+//                HttpClientUtil.runAsync(moreInfoRequest, new Callback() {
+//
+//                    @Override
+//                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+//                        ProgramInfoRequest.onFailure(e);
+//                    }
+//
+//                    @Override
+//                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+//                        moreData[0] = ProgramInfoRequest.onResponse(response);
+//                        Platform.runLater(() -> {
+//                            mainExecutionController.setProgramPeek(programPeek[0], moreData[0]);
+//
+//                        });
+//                    }
+//                });
+//            }
+//        });
 
     }
 
@@ -66,14 +110,24 @@ public class topController {
 
         degreeSelection.setPromptText("Choose expansion degree");
         degreeSelection.getItems().clear();
+
+        // Add integer values directly
         for (int i = 0; i <= capped; i++) {
-            degreeSelection.getItems().add(String.valueOf(i));
+            degreeSelection.getItems().add(i);
         }
+
+        // Optional: set default selection (for example 0)
+        degreeSelection.getSelectionModel().select(0);
     }
+
 
 
     public long getCredits() {
         String credits = availableCredits.getText();
         return Long.parseLong(credits);
+    }
+
+    public int getDegreeComboBoxValue() {
+        return degreeSelection.getValue();
     }
 }
