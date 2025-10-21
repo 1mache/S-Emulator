@@ -1,8 +1,8 @@
 package newGui.pages.execution.component.primary;
 
-
 import dto.ProgramPeek;
 import dto.server.response.ProgramData;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import newGui.pages.execution.component.execution.executionController;
 import newGui.pages.execution.component.instructions.instructionsController;
@@ -16,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import requests.ProgramInfoForRun;
 import requests.ProgramInfoRequest;
 import util.http.HttpClientUtil;
-
 import java.io.IOException;
 
 public class mainExecutionController {
@@ -44,7 +43,6 @@ public class mainExecutionController {
     }
 
 
-
     public void setProgramPeek(ProgramPeek programPeek,  ProgramData moreData) {
 
         topController.set(programPeek, moreData);
@@ -67,28 +65,26 @@ public class mainExecutionController {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 programPeek[0] = ProgramInfoForRun.onResponse(response);
+                Request moreInfoRequest = ProgramInfoRequest.build(programPeek[0].name());
+                HttpClientUtil.runAsync(moreInfoRequest, new Callback() {
+
+                    @Override
+                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                        ProgramInfoRequest.onFailure(e);
+                    }
+
+                    @Override
+                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                        moreData[0] = ProgramInfoRequest.onResponse(response);
+                        Platform.runLater(() -> {
+                            setProgramPeek(programPeek[0], moreData[0]);
+
+                        });
+                    }
+                });
             }
         });
 
-        Request moreInfoRequest = ProgramInfoRequest.build(programPeek[0].name());
-        HttpClientUtil.runAsync(moreInfoRequest, new Callback() {
-
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                ProgramInfoRequest.onFailure(e);
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                moreData[0] = ProgramInfoRequest.onResponse(response);
-            }
-        });
-
-        setProgramPeek(programPeek[0], moreData[0]);
-    }
-
-
-    public Object getMainController() {
-        return mainClientAppController;
+//        setProgramPeek(programPeek[0], moreData[0]);
     }
 }

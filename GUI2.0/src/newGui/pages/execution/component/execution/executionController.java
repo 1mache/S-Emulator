@@ -16,6 +16,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import newGui.pages.execution.component.primary.mainExecutionController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class executionController {
@@ -84,7 +85,7 @@ public class executionController {
 
 
         // Variables State Table
-        List<String> allVariables =  List.of();
+        List<String> allVariables = new ArrayList<>();
         allVariables.addAll(inputs);
         allVariables.addAll(works);
 
