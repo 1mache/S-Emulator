@@ -35,7 +35,6 @@ public class StartDebugServlet extends HttpServlet {
                     debugRequest.programName(),
                     debugRequest.expansionDegree(),
                     debugRequest.inputs(),
-                    true,
                     userManager.getUser(username).getRunHistory(),
                     debugRequest.breakpoints()
             );

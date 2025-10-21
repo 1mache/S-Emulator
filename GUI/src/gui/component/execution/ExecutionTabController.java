@@ -140,7 +140,6 @@ public class ExecutionTabController implements Initializable {
                     programNameProperty.get(),
                     expansionDegreeProperty.get(),
                     getInputsFromTextFields(),
-                    true,
                     runHistory,
                     breakpoints.stream().toList()
             );

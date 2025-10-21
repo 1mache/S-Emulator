@@ -5,6 +5,7 @@ import dto.ProgramExecutionResult;
 import dto.ProgramPeek;
 import engine.api.debug.DebugHandle;
 import engine.debugger.ProgramDebugger;
+import engine.execution.ExecutionLimiter;
 import engine.execution.ProgramRunner;
 import engine.execution.exception.SProgramNotLoadedException;
 import engine.expansion.ProgramExpander;
@@ -88,15 +89,34 @@ public class SLanguageEngine {
         return new ProgramViewer(program).getProgramPeek(expansionDegree);
     }
 
+    // no limiter version
     public ProgramExecutionResult runProgram(String programName,
                                              int expansionDegree,
                                              List<Long> inputs,
                                              boolean specificInputs,
                                              RunHistory history) {
+        return runProgram(programName, expansionDegree, inputs, specificInputs, history, null);
+    }
+
+    // no annoying boolean parameter
+    public ProgramExecutionResult runProgram(String programName,
+                                             int expansionDegree,
+                                             List<Long> inputs,
+                                             RunHistory history,
+                                             ExecutionLimiter executionLimiter) {
+        return runProgram(programName, expansionDegree, inputs, true, history, executionLimiter);
+    }
+
+    public ProgramExecutionResult runProgram(String programName,
+                                             int expansionDegree,
+                                             List<Long> inputs,
+                                             boolean specificInputs, // kept for legacy, in all advanced versions this is true
+                                             RunHistory history,
+                                             ExecutionLimiter executionLimiter) {
         validateInputs(inputs);
 
         Program expandedProgram = createExpandedProgram(programName, expansionDegree);
-        var runner = new ProgramRunner(expandedProgram);
+        var runner = new ProgramRunner(expandedProgram, executionLimiter);
 
         initializeInputs(runner, inputs, specificInputs);
 
@@ -125,19 +145,28 @@ public class SLanguageEngine {
     }
 
     // ========================== Debug ===========================
+    // no limiter version
     public DebugHandle startDebugSession(String programName,
                                          int expansionDegree,
                                          List<Long> inputs,
-                                         boolean specificInputs,
                                          RunHistory history,
                                          List<Integer> breakpoints) {
+        return startDebugSession(programName, expansionDegree, inputs, history, breakpoints, null);
+    }
+
+    public DebugHandle startDebugSession(String programName,
+                                         int expansionDegree,
+                                         List<Long> inputs,
+                                         RunHistory history,
+                                         List<Integer> breakpoints,
+                                         ExecutionLimiter executionLimiter) {
         validateInputs(inputs);
 
         Program expandedProgram = createExpandedProgram(programName, expansionDegree);
-        var debugger = new ProgramDebugger(expandedProgram);
+        var debugger = new ProgramDebugger(expandedProgram, executionLimiter);
         breakpoints.forEach(debugger::addBreakpoint); // add breakpoints
 
-        initializeInputs(debugger, inputs, specificInputs);
+        initializeInputs(debugger, inputs, true);
 
         incrementRunCount(programName);
 

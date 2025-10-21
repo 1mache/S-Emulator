@@ -15,14 +15,20 @@ import java.util.Optional;
 public class ProgramRunner {
     protected final Program program;
     protected RunContext runContext;
+    protected final ExecutionLimiter executionLimiter;
 
     // instruction pointer
     private int pc = 0;
     private long cycles = 0;
 
     public ProgramRunner(Program program) {
+        this(program, null);
+    }
+
+    public ProgramRunner(Program program, ExecutionLimiter executionLimiter) {
         this.program = program;
         runContext = new RunContextImpl();
+        this.executionLimiter = executionLimiter;
     }
 
     public void reset(){
@@ -34,6 +40,7 @@ public class ProgramRunner {
     public boolean run(){
         return run(FixedLabel.EMPTY);
     }
+
     /*
      an execution that starts at pc (or at init jump label)
      returns whether the run reached the end of the program
@@ -43,7 +50,7 @@ public class ProgramRunner {
         Label jumpLabel = initJumpLabel;
 
         do {
-            if(breakCheck(pc))
+            if(breakCheck())
                 return false; // early stop
 
             if (jumpLabel == FixedLabel.EMPTY) {
@@ -109,8 +116,10 @@ public class ProgramRunner {
     }
 
     // called before each instruction. override to implement debug modes
-    protected boolean breakCheck(int pc) {
-        return false; // this is normal execution
+    protected boolean breakCheck() {
+        if(executionLimiter == null)
+            return false;
+        return executionLimiter.breakCheck(cycles); // early stop possible by limiter
     }
 
     // Note: returns empty if label is EXIT

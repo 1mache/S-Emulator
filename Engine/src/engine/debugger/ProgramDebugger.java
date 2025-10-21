@@ -1,6 +1,7 @@
 package engine.debugger;
 
 import engine.debugger.exception.DebugStateException;
+import engine.execution.ExecutionLimiter;
 import engine.execution.ProgramRunner;
 import engine.instruction.Instruction;
 import engine.label.FixedLabel;
@@ -24,6 +25,10 @@ public class ProgramDebugger extends ProgramRunner {
 
     public ProgramDebugger(Program program) {
         super(program);
+    }
+
+    public ProgramDebugger(Program program, ExecutionLimiter executionLimiter) {
+        super(program, executionLimiter);
     }
 
     @Override
@@ -95,14 +100,13 @@ public class ProgramDebugger extends ProgramRunner {
         breakpoints.remove(lineNumber);
     }
 
-
     // -------- internal: -------
     @Override
-    protected boolean breakCheck(int pc) {
-        boolean hitBreakPoint = breakpoints.contains(pc);
+    protected boolean breakCheck() {
+        boolean hitBreakPoint = breakpoints.contains(getPc());
         if(hitBreakPoint)
             // (should never actually be null here)
-            transitionToOnInstruction(program.getInstructionByIndex(pc).orElse(null));
+            transitionToOnInstruction(program.getInstructionByIndex(getPc()).orElse(null));
 
         return hitBreakPoint;
     }
