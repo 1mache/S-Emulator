@@ -29,7 +29,7 @@
                   <Insets bottom="5.0" top="5.0" />
                </VBox.margin>
             </HBox>
-            <TableView fx:id="functionsTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+            <TableView fx:id="programsTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
                <columns>
                   <TableColumn fx:id="name" editable="false" prefWidth="100.0" sortable="false" style="-fx-alignment: CENTER;" text="Name" />
                   <TableColumn fx:id="uploadBy" editable="false" prefWidth="100.0" style="-fx-alignment: CENTER;" text="Upload By" />
@@ -42,7 +42,7 @@
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                </columnResizePolicy>
             </TableView>
-            <Button fx:id="executeProgram" mnemonicParsing="false" onAction="#executeFunctionListener" text="Execute Function" />
+            <Button fx:id="executeProgram" mnemonicParsing="false" onAction="#executeProgramListener" text="Execute Program" />
          </children>
          <padding>
             <Insets left="5.0" right="5.0" />
