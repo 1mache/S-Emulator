@@ -2,7 +2,6 @@ package web.resource.debug;
 
 import dto.server.response.DebugStateInfo;
 import engine.api.debug.DebugHandle;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +14,7 @@ import java.io.IOException;
 @WebServlet(urlPatterns = "debug/resume")
 public class ResumeDebugServlet extends HttpServlet {
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String username = ServletUtils.getUsernameFromRequest(req);
         var appContext = ServletUtils.getAppContext(getServletContext());
         if(username == null || !appContext.getUserManager().userExists(username)) {
