@@ -105,7 +105,11 @@ public class JaxbTranslator {
         return getProgram(sProgram, listener, Map.of());
     }
 
-    public Set<FunctionCall> getFunctionReferences() {
+    public Set<Function> getFunctions() {
+        return new HashSet<>(name2Function.values());
+    }
+
+    public Set<FunctionCall> getFunctionCalls() {
         return toBeResolved;
     }
 
