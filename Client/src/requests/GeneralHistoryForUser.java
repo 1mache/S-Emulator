@@ -4,7 +4,6 @@ import Alerts.Alerts;
 import dto.ProgramExecutionResult;
 import javafx.application.Platform;
 import newGui.pages.dashboard.component.primary.dashboardController;
-import newGui.pages.execution.component.execution.executionController;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -14,14 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class UserHistoryRequest {
+public class GeneralHistoryForUser {
 
-    public static Request build(String programName, String userName) {
+    public static Request build(String userName) {
 
         HttpUrl url = HttpUrl.parse(Constants.USER_HISTORY)
                 .newBuilder()
                 .addQueryParameter("username",userName)
-                .addQueryParameter("programName",programName)
                 .build();
 
 
@@ -31,7 +29,7 @@ public class UserHistoryRequest {
                 .build();
     }
 
-    public static void onResponse(Response response, executionController executionController) {
+    public static void onResponse(Response response, dashboardController dashboardController) {
         String responseBody;
         try {
             responseBody = response.body().string();
@@ -51,8 +49,9 @@ public class UserHistoryRequest {
             ProgramExecutionResult[] programExecutionResult = Constants.GSON_INSTANCE.fromJson(responseBody, ProgramExecutionResult[].class);
             List<ProgramExecutionResult> HistoryUsersDataList = new ArrayList<>(List.of(programExecutionResult));
             Platform.runLater(() -> {
-                executionController.updateHistoryTable(HistoryUsersDataList);
+               dashboardController.updateHistoryTable(HistoryUsersDataList);
             });
+
         }
     }
 

@@ -1,6 +1,7 @@
 package newGui.pages.dashboard.component.primary;
 
 
+import dto.ProgramExecutionResult;
 import dto.server.response.ProgramData;
 import dto.server.response.UserData;
 import javafx.application.Platform;
@@ -76,5 +77,17 @@ public class dashboardController {
         Platform.runLater(() -> {
             topController.updateCredits(credits);
         });
+    }
+
+    public String getCurrentUserName() {
+        return mainClientAppController.getUserNameProperty().get();
+    }
+
+    public void setUserNameInExecutionPage(String currentUserName) {
+        mainClientAppController.setNameAtExecution(currentUserName);
+    }
+
+    public void updateHistoryTable(List<ProgramExecutionResult> historyUsersDataList) {
+        historyTableController.updateHistoryTable(historyUsersDataList);
     }
 }

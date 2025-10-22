@@ -275,4 +275,8 @@ public class mainClientAppController {
 
         dashboardController.updateCredits(credits);
     }
+
+    public void setNameAtExecution(String currentUserName) {
+        executionController.setUserName(currentUserName);
+    }
 }

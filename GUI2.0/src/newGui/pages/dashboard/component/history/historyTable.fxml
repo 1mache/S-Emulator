@@ -31,7 +31,6 @@
             <TableView fx:id="historyTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
                <columns>
                   <TableColumn fx:id="number" editable="false" prefWidth="60.0" style="-fx-alignment: CENTER;" text="Number" />
-                  <TableColumn fx:id="functionOrProgram" editable="false" prefWidth="110.0" sortable="false" style="-fx-alignment: CENTER;" text="Function/Program" />
                   <TableColumn fx:id="name" editable="false" prefWidth="100.0" sortable="false" style="-fx-alignment: CENTER;" text="Name" />
                   <TableColumn fx:id="architecture" editable="false" prefWidth="75.0" style="-fx-alignment: CENTER;" text="Architecture" />
                   <TableColumn fx:id="level" editable="false" prefWidth="50.0" style="-fx-alignment: CENTER;" text="Level" />

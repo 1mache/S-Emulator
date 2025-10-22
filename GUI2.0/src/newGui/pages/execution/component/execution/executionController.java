@@ -9,12 +9,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import javafx.util.converter.LongStringConverter;
@@ -29,6 +24,8 @@ import util.http.HttpClientUtil;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.lang.String.valueOf;
 
 public class executionController {
 
@@ -57,29 +54,27 @@ public class executionController {
     @FXML private TableView<String> inputTable;
     @FXML private TableColumn<String, String> variableInput;
     @FXML private TableColumn<String, Long> valueInput;
-    // fields in the controller:
+    // Holds the values for ALL inputs variables shown in inputTable
     private final Map<String, Long> inputValues = new HashMap<>();
 
 
     // Variables State Table
     @FXML private TableView<String> variableTable;
-    @FXML private TableColumn<String, String> variableState;
-    @FXML private TableColumn<String, Long> valueState;
+    @FXML private TableColumn<String, String> variableState;@FXML
+    private TableColumn<String, Long> valueState;
     // Holds the latest values for ALL variables (inputs + works) shown in variableTable
     private final Map<String, Long> variableValues = new HashMap<>();
 
 
-
     // History Table
-    @FXML private TableView<InstructionPeek> historyTable;
-    @FXML private TableColumn<InstructionPeek, Long> Index;
-    @FXML private TableColumn<InstructionPeek, Long> cycles;
-    @FXML private TableColumn<InstructionPeek, List<Long>> inputs;
-    @FXML private TableColumn<InstructionPeek, Long> level;
-    @FXML private TableColumn<InstructionPeek, Long> output;
+    @FXML private TableView<ProgramExecutionResult> historyTable;
+    @FXML private TableColumn<ProgramExecutionResult, Number> Index;
+    @FXML private TableColumn<ProgramExecutionResult, Long> cycles;
+    @FXML private TableColumn<ProgramExecutionResult, String> inputs;
+    @FXML private TableColumn<ProgramExecutionResult, Integer> level;
+    @FXML private TableColumn<ProgramExecutionResult, Long> output;
 
     @FXML private ComboBox<String> architectureSelection;
-
     @FXML private TextField CyclesCounter;
 
     public void setMainExecutionController(mainExecutionController mainExecutionController) {
@@ -157,10 +152,9 @@ public class executionController {
     }
 
 
-        @FXML
+    @FXML
     void backListener(ActionEvent event) {
         mainExecutionController.returnToDashboard();
-
     }
 
     @FXML
@@ -189,18 +183,31 @@ public class executionController {
     }
 
     @FXML
+    void stepOverDebugListener(ActionEvent event) {
+
+    }
+
+    @FXML
+    void stopDebugListener(ActionEvent event) {
+
+    }
+
+
+
+
+
+    @FXML
     void startListener(ActionEvent event) {
         List<Long> inputs = sortKeysBySubstring(inputValues);
         int extensionDegree = mainExecutionController.getSelectedDgree();
         String programName = mainExecutionController.getProgramName();
 
-        Request runRequest = requests.RunRequest.build(new RunRequest(programName,extensionDegree, inputs));
+        Request runRequest = requests.RunRequest.build(new RunRequest(programName, extensionDegree, inputs));
         final ProgramExecutionResult[] result = new ProgramExecutionResult[1];
 
         HttpClientUtil.runAsync(runRequest, new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                System.out.println("Server Bad Response : " + e.getMessage());
                 requests.RunRequest.onFailure(e);
             }
 
@@ -217,27 +224,59 @@ public class executionController {
                     Map<String, Long> outMap = res.getVariableMap(); // or res.variableMap() if you use record accessors
                     variableValues.clear();
                     variableValues.putAll(outMap);
-
                     variableTable.refresh();
 
-                    // Optional: update history table and other UI parts if present in result
-                    /// I what to update history table every 2 seconds in the future
+                    // Update the Cycles Counter
+                    CyclesCounter.setText(valueOf(res.getCycles()));
+
+
+                    // Update history table
+                    // requet for history table
+                    Request userHistoryRequest = requests.UserHistoryRequest.build(mainExecutionController.getProgramName(), mainExecutionController.userName);
+                    HttpClientUtil.runAsync(userHistoryRequest, new Callback() {
+                        @Override
+                        public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                            requests.UserHistoryRequest.onFailure(e);
+                        }
+
+                        @Override
+                        public void onResponse(@NotNull Call call, @NotNull Response response) {
+                           requests.UserHistoryRequest.onResponse(response, executionController.this);
+                        }
+                    });
+
                 });
             }
         });
     }
 
+    public void updateHistoryTable(List<ProgramExecutionResult> results) {
+        // Bind columns to ProgramExecutionResult fields
+        // Index column - dynamic numbering without using model field
+        Index.setCellFactory(col -> new TableCell<ProgramExecutionResult, Number>() {
+            @Override
+            protected void updateItem(Number item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty ? null : String.valueOf(getIndex() + 1));
+            }
+        });
+        Index.setSortable(false);
+        cycles.setCellValueFactory(param ->
+                new ReadOnlyObjectWrapper<>(param.getValue().getCycles())
+        );
+        inputs.setCellValueFactory(param ->
+                new ReadOnlyObjectWrapper<>(param.getValue().getInputs().toString())
+        );
+        level.setCellValueFactory(param ->
+                new ReadOnlyObjectWrapper<>(param.getValue().getExpansionDegree())
+        );
+        output.setCellValueFactory(param ->
+                new ReadOnlyObjectWrapper<>(param.getValue().getOutputValue())
+        );
+        // Clear existing rows
+        historyTable.getItems().clear();
 
-    @FXML
-    void stepOverDebugListener(ActionEvent event) {
-
+        // Add new rows
+        historyTable.getItems().addAll(results);
     }
-
-    @FXML
-    void stopDebugListener(ActionEvent event) {
-
-    }
-
-
-
 }

@@ -44,6 +44,7 @@ public class availableFunctionsController {
         ProgramData selectedFunction = functionsTable.getSelectionModel().getSelectedItem();
         if (selectedFunction != null) {
             dashboardController.loadExecutionPage(selectedFunction.getName());
+            dashboardController.setUserNameInExecutionPage(dashboardController.getCurrentUserName());
         }
     }
 

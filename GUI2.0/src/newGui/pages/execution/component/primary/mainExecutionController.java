@@ -28,6 +28,7 @@ public class mainExecutionController {
     @FXML private executionController executionController;
 
     String programName;
+    public String userName;
 
     @FXML
     public void initialize() {
@@ -87,6 +88,25 @@ public class mainExecutionController {
                             setProgramPeek(programPeek[0], moreData[0]);
 
                         });
+
+                        // Fill History Table
+                        Request userHistoryRequest = requests.UserHistoryRequest.build(programName, userName);
+                        HttpClientUtil.runAsync(userHistoryRequest, new Callback() {
+                            @Override
+                            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                                requests.UserHistoryRequest.onFailure(e);
+                            }
+
+                            @Override
+                            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                                requests.UserHistoryRequest.onResponse(response, executionController);
+                            }
+                        });
+
+
+
+
+
                     }
                 });
             }
@@ -100,5 +120,9 @@ public class mainExecutionController {
 
     public int getSelectedDgree() {
         return topController.getDegreeComboBoxValue();
+    }
+
+    public void setUserName(String currentUserName) {
+        this.userName = currentUserName;
     }
 }
