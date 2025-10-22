@@ -9,9 +9,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import newGui.pages.execution.component.primary.mainExecutionController;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class instructionsController {
 
@@ -37,12 +35,13 @@ public class instructionsController {
 
     // History Chain Table
     @FXML private TableView<InstructionPeek> instructionsHistoryTable;
-    @FXML private TableColumn<InstructionPeek, ?> colHistoryLabel;
-    @FXML private TableColumn<InstructionPeek, ?> colHistoryNumber;
-    @FXML private TableColumn<InstructionPeek, ?> colHistoryBS;
-    @FXML private TableColumn<InstructionPeek, ?> colHistoryCycles;
-    @FXML private TableColumn<InstructionPeek, ?> colHistoryInstruction;
-    @FXML private TableColumn<InstructionPeek, ?> colHistoryArchitecture;
+    @FXML private TableColumn<InstructionPeek, String> colHistoryLabel;
+    @FXML private TableColumn<InstructionPeek, String> colHistoryBS;
+    @FXML private TableColumn<InstructionPeek, String> colHistoryInstruction;
+    @FXML private TableColumn<InstructionPeek, String> colHistoryArchitecture;
+    @FXML private TableColumn<InstructionPeek, Long> colHistoryCycles;
+    @FXML private TableColumn<InstructionPeek, Long> colHistoryNumber;
+
 
     @FXML private TextField SummaryLine;
 
@@ -52,6 +51,40 @@ public class instructionsController {
 
     @FXML
     void showHistoryChain(MouseEvent event) {
+        InstructionPeek instructionPeek = instructionsTable.getSelectionModel().getSelectedItem();
+        if (instructionPeek == null) {
+            return;
+        }
+
+        List<InstructionPeek> chain = new ArrayList<>();
+        for (InstructionPeek current = instructionPeek; current != null; current = current.expandedFrom()) {
+            chain.add(current);
+        }
+        Collections.reverse(chain);
+
+        instructionsHistoryTable.getItems().clear();
+        instructionsHistoryTable.getItems().addAll(chain);
+
+        colHistoryInstruction.setCellValueFactory(data ->
+                new SimpleStringProperty(data.getValue().stringRepresentation()));
+
+        colHistoryLabel.setCellValueFactory(data ->
+                new SimpleStringProperty(data.getValue().label()));
+
+        colHistoryCycles.setCellValueFactory(data ->
+                new SimpleLongProperty(data.getValue().cycles()).asObject());
+
+        colHistoryNumber.setCellValueFactory(data ->
+                new SimpleLongProperty(data.getValue().lineId()).asObject());
+
+        colHistoryBS.setCellValueFactory(data -> {
+            boolean isSynthetic = data.getValue().isSynthetic();
+            String text = isSynthetic ? "S" : "B";
+            return new SimpleStringProperty(text);
+        });
+
+        colHistoryArchitecture.setCellValueFactory(data -> new SimpleStringProperty(""));
+        installRowHighlighter();
 
     }
 

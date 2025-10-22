@@ -48,7 +48,6 @@ public class RunRequest {
         if (response.code() != 200) {
             Platform.runLater(() -> {
                 Alerts.serverBadAnswer(responseBody);
-                System.out.println("2 Server Bad Response : " + responseBody);
 
             });
             return null;

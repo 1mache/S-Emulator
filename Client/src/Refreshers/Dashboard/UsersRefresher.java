@@ -1,23 +1,19 @@
 package Refreshers.Dashboard;
 
-import newGui.pages.dashboard.component.availableFunctions.availableFunctionsController;
-import newGui.pages.dashboard.component.availablePrograms.availableProgramsController;
 import newGui.pages.dashboard.component.primary.dashboardController;
 import newGui.pages.dashboard.component.usersInfo.usersTableInfoController;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
-import requests.ProgramListRequest;
 import requests.UsersInfoListRequest;
 import util.http.HttpClientUtil;
-
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.*;
 
 /**
- * Periodic refresher that fetches all programs/functions and updates the dashboard.
+ * Periodic refresher that fetches all Users and updates the dashboard.
  */
 public class UsersRefresher {
 

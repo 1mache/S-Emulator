@@ -48,7 +48,6 @@ public class executionController {
     @FXML private Button stepOverDebugButton;
     @FXML private Button stopDebugButton;
     @FXML private Button backToDashboard;
-    @FXML private Button initButton;
 
     // Inputs Table
     @FXML private TableView<String> inputTable;
@@ -126,12 +125,14 @@ public class executionController {
         List<String> allVariables = new ArrayList<>();
         allVariables.addAll(inputs);
         allVariables.addAll(works);
+        allVariables.add("y"); // output variable
 
         // init backing map for state table (default 0L)
         variableValues.clear();
         for (String v : allVariables) {
             variableValues.put(v, 0L);
         }
+
 
 
         variableTable.getItems().clear();
@@ -157,26 +158,19 @@ public class executionController {
         mainExecutionController.returnToDashboard();
     }
 
+
+
+
+    // History
     @FXML
-    void initListener(ActionEvent event) {
-
-    }
-
-    @FXML
-    void reRunListener(ActionEvent event) {
-
-    }
-
-    @FXML
-    void resumeDebugListener(ActionEvent event) {
-
-    }
+    void reRunListener(ActionEvent event) {}
 
     @FXML
     void showHistoryListener(ActionEvent event) {
 
     }
 
+    // Debugger
     @FXML
     void startDebugListener(ActionEvent event) {
 
@@ -184,6 +178,11 @@ public class executionController {
 
     @FXML
     void stepOverDebugListener(ActionEvent event) {
+
+    }
+
+    @FXML
+    void resumeDebugListener(ActionEvent event) {
 
     }
 
@@ -221,7 +220,9 @@ public class executionController {
                 // Update maps and tables on the JavaFX Application Thread
                 Platform.runLater(() -> {
                     // Update the variable-values map for the variableTable
-                    Map<String, Long> outMap = res.getVariableMap(); // or res.variableMap() if you use record accessors
+                    Map<String, Long> outMap = res.getVariableMap();// or res.variableMap() if you use record accessors
+                    long result = res.getOutputValue();// or res.outputValue() if you use record accessors
+                    outMap.put("y", result); // add the output value with key "y"
                     variableValues.clear();
                     variableValues.putAll(outMap);
                     variableTable.refresh();
