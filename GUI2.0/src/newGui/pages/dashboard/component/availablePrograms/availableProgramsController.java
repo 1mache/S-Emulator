@@ -69,7 +69,7 @@ public class availableProgramsController {
 
     public void setPrograms(List<ProgramData> data) {
         List<ProgramData> filteredList = data.stream()
-                .filter(p -> !p.isMain())
+                .filter(p -> p.isMain())
                 .toList();
         programsTable.setItems(FXCollections.observableArrayList(filteredList));
     }

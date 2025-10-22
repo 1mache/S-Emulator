@@ -8,7 +8,7 @@ public class Constants {
     // global constants
     public final static String LINE_SEPARATOR = System.getProperty("line.separator");
     public final static String START_NAME = "<Anonymous>";
-    public final static int REFRESH_RATE = 2000;
+    public final static int REFRESH_RATE = 2;
     public final static String CHAT_LINE_FORMATTING = "%tH:%tM:%tS | %.10s: %s%n";
 
     // fxml locations

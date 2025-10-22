@@ -65,7 +65,7 @@ public class dashboardController {
         programsRefresher.start();
     }
 
-    
+
     public void setInActive() {
         if (programsRefresher != null) {
             programsRefresher.stop();

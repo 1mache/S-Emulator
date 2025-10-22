@@ -274,39 +274,4 @@ public class mainClientAppController {
         }
     }
 
-
-
-    public void returnToDashboard(long credits) {
-        // Update credits in dashboard controller
-        loadDashboardPage();
-
-        Request functionsRequest = ProgramListRequest.build();
-        HttpClientUtil.runAsync(functionsRequest, new Callback() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                ProgramListRequest.onFailure(e);
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                ProgramListRequest.onResponse(response, dashboardController);
-            }
-        });
-
-        Request usersRequest = UsersInfoListRequest.build();
-        HttpClientUtil.runAsync(usersRequest, new Callback() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                UsersInfoListRequest.onFailure(e);
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                UsersInfoListRequest.onResponse(response, dashboardController);
-            }
-        });
-
-        dashboardController.updateCredits(credits);
-    }
-
 }
