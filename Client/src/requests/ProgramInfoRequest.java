@@ -1,14 +1,10 @@
 package requests;
 
 import Alerts.Alerts;
-import dto.ProgramPeek;
-import dto.server.request.ProgramViewRequest;
 import dto.server.response.ProgramData;
 import javafx.application.Platform;
-import newGui.pages.execution.component.primary.mainExecutionController;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 import util.Constants;
 

@@ -27,6 +27,8 @@ public class mainExecutionController {
     @FXML private instructionsController instructionsController;
     @FXML private executionController executionController;
 
+    String programName;
+
     @FXML
     public void initialize() {
         topController.setMainExecutionController(this);
@@ -48,6 +50,11 @@ public class mainExecutionController {
         topController.set(programPeek, moreData);
         executionController.setProgramPeek(programPeek);
         instructionsController.setProgramPeek(programPeek.instructions());
+        programName = programPeek.name();
+    }
+
+    public String getProgramName() {
+        return programName;
     }
 
     public void set(String programName) {
@@ -85,6 +92,13 @@ public class mainExecutionController {
             }
         });
 
-//        setProgramPeek(programPeek[0], moreData[0]);
+    }
+
+    public void returnToDashboard() {
+        mainClientAppController.returnToDashboard(topController.getCredits());
+    }
+
+    public int getSelectedDgree() {
+        return topController.getDegreeComboBoxValue();
     }
 }

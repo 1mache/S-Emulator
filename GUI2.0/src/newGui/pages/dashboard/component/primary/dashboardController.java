@@ -71,4 +71,10 @@ public class dashboardController {
     public long getCredits() {
         return topController.getCredits();
     }
+
+    public void updateCredits(long credits) {
+        Platform.runLater(() -> {
+            topController.updateCredits(credits);
+        });
+    }
 }

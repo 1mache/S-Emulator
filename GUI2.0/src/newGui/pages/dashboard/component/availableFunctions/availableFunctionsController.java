@@ -32,7 +32,8 @@ public class availableFunctionsController {
     @FXML private TableColumn<ProgramData, Long> averageCreditCost;
 
     // Buttons
-    @FXML private Button executeProgram;
+    @FXML private Button executeFunction;
+
 
     public void setDashboardController(dashboardController dashboardController) {
         this.dashboardController = dashboardController;
