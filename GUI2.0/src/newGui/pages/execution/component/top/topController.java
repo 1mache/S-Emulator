@@ -163,30 +163,6 @@ public class topController {
         setDegree(moreData.getMaxExpansionDegree());
     }
 
-//    private void setDegree(int maxDegree) {
-//        int capped = Math.max(0, maxDegree);
-//
-//        populatingDegrees = true;
-//        try {
-//            degreeSelection.setPromptText("Choose expansion degree");
-//            degreeSelection.getItems().clear();
-//
-//            // populate 0..capped as Integer
-//            for (int i = 0; i <= capped; i++) {
-//                degreeSelection.getItems().add(i);
-//            }
-//
-//            // choose a safe default so value won't be null
-//            if (!degreeSelection.getItems().isEmpty()) {
-//                degreeSelection.getSelectionModel().select(0);
-//            } else {
-//                degreeSelection.getSelectionModel().clearSelection();
-//            }
-//        } finally {
-//            populatingDegrees = false;
-//        }
-//    }
-
     private void setDegree(int maxDegree) {
         int capped = Math.max(0, maxDegree);
         currentMaxDegree = capped;
@@ -223,10 +199,6 @@ public class topController {
             populatingDegrees = false;
         }
     }
-
-
-
-
 
     public long getCredits() {
         String credits = availableCredits.getText();
