@@ -2,6 +2,7 @@ package newGui.pages.dashboard.component.primary;
 
 
 import Refreshers.Dashboard.ProgramsRefresher;
+import Refreshers.Dashboard.UsersRefresher;
 import dto.ProgramExecutionResult;
 import dto.server.response.ProgramData;
 import dto.server.response.UserData;
@@ -29,6 +30,7 @@ public class dashboardController {
     @FXML private availableFunctionsController availableFunctionsController; // bottom right
 
     private ProgramsRefresher programsRefresher;
+    private UsersRefresher usersRefresher;
 
 
     // left controllers
@@ -63,6 +65,15 @@ public class dashboardController {
             );
         }
         programsRefresher.start();
+
+        if (usersRefresher == null) {
+            usersRefresher = new UsersRefresher(
+                    userTableInfoController,
+                    this,
+                    Constants.REFRESH_RATE
+            );
+        }
+        usersRefresher.start();
     }
 
 
@@ -70,15 +81,11 @@ public class dashboardController {
         if (programsRefresher != null) {
             programsRefresher.stop();
         }
+        if (usersRefresher != null) {
+            usersRefresher.stop();
+        }
     }
 
-//    public void updateProgramList(List<ProgramData> funcList) {
-//        Platform.runLater(() -> {
-//            availableFunctionsController.updateFunctionList(funcList);
-//            availableProgramsController.updateProgramList(funcList);
-//        });
-//
-//    }
 
     public void updateAllProgramData(List<ProgramData> list) {
         Platform.runLater(() -> {

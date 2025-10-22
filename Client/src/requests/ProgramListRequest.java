@@ -1,6 +1,5 @@
 package requests;
 
-import com.google.gson.reflect.TypeToken;
 import dto.server.response.ProgramData;
 import javafx.application.Platform;
 import Alerts.Alerts;
@@ -8,11 +7,8 @@ import newGui.pages.dashboard.component.primary.dashboardController;
 import okhttp3.*;
 import util.Constants;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class ProgramListRequest {
 

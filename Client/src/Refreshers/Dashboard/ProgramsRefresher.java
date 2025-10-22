@@ -25,7 +25,7 @@ public class ProgramsRefresher {
     private final availableFunctionsController functionsController;
 
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-        Thread t = new Thread(r, "ProgramsRefresher");
+        Thread t = new Thread(r, "ProgramsRefresher(Programs)");
         t.setDaemon(true);
         return t;
     });
