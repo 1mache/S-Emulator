@@ -1,26 +1,14 @@
 package newGui.pages.dashboard.component.availablePrograms;
 
 import dto.server.response.ProgramData;
-import dto.server.response.UserData;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import newGui.pages.dashboard.component.primary.dashboardController;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Request;
-import okhttp3.Response;
-import org.jetbrains.annotations.NotNull;
-import requests.ProgramInfoForRun;
-import requests.ProgramInfoRequest;
-import util.http.HttpClientUtil;
-
-import java.io.IOException;
 import java.util.List;
 
 public class availableProgramsController {
@@ -36,6 +24,15 @@ public class availableProgramsController {
     @FXML private TableColumn<ProgramData, Integer> runs;
     @FXML private TableColumn<ProgramData, Long> averageCreditCost;
 
+    @FXML
+    private void initialize() {
+        name.setCellValueFactory(new PropertyValueFactory<>("name"));
+        uploadBy.setCellValueFactory(new PropertyValueFactory<>("uploadedBy"));
+        numberOfInstructions.setCellValueFactory(new PropertyValueFactory<>("instructionCount"));
+        maxLevel.setCellValueFactory(new PropertyValueFactory<>("maxExpansionDegree"));
+        runs.setCellValueFactory(new PropertyValueFactory<>("runCount"));
+        averageCreditCost.setCellValueFactory(new PropertyValueFactory<>("avgCreditCost"));
+    }
 
     public void setDashboardController(dashboardController dashboardController) {
         this.dashboardController = dashboardController;
@@ -49,7 +46,7 @@ public class availableProgramsController {
         }
     }
 
-    public void updateFunctionList(List<ProgramData> funcList) {
+    public void updateProgramList(List<ProgramData> funcList) {
         List<ProgramData> filtered = funcList.stream()
                 .filter(p -> p.isMain())
                 .toList();
@@ -67,5 +64,13 @@ public class availableProgramsController {
 
         // Attach the data to the table
         programsTable.setItems(observableList);
+    }
+
+
+    public void setPrograms(List<ProgramData> data) {
+        List<ProgramData> filteredList = data.stream()
+                .filter(p -> !p.isMain())
+                .toList();
+        programsTable.setItems(FXCollections.observableArrayList(filteredList));
     }
 }

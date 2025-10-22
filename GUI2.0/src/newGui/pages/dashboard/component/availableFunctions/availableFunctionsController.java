@@ -31,7 +31,15 @@ public class availableFunctionsController {
     @FXML private TableColumn<ProgramData, Integer> runs;
     @FXML private TableColumn<ProgramData, Long> averageCreditCost;
 
-
+    @FXML
+    private void initialize() {
+        name.setCellValueFactory(new PropertyValueFactory<>("name"));
+        uploadBy.setCellValueFactory(new PropertyValueFactory<>("uploadedBy"));
+        numberOfInstructions.setCellValueFactory(new PropertyValueFactory<>("instructionCount"));
+        maxLevel.setCellValueFactory(new PropertyValueFactory<>("maxExpansionDegree"));
+        runs.setCellValueFactory(new PropertyValueFactory<>("runCount"));
+        averageCreditCost.setCellValueFactory(new PropertyValueFactory<>("avgCreditCost"));
+    }
 
     public void setDashboardController(dashboardController dashboardController) {
         this.dashboardController = dashboardController;
@@ -65,5 +73,10 @@ public class availableFunctionsController {
         functionsTable.setItems(observableList);
     }
 
+    public void setFunctions(List<ProgramData> data) {
+        List<ProgramData> filteredList = data.stream()
+                .filter(p -> !p.isMain())
+                .toList();
+        functionsTable.setItems(FXCollections.observableArrayList(filteredList));
+    }
 }
-
