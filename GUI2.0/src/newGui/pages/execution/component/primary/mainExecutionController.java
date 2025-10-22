@@ -106,16 +106,10 @@ public class mainExecutionController {
                                 requests.UserHistoryRequest.onResponse(response, executionController);
                             }
                         });
-
-
-
-
-
                     }
                 });
             }
         });
-
     }
 
     public void returnToDashboard() {
