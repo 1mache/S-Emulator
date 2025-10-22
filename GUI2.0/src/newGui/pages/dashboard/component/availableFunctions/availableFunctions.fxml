@@ -42,7 +42,7 @@
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                </columnResizePolicy>
             </TableView>
-            <Button fx:id="executeFunction" mnemonicParsing="false" onAction="#executeFunctionListener" text="Execute Program" />
+            <Button mnemonicParsing="false" onAction="#executeFunctionListener" text="Execute Program" />
          </children>
          <padding>
             <Insets left="5.0" right="5.0" />

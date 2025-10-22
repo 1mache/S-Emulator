@@ -65,8 +65,8 @@ public class dashboardController {
         historyTableController.clearHistoryTable();
     }
 
-    public void loadExecutionPage(String name) {
-        mainClientAppController.switchToExecution(name);
+    public void loadExecutionPage(String name, String currentUserName) {
+        mainClientAppController.switchToExecution(name, currentUserName);
     }
 
     public long getCredits() {
@@ -81,10 +81,6 @@ public class dashboardController {
 
     public String getCurrentUserName() {
         return mainClientAppController.getUserNameProperty().get();
-    }
-
-    public void setUserNameInExecutionPage(String currentUserName) {
-        mainClientAppController.setNameAtExecution(currentUserName);
     }
 
     public void updateHistoryTable(List<ProgramExecutionResult> historyUsersDataList) {

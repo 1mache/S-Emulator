@@ -36,9 +36,6 @@ public class availableProgramsController {
     @FXML private TableColumn<ProgramData, Integer> runs;
     @FXML private TableColumn<ProgramData, Long> averageCreditCost;
 
-    // Buttons
-    @FXML
-    private Button executeProgram;
 
     public void setDashboardController(dashboardController dashboardController) {
         this.dashboardController = dashboardController;
@@ -48,12 +45,9 @@ public class availableProgramsController {
     void executeProgramListener(ActionEvent event) {
         ProgramData selectedProgram = programsTable.getSelectionModel().getSelectedItem();
         if (selectedProgram != null) {
-            dashboardController.loadExecutionPage(selectedProgram.getName());
+            dashboardController.loadExecutionPage(selectedProgram.getName(),dashboardController.getCurrentUserName());
         }
     }
-
-
-
 
     public void updateFunctionList(List<ProgramData> funcList) {
         List<ProgramData> filtered = funcList.stream()

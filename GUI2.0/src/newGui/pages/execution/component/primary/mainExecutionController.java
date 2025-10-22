@@ -17,6 +17,7 @@ import requests.ProgramInfoForRun;
 import requests.ProgramInfoRequest;
 import util.http.HttpClientUtil;
 import java.io.IOException;
+import java.util.List;
 
 public class mainExecutionController {
 
@@ -58,9 +59,11 @@ public class mainExecutionController {
         return programName;
     }
 
-    public void set(String programName) {
+    public void set(String programName, String userName) {
         final ProgramPeek[] programPeek = new ProgramPeek[1];
         final ProgramData[] moreData = new ProgramData[1];
+        this.programName = programName;
+        this.userName = userName;
 
         Request programRequest = ProgramInfoForRun.build(programName,0);
         HttpClientUtil.runAsync(programRequest, new Callback() {
@@ -73,7 +76,7 @@ public class mainExecutionController {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 programPeek[0] = ProgramInfoForRun.onResponse(response);
-                Request moreInfoRequest = ProgramInfoRequest.build(programPeek[0].name());
+                Request moreInfoRequest = ProgramInfoRequest.build(programName);
                 HttpClientUtil.runAsync(moreInfoRequest, new Callback() {
 
                     @Override
@@ -91,6 +94,7 @@ public class mainExecutionController {
 
                         // Fill History Table
                         Request userHistoryRequest = requests.UserHistoryRequest.build(programName, userName);
+
                         HttpClientUtil.runAsync(userHistoryRequest, new Callback() {
                             @Override
                             public void onFailure(@NotNull Call call, @NotNull IOException e) {
@@ -122,7 +126,7 @@ public class mainExecutionController {
         return topController.getDegreeComboBoxValue();
     }
 
-    public void setUserName(String currentUserName) {
-        this.userName = currentUserName;
+    public void updateHighlightedInstructions(List<Integer> numbersList) {
+        instructionsController.updateHighlightedInstructions(numbersList);
     }
 }

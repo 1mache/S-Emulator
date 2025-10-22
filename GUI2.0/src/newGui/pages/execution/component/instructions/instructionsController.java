@@ -4,15 +4,14 @@ import dto.InstructionPeek;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import newGui.pages.execution.component.primary.mainExecutionController;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class instructionsController {
 
@@ -31,6 +30,9 @@ public class instructionsController {
     @FXML private TableColumn<InstructionPeek, String> colInstruction;
     @FXML private TableColumn<InstructionPeek, String> colLabel;
     @FXML private TableColumn<InstructionPeek, Long> colNumber;
+
+    private final Set<Integer> highlighted = new HashSet<>();
+
 
 
     // History Chain Table
@@ -76,7 +78,35 @@ public class instructionsController {
         });
 
         colArchitecture.setCellValueFactory(data -> new SimpleStringProperty(""));
+        installRowHighlighter();
+
     }
 
 
+    private void installRowHighlighter() {
+        if (instructionsTable.getRowFactory() != null) return;
+
+        instructionsTable.setRowFactory(tv -> new TableRow<InstructionPeek>() {
+            @Override
+            protected void updateItem(InstructionPeek item, boolean empty) {
+                super.updateItem(item, empty);
+
+                // Apply yellow background only for highlighted row indices
+                if (!empty && highlighted.contains(getIndex())) {
+                    setStyle("-fx-background-color: #fff59d;"); // light yellow
+                } else {
+                    setStyle(""); // reset
+                }
+            }
+        });
+    }
+
+
+    public void updateHighlightedInstructions(List<Integer> indices) {
+        highlighted.clear();
+        if (indices != null) {
+            highlighted.addAll(indices);
+        }
+        instructionsTable.refresh(); // re-render rows to apply styles
+    }
 }

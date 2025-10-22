@@ -32,7 +32,6 @@ public class ProgramInfoForRun {
         String responseBody;
         try {
             responseBody = response.body().string();
-
         } catch (IOException e) {
             Platform.runLater(() -> {
                 Alerts.badBody(e.getMessage());

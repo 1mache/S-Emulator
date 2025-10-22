@@ -31,8 +31,6 @@ public class availableFunctionsController {
     @FXML private TableColumn<ProgramData, Integer> runs;
     @FXML private TableColumn<ProgramData, Long> averageCreditCost;
 
-    // Buttons
-    @FXML private Button executeFunction;
 
 
     public void setDashboardController(dashboardController dashboardController) {
@@ -43,8 +41,7 @@ public class availableFunctionsController {
     void executeFunctionListener(ActionEvent event) {
         ProgramData selectedFunction = functionsTable.getSelectionModel().getSelectedItem();
         if (selectedFunction != null) {
-            dashboardController.loadExecutionPage(selectedFunction.getName());
-            dashboardController.setUserNameInExecutionPage(dashboardController.getCurrentUserName());
+            dashboardController.loadExecutionPage(selectedFunction.getName(), dashboardController.getCurrentUserName() );
         }
     }
 

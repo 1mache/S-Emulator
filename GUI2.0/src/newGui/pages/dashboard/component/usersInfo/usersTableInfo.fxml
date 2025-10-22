@@ -13,12 +13,12 @@
    <content>
       <VBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="120.0" minWidth="580.0">
          <children>
-            <Label fx:id="usersInformation" text="Users Information">
+            <Label text="Users Information">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>
             </Label>
-            <TableView fx:id="usersTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="100.0" minWidth="580.0" VBox.vgrow="ALWAYS">
+            <TableView fx:id="usersTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="100.0" minWidth="580.0" onMouseClicked="#onRowClicked" VBox.vgrow="ALWAYS">
                <columns>
                   <TableColumn fx:id="name" editable="false" minWidth="90.0" prefWidth="90.0" sortable="false" style="-fx-alignment: CENTER;" text="Name" />
                   <TableColumn fx:id="numberOfNewPrograms" editable="false" minWidth="60.0" prefWidth="60.0" style="-fx-alignment: CENTER;" text="New Programs" />
@@ -31,7 +31,7 @@
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                </columnResizePolicy>
             </TableView>
-            <Button fx:id="unselectButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#UnselectButtonListener" text="Unselect User" textAlignment="CENTER">
+            <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#UnselectButtonListener" text="Unselect User" textAlignment="CENTER">
                <VBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </VBox.margin>

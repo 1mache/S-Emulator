@@ -16,13 +16,10 @@ public class historyTableController {
 
     private dashboardController dashboardController;
 
-
-    // Won't Use
-    @FXML private ScrollPane mainHistory;
-
     // History Table
     @FXML private TableView<ProgramExecutionResult> historyTable;
     @FXML private TableColumn<ProgramExecutionResult, ?> architecture;
+    @FXML private TableColumn<ProgramExecutionResult, ?> FunctionOrProgram;
     @FXML private TableColumn<ProgramExecutionResult, Number> number;
     @FXML private TableColumn<ProgramExecutionResult, Long> cycels;
     @FXML private TableColumn<ProgramExecutionResult, Integer> level;

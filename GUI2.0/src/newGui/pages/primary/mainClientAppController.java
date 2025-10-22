@@ -193,11 +193,11 @@ public class mainClientAppController {
     }
 
     // Execution Page
-    public void switchToExecution(String programName) {
-        loadExecutionPage(programName);
+    public void switchToExecution(String programName, String currentUserName) {
+        loadExecutionPage(programName, currentUserName);
     }
 
-    private void loadExecutionPage(String programName) {
+    private void loadExecutionPage(String programName , String currentUserName) {
         URL executionPageUrl = getClass().getResource(EXECUTION_PAGE_FXML_RESOURCE_LOCATION);
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
@@ -209,7 +209,7 @@ public class mainClientAppController {
             executionController.activate(dashboardController.getCredits());
 
             // Call set with program name
-            executionController.set(programName);
+            executionController.set(programName, currentUserName);
 
             // Use the existing primary stage reference
             primaryStage.setMinHeight(800);
@@ -243,8 +243,6 @@ public class mainClientAppController {
 
     public void returnToDashboard(long credits) {
         // Update credits in dashboard controller
-        /// need to reload the dashboard data with the name and credits
-
         loadDashboardPage();
 
         Request functionsRequest = ProgramListRequest.build();
@@ -276,7 +274,4 @@ public class mainClientAppController {
         dashboardController.updateCredits(credits);
     }
 
-    public void setNameAtExecution(String currentUserName) {
-        executionController.setUserName(currentUserName);
-    }
 }
