@@ -77,4 +77,13 @@ public class Alerts {
         return null;
     }
 
+    public static Runnable endOfDebug() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Debug Information");
+        alert.setHeaderText(null);
+        alert.setContentText("End of Debug (: ");
+        alert.showAndWait();
+        return null;
+    }
+
 }

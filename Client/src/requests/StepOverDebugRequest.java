@@ -2,6 +2,7 @@ package requests;
 
 import Alerts.Alerts;
 import dto.ProgramExecutionResult;
+import dto.debug.DebugStepPeek;
 import javafx.application.Platform;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
@@ -15,9 +16,7 @@ import static util.Constants.GSON_INSTANCE;
 
 public class StepOverDebugRequest {
 
-    public static Request build(dto.server.request.RunRequest info ) {
-        String json = GSON_INSTANCE.toJson(info);
-        RequestBody body = RequestBody.create(json, Constants.MEDIA_TYPE_JSON);
+    public static Request build() {
 
         HttpUrl url = HttpUrl.parse(Constants.STEP_OVER_DEBUG)
                 .newBuilder()
@@ -25,11 +24,11 @@ public class StepOverDebugRequest {
 
         return new Request.Builder()
                 .url(url)
-                .post(body)
+                .post(RequestBody.create(new byte[0], null))
                 .build();
     }
 
-    public static ProgramExecutionResult onResponse(Response response) {
+    public static DebugStepPeek onResponse(Response response) {
         String responseBody;
         try {
             responseBody = response.body().string();
@@ -47,8 +46,7 @@ public class StepOverDebugRequest {
             });
             return null;
         } else {
-            ProgramExecutionResult programResult = Constants.GSON_INSTANCE.fromJson(responseBody, ProgramExecutionResult.class);
-            return programResult;
+            return Constants.GSON_INSTANCE.fromJson(responseBody, DebugStepPeek.class);
         }
     }
 

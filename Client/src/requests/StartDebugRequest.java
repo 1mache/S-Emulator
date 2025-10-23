@@ -2,6 +2,7 @@ package requests;
 
 import Alerts.Alerts;
 import dto.ProgramExecutionResult;
+import dto.server.response.DebugStateInfo;
 import javafx.application.Platform;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
@@ -15,7 +16,7 @@ import static util.Constants.GSON_INSTANCE;
 
 public class StartDebugRequest {
 
-    public static Request build(StartDebugRequest info ) {
+    public static Request build(dto.server.request.StartDebugRequest info ) {
         String json = GSON_INSTANCE.toJson(info);
         RequestBody body = RequestBody.create(json, Constants.MEDIA_TYPE_JSON);
 
@@ -29,7 +30,7 @@ public class StartDebugRequest {
                 .build();
     }
 
-    public static ProgramExecutionResult onResponse(Response response) {
+    public static DebugStateInfo onResponse(Response response) {
         String responseBody;
         try {
             responseBody = response.body().string();
@@ -47,8 +48,7 @@ public class StartDebugRequest {
             });
             return null;
         } else {
-            ProgramExecutionResult programResult = Constants.GSON_INSTANCE.fromJson(responseBody, ProgramExecutionResult.class);
-            return programResult;
+            return Constants.GSON_INSTANCE.fromJson(responseBody, DebugStateInfo.class);
         }
     }
 

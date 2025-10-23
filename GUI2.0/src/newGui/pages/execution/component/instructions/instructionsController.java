@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
 import newGui.pages.execution.component.primary.mainExecutionController;
 
 import java.util.*;
@@ -30,6 +31,7 @@ public class instructionsController {
     @FXML private TableColumn<InstructionPeek, Long> colNumber;
 
     private final Set<Integer> highlighted = new HashSet<>();
+    private final Set<Integer> breakpointIndices = new HashSet<>();
 
 
 
@@ -44,6 +46,63 @@ public class instructionsController {
 
 
     @FXML private TextField SummaryLine;
+
+    @FXML
+    private void initialize() {
+        refreshRowStylesWithBreakpoints();
+        installBreakpointToggleByDoubleClick();
+    }
+
+    private void refreshRowStylesWithBreakpoints() {
+        colNumber.setCellFactory(col -> new TableCell<InstructionPeek, Long>() {
+            @Override
+            protected void updateItem(Long item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                    return;
+                }
+
+                setText(String.valueOf(item));
+
+                int idx = getIndex();
+
+                if (breakpointIndices.contains(idx)) {
+                    javafx.scene.shape.Circle circle =
+                            new javafx.scene.shape.Circle(5, javafx.scene.paint.Color.RED);
+                    setGraphic(circle);
+                    setContentDisplay(ContentDisplay.LEFT); // נקודה משמאל לטקסט
+                } else {
+                    setGraphic(null);
+                }
+            }
+        });
+
+        instructionsTable.refresh();
+    }
+
+    private void installBreakpointToggleByDoubleClick() {
+        instructionsTable.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2) {
+                int idx = instructionsTable.getSelectionModel().getSelectedIndex();
+                if (idx >= 0) {
+                    if (breakpointIndices.contains(idx)) {
+                        breakpointIndices.remove(idx);
+                    } else {
+                        breakpointIndices.add(idx);
+                    }
+                    instructionsTable.refresh();
+                }
+            }
+        });
+    }
+
+    public List<Integer> getBreakpointIndices() {
+        return new ArrayList<>(breakpointIndices);
+    }
+
 
     public void setMainExecutionController(mainExecutionController mainExecutionController) {
         this.mainExecutionController = mainExecutionController;
@@ -139,6 +198,13 @@ public class instructionsController {
         highlighted.clear();
         if (indices != null) {
             highlighted.addAll(indices);
+        }
+        instructionsTable.refresh(); // re-render rows to apply styles
+    }
+
+    public void highlightLine(Integer stopedLineInDebug) {
+        if (stopedLineInDebug != null) {
+            highlighted.add(stopedLineInDebug);
         }
         instructionsTable.refresh(); // re-render rows to apply styles
     }

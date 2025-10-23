@@ -1,8 +1,11 @@
 package newGui.pages.execution.component.execution;
 
+import Alerts.Alerts;
 import dto.InstructionPeek;
 import dto.ProgramExecutionResult;
 import dto.ProgramPeek;
+import dto.debug.DebugEndResult;
+import dto.debug.DebugStepPeek;
 import dto.server.request.RunRequest;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -26,6 +29,7 @@ import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
+import requests.StepOverDebugRequest;
 import util.http.HttpClientUtil;
 
 import java.io.IOException;
@@ -82,6 +86,7 @@ public class executionController {
 
     @FXML private ComboBox<String> architectureSelection;
     @FXML private TextField CyclesCounter;
+
 
     public void setMainExecutionController(mainExecutionController mainExecutionController) {
         this.mainExecutionController = mainExecutionController;
@@ -272,18 +277,164 @@ public class executionController {
     @FXML
     void startDebugListener(ActionEvent event) {
 
+        Request runDebugRequest = requests.StartDebugRequest.build(
+                new dto.server.request.StartDebugRequest(
+                        mainExecutionController.getProgramName(),
+                        mainExecutionController.getSelectedDgree(),
+                        sortKeysBySubstring(inputValues),
+                        mainExecutionController.getBreakpoints()
+                )
+        );
+
+        HttpClientUtil.runAsync(runDebugRequest, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                requests.StartDebugRequest.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                dto.server.response.DebugStateInfo debugStateInfo = requests.StartDebugRequest.onResponse(response);
+                if (debugStateInfo == null) {
+                    return;
+                }
+
+                // Update UI on the JavaFX Application Thread
+                Platform.runLater(() -> {
+                    // Update variable-values map for variableTable
+                    Map<String, Long> outMap = debugStateInfo.getVariableMap();
+                    variableValues.clear();
+                    variableValues.putAll(outMap);
+                    variableTable.refresh();
+
+                    if (debugStateInfo.getFinished()) {
+                        // program finished without hitting a breakpoint
+                        endDebug();
+                    } else {
+                        // stopped on a breakpoint
+                        mainExecutionController.getInstructionsController().highlightLine(debugStateInfo.getStoppedOnLine());
+                    }
+                    // Update Cycles Counter
+                    CyclesCounter.setText(valueOf(debugStateInfo.getCycles()));
+                });
+            }
+        });
+    }
+
+    private void endDebug() {
+        // last line or?
+        // clear highlighted lines
+        mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
+        Alerts.endOfDebug();
     }
 
     @FXML
     void stepOverDebugListener(ActionEvent event) {
+        Request stepOverDebugRequest = requests.StepOverDebugRequest.build();
+
+        HttpClientUtil.runAsync(stepOverDebugRequest, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                requests.StepOverDebugRequest.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                DebugStepPeek debugStepPeek = requests.StepOverDebugRequest.onResponse(response);
+                if (debugStepPeek == null) {
+                    return;
+                }
+
+                // Update UI on the JavaFX Application Thread
+                Platform.runLater(() -> {
+                    mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
+
+                    // Update variable-value map for variableTable // only one variable changed
+                    if (debugStepPeek.variable().isPresent()) {
+                        String varName = debugStepPeek.variable().get();
+                        Long newValue = debugStepPeek.newValue();
+                        variableValues.put(varName, newValue);
+                        variableTable.refresh();
+                    }
+                });
+            }
+        });
+
 
     }
 
     @FXML
-    void resumeDebugListener(ActionEvent event) {}
+    void resumeDebugListener(ActionEvent event) {
+        Request resumeDebugRequest = requests.ResumeDebugRequest.build();
+
+        HttpClientUtil.runAsync(resumeDebugRequest, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                requests.ResumeDebugRequest.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                dto.server.response.DebugStateInfo debugStateInfo = requests.ResumeDebugRequest.onResponse(response);
+                if (debugStateInfo == null) {
+                    return;
+                }
+
+                // Update UI on the JavaFX Application Thread
+                Platform.runLater(() -> {
+                    // Update variable-values map for variableTable
+                    Map<String, Long> outMap = debugStateInfo.getVariableMap();
+                    variableValues.clear();
+                    variableValues.putAll(outMap);
+                    variableTable.refresh();
+
+                    if (debugStateInfo.getFinished()) {
+                        // program finished without hitting a breakpoint
+                        endDebug();
+                    } else {
+                        // stopped on a breakpoint
+                        mainExecutionController.getInstructionsController().highlightLine(debugStateInfo.getStoppedOnLine());
+                    }
+                    // Update Cycles Counter
+                    CyclesCounter.setText(valueOf(debugStateInfo.getCycles()));
+                });
+            }
+        });
+    }
 
     @FXML
-    void stopDebugListener(ActionEvent event) {}
+    void stopDebugListener(ActionEvent event) {
+        Request stopDebugRequest = requests.StopDebugRequest.build();
+
+        HttpClientUtil.runAsync(stopDebugRequest, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                requests.StopDebugRequest.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                DebugEndResult debugEndResult = requests.StopDebugRequest.onResponse(response);
+                if (debugEndResult == null) {
+                    return;
+                }
+
+                // Update UI on the JavaFX Application Thread
+                Platform.runLater(() -> {
+                    // Update variable-values map for variableTable
+                    Map<String, Long> outMap = debugEndResult.getVariableMap();
+                    outMap.put("y", debugEndResult.getOutput());
+                    variableValues.clear();
+                    variableValues.putAll(outMap);
+                    variableTable.refresh();
+
+                    // Update Cycles Counter
+                    CyclesCounter.setText(valueOf(debugEndResult.getCycles()));
+                    endDebug();
+                });
+            }
+        });
+    }
 
 
 

@@ -123,4 +123,12 @@ public class mainExecutionController {
     public void updateHighlightedInstructions(List<Integer> numbersList) {
         instructionsController.updateHighlightedInstructions(numbersList);
     }
+
+    public List<Integer> getBreakpoints() {
+        return instructionsController.getBreakpointIndices();
+    }
+
+    public instructionsController getInstructionsController() {
+        return instructionsController;
+    }
 }
