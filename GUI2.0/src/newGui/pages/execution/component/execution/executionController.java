@@ -7,11 +7,18 @@ import dto.server.request.RunRequest;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.util.Pair;
 import javafx.util.converter.LongStringConverter;
 import newGui.pages.execution.component.primary.mainExecutionController;
 import okhttp3.Call;
@@ -152,23 +159,114 @@ public class executionController {
                 .collect(Collectors.toList());
     }
 
-
+    // General
     @FXML
     void backListener(ActionEvent event) {
         mainExecutionController.returnToDashboard();
     }
 
 
-
-
     // History
     @FXML
-    void reRunListener(ActionEvent event) {}
+    void reRunListener(ActionEvent event) {
+        // 1) get selected history row
+        ProgramExecutionResult selected = historyTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            return; // no selection, do nothing
+        }
+
+        // 2) extract past inputs
+        List<Long> pastInputs = selected.getInputs();
+        if (pastInputs == null || pastInputs.isEmpty()) {
+            return;
+        }
+
+        // 3) apply inputs to inputValues map
+        List<String> sortedNames = getSortedInputNames();
+        int n = Math.min(sortedNames.size(), pastInputs.size());
+        for (int i = 0; i < n; i++) {
+            inputValues.put(sortedNames.get(i), pastInputs.get(i));
+        }
+        inputTable.refresh();
+
+        // 4) reset variableValues map → all variables = 0
+        variableValues.replaceAll((k, v) -> 0L);
+        variableTable.refresh();
+
+        // 5) clear cycles counter
+        CyclesCounter.setText(0L + "");
+
+        // optional UX cleanup
+        inputTable.getSelectionModel().clearSelection();
+        variableTable.getSelectionModel().clearSelection();
+    }
 
     @FXML
     void showHistoryListener(ActionEvent event) {
+        // Get selected history row
+        ProgramExecutionResult selected = historyTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            return; // No selection, do nothing
+        }
 
+        // Get sorted input variable names
+        List<String> inputNames = getSortedInputNames();
+
+        // Take past inputs from the selected execution
+        List<Long> pastInputs = selected.getInputs();
+        if (pastInputs == null) {
+            pastInputs = Collections.emptyList();
+        }
+
+        // Build data for the new TableView
+        ObservableList<Pair<String, Long>> rows = javafx.collections.FXCollections.observableArrayList();
+        int n = Math.min(inputNames.size(), pastInputs.size());
+        for (int i = 0; i < n; i++) {
+            rows.add(new Pair<>(inputNames.get(i), pastInputs.get(i)));
+        }
+        rows.add(new Pair<>("y(Result)", selected.getOutputValue()));
+
+        // Create the TableView
+        TableView<Pair<String, Long>> table = new TableView<>(rows);
+        TableColumn<Pair<String, Long>, String> varCol = new TableColumn<>("Variable");
+        varCol.setCellValueFactory(cd -> new ReadOnlyObjectWrapper<>(cd.getValue().getKey()));
+
+        TableColumn<Pair<String, Long>, Long> valCol = new TableColumn<>("Value");
+        valCol.setCellValueFactory(cd -> new ReadOnlyObjectWrapper<>(cd.getValue().getValue()));
+        varCol.setStyle("-fx-alignment: CENTER;");
+        valCol.setStyle("-fx-alignment: CENTER;");
+
+
+        table.getColumns().addAll(varCol, valCol);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setMaxWidth(250);
+
+        // Put the table in a layout (VBox)
+        VBox root = new VBox(table);
+        root.setAlignment(Pos.CENTER);
+        root.setSpacing(10);
+        root.setPadding(new Insets(15));
+        root.setStyle("-fx-background-color: #f9f9f9;");
+
+        // Create and show the new stage
+        Stage stage = new Stage();
+        stage.setTitle("Inputs & Result");
+        stage.initOwner(inputTable.getScene().getWindow());
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setScene(new Scene(root, 360, 420));
+
+        // auto-center on screen
+        stage.centerOnScreen();
+        stage.show();
     }
+    // Helper: get input variable names sorted by index (x1, x2, x10, ...)
+    private List<String> getSortedInputNames() {
+        return inputValues.keySet()
+                .stream()
+                .sorted(Comparator.comparing(s -> s.substring(1))) // assumes names like x1, x2 ...
+                .collect(Collectors.toList());
+    }
+
 
     // Debugger
     @FXML
@@ -182,19 +280,15 @@ public class executionController {
     }
 
     @FXML
-    void resumeDebugListener(ActionEvent event) {
-
-    }
+    void resumeDebugListener(ActionEvent event) {}
 
     @FXML
-    void stopDebugListener(ActionEvent event) {
-
-    }
+    void stopDebugListener(ActionEvent event) {}
 
 
 
 
-
+    // Run
     @FXML
     void startListener(ActionEvent event) {
         List<Long> inputs = sortKeysBySubstring(inputValues);

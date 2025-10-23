@@ -46,9 +46,12 @@ public class Constants {
 
 
     // Execution
-
-    public final static String RUN = FULL_SERVER_PATH +"/execution/run";
     public final static String HIGHLIGHT = FULL_SERVER_PATH +"/highlight";
+    public final static String RUN = FULL_SERVER_PATH +"/execution/run";
+    public final static String START_DEBUG = FULL_SERVER_PATH +"/debug/start";
+    public final static String STEP_OVER_DEBUG = FULL_SERVER_PATH +"/debug/step-over";
+    public final static String RESUME_DEBUG = FULL_SERVER_PATH +"/debug/resume";
+    public final static String STOP_DEBUG = FULL_SERVER_PATH +"/debug/stop";
 
 
 
