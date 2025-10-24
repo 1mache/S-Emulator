@@ -56,9 +56,8 @@ public class ProgramRunner {
             if (jumpLabel == FixedLabel.EMPTY) {
                 currInstruction = program.getInstructionByIndex(pc);
 
-                if(canExecuteNextInstruction(currInstruction.orElseThrow())){
+                if(currInstruction.isPresent() && cannotExecuteNextInstruction(currInstruction.get()))
                     return false;
-                }
 
                 jumpLabel = executeInstruction(currInstruction.orElse(null));
             }
@@ -66,7 +65,9 @@ public class ProgramRunner {
                 currInstruction = jumpToInstructionByLabel(jumpLabel);
 
                 if(currInstruction.isPresent()){
-                    canExecuteNextInstruction(currInstruction.get());
+                    if(cannotExecuteNextInstruction(currInstruction.get()))
+                        return false;
+
                     jumpLabel = executeInstruction(currInstruction.get());
                 }
 
@@ -142,6 +143,8 @@ public class ProgramRunner {
                 .map(ins -> {
                     InstructionExecutionResult result = ins.execute(runContext);
                     cycles += result.cycles(); // add cycles cost
+                    // update the limiter
+                    executionLimiter.update(result.cycles());
                     return result.jumpTo();
                 })
                 .orElse(FixedLabel.EMPTY);
@@ -160,8 +163,8 @@ public class ProgramRunner {
         return jumpLabel;
     }
 
-    private boolean canExecuteNextInstruction(Instruction currInstruction) {
+    protected boolean cannotExecuteNextInstruction(Instruction currInstruction) {
         // check if we can execute the next instruction
-        return !executionLimiter.breakCheck(currInstruction);
+        return executionLimiter.breakCheck(currInstruction);
     }
 }

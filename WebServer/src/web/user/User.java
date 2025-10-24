@@ -36,11 +36,13 @@ public class User {
     }
 
     public void addCredits(long credits) {
-        this.totalCredits += credits;
+        totalCredits += credits;
     }
 
     public void removeCredits(long credits) {
-        this.totalCredits -= credits;
-        this.usedCredits += credits;
+        var hadCredits = totalCredits;
+
+        totalCredits = Math.max(totalCredits - credits, 0);
+        usedCredits += Math.min(hadCredits, credits);
     }
 }
