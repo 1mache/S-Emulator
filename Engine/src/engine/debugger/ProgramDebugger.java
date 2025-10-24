@@ -61,7 +61,6 @@ public class ProgramDebugger extends ProgramRunner {
     public DebugStep stepOver() {
         enforceOnInstructionState();
 
-        int pcBeforeExecution = getPc();
         Variable variable = pausedOn.getVariable();
         Long oldValue = runContext.getVariableValue(variable);
 
@@ -82,7 +81,7 @@ public class ProgramDebugger extends ProgramRunner {
         if(pausedOn == null) // executed last instruction
             transitionToEnd();
 
-        return new DebugStep(variable, newValue, pcBeforeExecution);
+        return new DebugStep(variable, newValue);
     }
 
     public boolean resume(){
@@ -105,8 +104,7 @@ public class ProgramDebugger extends ProgramRunner {
     protected boolean breakCheck() {
         boolean hitBreakPoint = breakpoints.contains(getPc());
         if(hitBreakPoint)
-            // (should never actually be null here)
-            transitionToOnInstruction(program.getInstructionByIndex(getPc()).orElse(null));
+            transitionToOnInstruction(program.getInstructionByIndex(getPc()).orElseThrow());
 
         return hitBreakPoint;
     }

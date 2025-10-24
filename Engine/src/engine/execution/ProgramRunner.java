@@ -55,13 +55,20 @@ public class ProgramRunner {
 
             if (jumpLabel == FixedLabel.EMPTY) {
                 currInstruction = program.getInstructionByIndex(pc);
+
+                if(canExecuteNextInstruction(currInstruction.orElseThrow())){
+                    return false;
+                }
+
                 jumpLabel = executeInstruction(currInstruction.orElse(null));
             }
             else {
                 currInstruction = jumpToInstructionByLabel(jumpLabel);
 
-                if(currInstruction.isPresent())
+                if(currInstruction.isPresent()){
+                    canExecuteNextInstruction(currInstruction.get());
                     jumpLabel = executeInstruction(currInstruction.get());
+                }
 
             }
         }
@@ -109,27 +116,25 @@ public class ProgramRunner {
         runContext.setVariableValue(Variable.RESULT, 0L);
     }
 
-    // ------------ internal: ------------
 
+    // ------------ internal: ------------
     protected int getPc(){
         return pc;
     }
 
     // called before each instruction. override to implement debug modes
-    protected boolean breakCheck() {
-        if(executionLimiter == null)
-            return false;
-        return executionLimiter.breakCheck(cycles); // early stop possible by limiter
-    }
 
+    protected boolean breakCheck() {
+        return false;
+    }
     // Note: returns empty if label is EXIT
+
     protected Optional<Instruction> jumpToInstructionByLabel(Label jumpLabel) {
         Optional<Instruction> jumpedTo;
         // jump needs to happen
         jumpedTo = program.getInstructionByLabel(jumpLabel);
         return jumpedTo;
     }
-
     protected Label executeInstruction(Instruction instruction) {
         Optional<Instruction> optionalInstruction = Optional.ofNullable(instruction);
 
@@ -153,5 +158,10 @@ public class ProgramRunner {
         }
 
         return jumpLabel;
+    }
+
+    private boolean canExecuteNextInstruction(Instruction currInstruction) {
+        // check if we can execute the next instruction
+        return !executionLimiter.breakCheck(currInstruction);
     }
 }

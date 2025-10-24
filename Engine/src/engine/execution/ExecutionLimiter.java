@@ -1,6 +1,8 @@
 package engine.execution;
 
+import engine.instruction.Instruction;
+
 @FunctionalInterface
 public interface ExecutionLimiter {
-    boolean breakCheck(long cycles);
+    boolean breakCheck(Instruction nextInstruction);
 }

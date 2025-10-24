@@ -39,7 +39,8 @@ public class DebugHandle {
 
         return new DebugStepPeek(
                 variableChanged,
-                debugStep.newValue()
+                debugStep.newValue(),
+                whichLine().orElse(-1)
         );
     }
 
