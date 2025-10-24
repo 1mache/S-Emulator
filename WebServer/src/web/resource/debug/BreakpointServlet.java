@@ -1,8 +1,7 @@
 package web.resource.debug;
 
-import dto.debug.DebugStepPeek;
+import dto.server.request.BreakpointRequest;
 import engine.api.debug.DebugHandle;
-import engine.debugger.exception.DebugStateException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,9 +11,10 @@ import web.utils.ServletUtils;
 
 import java.io.IOException;
 
-@WebServlet(urlPatterns = "/debug/step-over")
-public class StepOverServlet extends HttpServlet {
-    public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+@WebServlet(urlPatterns = "/debug/breakpoint")
+public class BreakpointServlet extends HttpServlet {
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String username = ServletUtils.getUsernameFromRequest(req);
         var appContext = ServletUtils.getAppContext(getServletContext());
         if(username == null || !appContext.getUserManager().userExists(username)) {
@@ -24,15 +24,15 @@ public class StepOverServlet extends HttpServlet {
 
         try {
             DebugHandle debugHandle = appContext.getDebugHandle(username);
-            DebugStepPeek stepInfo = debugHandle.stepOver();
-            resp.setContentType("application/json");
-            ServletUtils.GsonInstance.toJson(stepInfo, resp.getWriter());
+            BreakpointRequest breakpointRequest = ServletUtils.GsonInstance.fromJson(req.getReader(), BreakpointRequest.class);
+            if(breakpointRequest.remove())
+                debugHandle.removeBreakpoint(breakpointRequest.line());
+            else
+                debugHandle.addBreakpoint(breakpointRequest.line());
+
         } catch (NotInDebugException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().println("User" + username + " is not in Debug session");
-        } catch(DebugStateException e){
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().println("Invalid debug state. " + e.getMessage());
+            resp.getWriter().println("Debugger couldn't step over. " + e.getMessage());
         }
     }
 }

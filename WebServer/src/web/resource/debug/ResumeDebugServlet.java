@@ -2,6 +2,7 @@ package web.resource.debug;
 
 import dto.server.response.DebugStateInfo;
 import engine.api.debug.DebugHandle;
+import engine.debugger.exception.DebugStateException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,6 +50,9 @@ public class ResumeDebugServlet extends HttpServlet {
         } catch (NotInDebugException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().println("User" + username + " is not in Debug session");
+        } catch(DebugStateException e){
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().println("Invalid debug state. " + e.getMessage());
         }
     }
 }
