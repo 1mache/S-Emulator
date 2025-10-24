@@ -1,37 +1,35 @@
 package requests;
 
 import Alerts.Alerts;
-import dto.ProgramExecutionResult;
+import dto.server.request.HighlightRequest;
 import javafx.application.Platform;
-import newGui.pages.dashboard.component.primary.dashboardController;
-import newGui.pages.execution.component.execution.executionController;
+import newGui.pages.execution.component.primary.mainExecutionController;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import util.Constants;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import static util.Constants.GSON_INSTANCE;
 
+public class HighlightInfoRequest {
+    public static Request build(HighlightRequest info ) {
+        String json = GSON_INSTANCE.toJson(info);
+        RequestBody body = RequestBody.create(json, Constants.MEDIA_TYPE_JSON);
 
-public class UserHistoryRequest {
-
-    public static Request build(String programName, String userName) {
-
-        HttpUrl url = HttpUrl.parse(Constants.USER_HISTORY)
+        HttpUrl url = HttpUrl.parse(Constants.HIGHLIGHT)
                 .newBuilder()
-                .addQueryParameter("username",userName)
-                .addQueryParameter("programName",programName)
                 .build();
-
 
         return new Request.Builder()
                 .url(url)
-                .get()
+                .post(body)
                 .build();
     }
 
-    public static void onResponse(Response response, executionController executionController) {
+    public static void onResponse(Response response, mainExecutionController mainExecutionController) {
         String responseBody;
         try {
             responseBody = response.body().string();
@@ -48,11 +46,12 @@ public class UserHistoryRequest {
             });
         } else {
 
-            ProgramExecutionResult[] programExecutionResult = Constants.GSON_INSTANCE.fromJson(responseBody, ProgramExecutionResult[].class);
-            List<ProgramExecutionResult> HistoryUsersDataList = new ArrayList<>(List.of(programExecutionResult));
+            Integer[] numbers = Constants.GSON_INSTANCE.fromJson(responseBody, Integer[].class);
+            List<Integer> numbersList = Arrays.asList(numbers);
             Platform.runLater(() -> {
-                executionController.updateHistoryTable(HistoryUsersDataList);
+                mainExecutionController.updateHighlightedInstructions(numbersList);
             });
+
         }
     }
 

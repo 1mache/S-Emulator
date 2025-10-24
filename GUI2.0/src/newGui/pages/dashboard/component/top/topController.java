@@ -19,23 +19,16 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import requests.LoadCreditRequest;
-import requests.LoginRequest;
 import requests.UploadRequest;
 import util.http.HttpClientUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 
 
 public class topController {
 
     private dashboardController dashboardController;
-
-
-
-    // Won't Use
-    @FXML private ScrollPane top;
 
     // Buttons
     @FXML private Button chargeCreditsButton;
@@ -255,177 +248,8 @@ public class topController {
     public long getCredits() {
         return Long.parseLong(availableCredits.getText());
     }
+
+    public void updateCredits(long credits) {
+        this.credits.set(credits);
+    }
 }
-
-
-//
-//
-//
-//    @Override
-//    public void initialize(URL url, ResourceBundle resourceBundle) {
-//        setBusy(false);
-//        setStatus("", true);
-//    }
-
-
-
-
-////    @FXML
-////    void LoadListener(ActionEvent event) {
-////
-////        FileChooser fc = new FileChooser();
-////        fc.setTitle("Open Resource File");
-////        fc.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml"));
-////        if (lastDir != null && lastDir.isDirectory()) {
-////            fc.setInitialDirectory(lastDir);
-////        }
-////        Stage stage = (Stage) ((Node) loadFileButton).getScene().getWindow();
-////        File file = fc.showOpenDialog(stage);
-////        if (file != null) {
-////            lastDir = file.getParentFile();
-////        } else {
-////            return;
-////        }
-////
-////        currentlyLoadedFilePath.setText(file.getAbsolutePath());
-////
-////        // Safely reset the status label before (re)binding it in startLoadFileProgress
-////        if (clearStatusLater != null) { // cancel any previous clear-timer
-////            clearStatusLater.stop();
-////            clearStatusLater = null;
-////        }
-////        statusLabel.textProperty().unbind();  // IMPORTANT: unbind before setText
-////        statusLabel.setText("");
-////
-////
-////
-////        // Read a path from text field and build request
-////        final Request request;
-////        try {
-////            request = LoadFileRequest.build(file.toPath());
-////        } catch (IllegalArgumentException ex) {
-////            loafField(ex);
-////            return;
-////        }
-////
-////        setBusy(true);
-////
-////        // Send async and update UI by response
-////        HttpClientUtil.runAsync(request, new Callback() {
-////            @Override
-////            public void onFailure(Call call, IOException e) {
-////                Platform.runLater(() -> {
-////                    setBusy(false);
-////                    setStatus("Something went wrong: " + e.getMessage(),  false);
-////                });
-////            }
-////
-////            @Override
-////            public void onResponse(Call call, Response response) {
-////                try (response) {
-////                    final int code = response.code();
-////                    final String body = response.body() != null ? response.body().string() : "";
-////
-////                    Platform.runLater(() -> {
-////                        setBusy(false);
-////                        if (response.isSuccessful()) {
-////                            // Success path: show some info from server
-////                            // If your server returns JSON, you can parse it here instead of showing raw body.
-////                            setStatus("Load Successfully" + code + ")", true);
-////                            // Example: you can also reflect details from body:
-////                            // detailsLabel.setText(body);  // if you add a label for details
-////                        } else {
-////                            setStatus("Problem with the server " + code + "): " + body, false);
-////                        }
-////                    });
-////                } catch (IOException io) {
-////                    Platform.runLater(() -> {
-////                        setBusy(false);
-////                        setStatus("Error in read server response" + io.getMessage(), false);
-////                    });
-////                }
-////            }
-////        });
-////    }
-
-
-
-
-
-////    @FXML
-////    void LoadListener(ActionEvent event) {
-////
-////        FileChooser fc = new FileChooser();
-////        fc.setTitle("Open Resource File");
-////        fc.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml"));
-////        if (lastDir != null && lastDir.isDirectory()) {
-////            fc.setInitialDirectory(lastDir);
-////        }
-////        Stage stage = (Stage) ((Node) loadFileButton).getScene().getWindow();
-////        File file = fc.showOpenDialog(stage);
-////        if (file != null) {
-////            lastDir = file.getParentFile();
-////        } else {
-////            return;
-////        }
-////
-////        currentlyLoadedFilePath.setText(file.getAbsolutePath());
-////
-////        // Safely reset the status label before (re)binding it in startLoadFileProgress
-////        if (clearStatusLater != null) { // cancel any previous clear-timer
-////            clearStatusLater.stop();
-////            clearStatusLater = null;
-////        }
-////        statusLabel.textProperty().unbind();  // IMPORTANT: unbind before setText
-////        statusLabel.setText("");
-////
-////
-////
-////        // Read a path from text field and build request
-////        final Request request;
-////        try {
-////            request = LoadFileRequest.build(file.toPath());
-////        } catch (IllegalArgumentException ex) {
-////            loafField(ex);
-////            return;
-////        }
-////
-////        setBusy(true);
-////
-////        // Send async and update UI by response
-////        HttpClientUtil.runAsync(request, new Callback() {
-////            @Override
-////            public void onFailure(Call call, IOException e) {
-////                Platform.runLater(() -> {
-////                    setBusy(false);
-////                    setStatus("Something went wrong: " + e.getMessage(),  false);
-////                });
-////            }
-////
-////            @Override
-////            public void onResponse(Call call, Response response) {
-////                try (response) {
-////                    final int code = response.code();
-////                    final String body = response.body() != null ? response.body().string() : "";
-////
-////                    Platform.runLater(() -> {
-////                        setBusy(false);
-////                        if (response.isSuccessful()) {
-////                            // Success path: show some info from server
-////                            // If your server returns JSON, you can parse it here instead of showing raw body.
-////                            setStatus("Load Successfully" + code + ")", true);
-////                            // Example: you can also reflect details from body:
-////                            // detailsLabel.setText(body);  // if you add a label for details
-////                        } else {
-////                            setStatus("Problem with the server " + code + "): " + body, false);
-////                        }
-////                    });
-////                } catch (IOException io) {
-////                    Platform.runLater(() -> {
-////                        setBusy(false);
-////                        setStatus("Error in read server response" + io.getMessage(), false);
-////                    });
-////                }
-////            }
-////        });
-////    }

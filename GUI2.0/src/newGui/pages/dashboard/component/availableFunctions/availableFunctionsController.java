@@ -23,7 +23,7 @@ public class availableFunctionsController {
     private dashboardController dashboardController;
 
     // Functions Table
-    @FXML private TableView<ProgramData> programsTable;
+    @FXML private TableView<ProgramData> functionsTable;
     @FXML private TableColumn<ProgramData, String> uploadBy;
     @FXML private TableColumn<ProgramData, String> name;
     @FXML private TableColumn<ProgramData, Integer> maxLevel;
@@ -31,18 +31,25 @@ public class availableFunctionsController {
     @FXML private TableColumn<ProgramData, Integer> runs;
     @FXML private TableColumn<ProgramData, Long> averageCreditCost;
 
-    // Buttons
-    @FXML private Button executeProgram;
+    @FXML
+    private void initialize() {
+        name.setCellValueFactory(new PropertyValueFactory<>("name"));
+        uploadBy.setCellValueFactory(new PropertyValueFactory<>("uploadedBy"));
+        numberOfInstructions.setCellValueFactory(new PropertyValueFactory<>("instructionCount"));
+        maxLevel.setCellValueFactory(new PropertyValueFactory<>("maxExpansionDegree"));
+        runs.setCellValueFactory(new PropertyValueFactory<>("runCount"));
+        averageCreditCost.setCellValueFactory(new PropertyValueFactory<>("avgCreditCost"));
+    }
 
     public void setDashboardController(dashboardController dashboardController) {
         this.dashboardController = dashboardController;
     }
 
     @FXML
-    void executeProgramListener(ActionEvent event) {
-        ProgramData selectedProgram = programsTable.getSelectionModel().getSelectedItem();
-        if (selectedProgram != null) {
-            dashboardController.loadExecutionPage(selectedProgram.getName());
+    void executeFunctionListener(ActionEvent event) {
+        ProgramData selectedFunction = functionsTable.getSelectionModel().getSelectedItem();
+        if (selectedFunction != null) {
+            dashboardController.loadExecutionPage(selectedFunction.getName(), dashboardController.getCurrentUserName() );
         }
     }
 
@@ -63,8 +70,13 @@ public class availableFunctionsController {
         averageCreditCost.setCellValueFactory(new PropertyValueFactory<>("avgCreditCost"));
 
         // Attach the data to the table
-        programsTable.setItems(observableList);
+        functionsTable.setItems(observableList);
     }
 
+    public void setFunctions(List<ProgramData> data) {
+        List<ProgramData> filteredList = data.stream()
+                .filter(p -> !p.isMain())
+                .toList();
+        functionsTable.setItems(FXCollections.observableArrayList(filteredList));
+    }
 }
-

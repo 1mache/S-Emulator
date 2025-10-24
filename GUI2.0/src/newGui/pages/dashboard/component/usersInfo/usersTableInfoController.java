@@ -15,6 +15,7 @@ import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
+import requests.GeneralHistoryForUser;
 import requests.UserHistoryRequest;
 import util.http.HttpClientUtil;
 
@@ -24,13 +25,6 @@ import java.util.List;
 public class usersTableInfoController {
 
     private dashboardController dashboardController;
-
-
-    // Won't Use
-    @FXML private Label usersInformation;
-
-    // Buttons
-    @FXML private Button unselectButton;
 
     // Users Table
     @FXML private TableView<UserData> usersTable;
@@ -48,7 +42,6 @@ public class usersTableInfoController {
     @FXML void UnselectButtonListener(ActionEvent event) {
         dashboardController.clearUserInfo();
     }
-
 
     public void updateUsersList(List<UserData> usersDataList) {
         // Create an observable list for the TableView
@@ -68,19 +61,23 @@ public class usersTableInfoController {
 
     @FXML
     void onRowClicked(MouseEvent event) {
+        if (event.getClickCount() < 1) return;
         UserData selected = usersTable.getSelectionModel().getSelectedItem();
+        if (selected == null) return;
 
-        Request userInfoRequest = UserHistoryRequest.build(selected.getUsername());
+
+        Request userInfoRequest = GeneralHistoryForUser.build(selected.getUsername());
         HttpClientUtil.runAsync(userInfoRequest, new Callback()  {
 
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                UserHistoryRequest.onFailure(e);
+                GeneralHistoryForUser.onFailure(e);
+
             }
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                UserHistoryRequest.onResponse(response,dashboardController);
+                GeneralHistoryForUser.onResponse(response,dashboardController);
             }
         });
 

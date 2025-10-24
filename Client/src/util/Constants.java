@@ -8,7 +8,7 @@ public class Constants {
     // global constants
     public final static String LINE_SEPARATOR = System.getProperty("line.separator");
     public final static String START_NAME = "<Anonymous>";
-    public final static int REFRESH_RATE = 2000;
+    public final static int REFRESH_RATE = 2;
     public final static String CHAT_LINE_FORMATTING = "%tH:%tM:%tS | %.10s: %s%n";
 
     // fxml locations
@@ -22,7 +22,7 @@ public class Constants {
     public final static String DASHBOARD_PAGE_STYLE_RESOURCE_LOCATION = "/newGui/pages/dashboard/component/primary/dashboard_styling.css";
 
     public final static String EXECUTION_PAGE_FXML_RESOURCE_LOCATION = "/newGui/pages/execution/component/primary/mainExecution.fxml";
-    public final static String EXECUTION_PAGE_STYLE_RESOURCE_LOCATION = "/newGui/pages/dashboard/component/primary/main_styling.css";
+    public final static String EXECUTION_PAGE_STYLE_RESOURCE_LOCATION = "/newGui/pages/execution/component/primary/main_styling.css";
 
 
     // Server resources locations
@@ -39,14 +39,19 @@ public class Constants {
 
     // Dashboard
     public final static String UPLOAD = FULL_SERVER_PATH + "/upload";
-    public final static String ADD_CREDIT = FULL_SERVER_PATH + "/addCredit";
+    public final static String ADD_CREDIT = FULL_SERVER_PATH + "/add-credit";
     public final static String USER_HISTORY = FULL_SERVER_PATH + "/user-history";
     public final static String PROGRAM_VIEW = FULL_SERVER_PATH + "/execution/view-program"; // Go to execution page
     public final static String MORE_PROGRAM_INFO = FULL_SERVER_PATH + "/info/program-info"; // Go to execution page
 
 
     // Execution
-
+    public final static String HIGHLIGHT = FULL_SERVER_PATH +"/highlight";
+    public final static String RUN = FULL_SERVER_PATH +"/execution/run";
+    public final static String START_DEBUG = FULL_SERVER_PATH +"/debug/start";
+    public final static String STEP_OVER_DEBUG = FULL_SERVER_PATH +"/debug/step-over";
+    public final static String RESUME_DEBUG = FULL_SERVER_PATH +"/debug/resume";
+    public final static String STOP_DEBUG = FULL_SERVER_PATH +"/debug/stop";
 
 
 

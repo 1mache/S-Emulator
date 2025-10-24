@@ -1,51 +1,53 @@
 package requests;
 
 import Alerts.Alerts;
-import dto.server.response.ProgramData;
+import dto.ProgramExecutionResult;
+import dto.debug.DebugEndResult;
 import javafx.application.Platform;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import util.Constants;
 
 import java.io.IOException;
 
-public class ProgramInfoRequest {
+import static util.Constants.GSON_INSTANCE;
 
-    public static Request build(String programName) {
+public class StopDebugRequest {
 
-        HttpUrl url = HttpUrl.parse(Constants.MORE_PROGRAM_INFO)
+    public static Request build() {
+
+        HttpUrl url = HttpUrl.parse(Constants.STOP_DEBUG)
                 .newBuilder()
-                .addQueryParameter("programName",programName)
                 .build();
-
 
         return new Request.Builder()
                 .url(url)
-                .get()
+                .post(RequestBody.create(new byte[0]))
                 .build();
     }
 
-    public static ProgramData onResponse(Response response) {
+    public static DebugEndResult onResponse(Response response) {
         String responseBody;
         try {
             responseBody = response.body().string();
-
-        } catch (IOException e) {
-            Platform.runLater(() -> {
-                Alerts.badBody(e.getMessage());
-            });
+        } catch (Exception e) {
+            Platform.runLater(() ->
+                    Alerts.badBody(e.getMessage())
+            );
             return null;
         }
 
         if (response.code() != 200) {
             Platform.runLater(() -> {
-                Alerts.loadField(responseBody);
+                Alerts.serverBadAnswer(responseBody);
+
             });
             return null;
         } else {
-            ProgramData moreData = Constants.GSON_INSTANCE.fromJson(responseBody, ProgramData.class);
-            return moreData;
+            return Constants.GSON_INSTANCE.fromJson(responseBody, DebugEndResult.class);
+
         }
     }
 
@@ -54,6 +56,4 @@ public class ProgramInfoRequest {
             Alerts.serverProblamResponse(e.getMessage());
         });
     }
-
-
 }

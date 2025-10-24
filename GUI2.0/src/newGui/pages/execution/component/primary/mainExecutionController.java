@@ -1,8 +1,8 @@
 package newGui.pages.execution.component.primary;
 
-
 import dto.ProgramPeek;
 import dto.server.response.ProgramData;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import newGui.pages.execution.component.execution.executionController;
 import newGui.pages.execution.component.instructions.instructionsController;
@@ -16,16 +16,20 @@ import org.jetbrains.annotations.NotNull;
 import requests.ProgramInfoForRun;
 import requests.ProgramInfoRequest;
 import util.http.HttpClientUtil;
-
 import java.io.IOException;
+import java.util.List;
 
 public class mainExecutionController {
 
     private mainClientAppController mainClientAppController;
 
-    private executionController executionController;
-    private instructionsController instructionsController;
-    private topController topController;
+
+    @FXML private topController topController;
+    @FXML private instructionsController instructionsController;
+    @FXML private executionController executionController;
+
+    String programName;
+    public String userName;
 
     @FXML
     public void initialize() {
@@ -43,17 +47,23 @@ public class mainExecutionController {
     }
 
 
-
     public void setProgramPeek(ProgramPeek programPeek,  ProgramData moreData) {
 
         topController.set(programPeek, moreData);
         executionController.setProgramPeek(programPeek);
         instructionsController.setProgramPeek(programPeek.instructions());
+        programName = programPeek.name();
     }
 
-    public void set(String programName) {
+    public String getProgramName() {
+        return programName;
+    }
+
+    public void set(String programName, String userName) {
         final ProgramPeek[] programPeek = new ProgramPeek[1];
         final ProgramData[] moreData = new ProgramData[1];
+        this.programName = programName;
+        this.userName = userName;
 
         Request programRequest = ProgramInfoForRun.build(programName,0);
         HttpClientUtil.runAsync(programRequest, new Callback() {
@@ -66,28 +76,59 @@ public class mainExecutionController {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 programPeek[0] = ProgramInfoForRun.onResponse(response);
+                Request moreInfoRequest = ProgramInfoRequest.build(programName);
+                HttpClientUtil.runAsync(moreInfoRequest, new Callback() {
+
+                    @Override
+                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                        ProgramInfoRequest.onFailure(e);
+                    }
+
+                    @Override
+                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                        moreData[0] = ProgramInfoRequest.onResponse(response);
+                        Platform.runLater(() -> {
+                            setProgramPeek(programPeek[0], moreData[0]);
+
+                        });
+
+                        // Fill History Table
+                        Request userHistoryRequest = requests.UserHistoryRequest.build(programName, userName);
+
+                        HttpClientUtil.runAsync(userHistoryRequest, new Callback() {
+                            @Override
+                            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                                requests.UserHistoryRequest.onFailure(e);
+                            }
+
+                            @Override
+                            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                                requests.UserHistoryRequest.onResponse(response, executionController);
+                            }
+                        });
+                    }
+                });
             }
         });
-
-        Request moreInfoRequest = ProgramInfoRequest.build(programPeek[0].name());
-        HttpClientUtil.runAsync(moreInfoRequest, new Callback() {
-
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                ProgramInfoRequest.onFailure(e);
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                moreData[0] = ProgramInfoRequest.onResponse(response);
-            }
-        });
-
-        setProgramPeek(programPeek[0], moreData[0]);
     }
 
+    public void returnToDashboard() {
+        mainClientAppController.returnToDashboard(topController.getCredits());
+    }
 
-    public Object getMainController() {
-        return mainClientAppController;
+    public int getSelectedDgree() {
+        return topController.getDegreeComboBoxValue();
+    }
+
+    public void updateHighlightedInstructions(List<Integer> numbersList) {
+        instructionsController.updateHighlightedInstructions(numbersList);
+    }
+
+    public List<Integer> getBreakpoints() {
+        return instructionsController.getBreakpointIndices();
+    }
+
+    public instructionsController getInstructionsController() {
+        return instructionsController;
     }
 }
