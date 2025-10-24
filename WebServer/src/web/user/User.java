@@ -19,27 +19,27 @@ public class User {
         return username;
     }
 
-    public long getUsedCredits() {
+    public synchronized long getUsedCredits() {
         return usedCredits;
     }
 
-    public long getTotalCredits() {
+    public synchronized long getTotalCredits() {
         return totalCredits;
     }
 
-    public RunHistory getRunHistory() {
+    public synchronized RunHistory getRunHistory() {
         return runHistory;
     }
 
-    public int getRunCount() {
+    public synchronized int getRunCount() {
         return runHistory.runCount();
     }
 
-    public void addCredits(long credits) {
+    public synchronized void addCredits(long credits) {
         totalCredits += credits;
     }
 
-    public void removeCredits(long credits) {
+    public synchronized void removeCredits(long credits) {
         var hadCredits = totalCredits;
 
         totalCredits = Math.max(totalCredits - credits, 0);
