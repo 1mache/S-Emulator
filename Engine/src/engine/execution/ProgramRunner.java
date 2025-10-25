@@ -143,8 +143,7 @@ public class ProgramRunner {
                 .map(ins -> {
                     InstructionExecutionResult result = ins.execute(runContext);
                     cycles += result.cycles(); // add cycles cost
-                    // update the limiter
-                    executionLimiter.update(result.cycles());
+                    updateLimiter(result);
                     return result.jumpTo();
                 })
                 .orElse(FixedLabel.EMPTY);
@@ -165,6 +164,11 @@ public class ProgramRunner {
 
     protected boolean cannotExecuteNextInstruction(Instruction currInstruction) {
         // check if we can execute the next instruction
-        return executionLimiter.breakCheck(currInstruction);
+        return executionLimiter != null && executionLimiter.breakCheck(currInstruction);
+    }
+
+    private void updateLimiter(InstructionExecutionResult result) {
+        if(executionLimiter != null)
+            executionLimiter.update(result);
     }
 }

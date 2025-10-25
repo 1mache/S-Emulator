@@ -1,6 +1,7 @@
 package web.user;
 
 import engine.execution.ExecutionLimiter;
+import engine.execution.InstructionExecutionResult;
 import engine.instruction.Instruction;
 
 public class CreditExecutionLimiter implements ExecutionLimiter {
@@ -21,7 +22,11 @@ public class CreditExecutionLimiter implements ExecutionLimiter {
     }
 
     @Override
-    public void update(long cycles) {
-        user.removeCredits(cycles);
+    public void update(InstructionExecutionResult result) {
+        user.removeCredits(result.cycles());
+    }
+
+    public boolean isStopped() {
+        return stopped;
     }
 }

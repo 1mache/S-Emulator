@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import web.user.CreditExecutionLimiter;
 import web.user.User;
 import web.utils.ServletUtils;
 
@@ -29,15 +30,20 @@ public class RunProgramServlet extends HttpServlet {
         RunRequest runRequest = ServletUtils.GsonInstance.fromJson(req.getReader(), RunRequest.class);
 
         ProgramExecutionResult result;
+        CreditExecutionLimiter creditLimiter = new CreditExecutionLimiter(user);
         synchronized (getServletContext()){
             result = engine.runProgram(
                     runRequest.programName(),
                     runRequest.expansionDegree(),
                     runRequest.inputs(),
                     true,
-                    user.getRunHistory()
+                    user.getRunHistory(),
+                    creditLimiter
             );
         }
+
+        if(creditLimiter.isStopped())
+            resp.getWriter().println("Program execution has been stopped. Not enough credits");
 
         resp.setContentType("application/json");
         ServletUtils.GsonInstance.toJson(result, resp.getWriter());
