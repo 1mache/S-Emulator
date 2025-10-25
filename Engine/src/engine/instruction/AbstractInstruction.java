@@ -47,6 +47,11 @@ public abstract class AbstractInstruction implements Instruction {
     }
 
     @Override
+    public Architecture getArchitecture() {
+        return data.getArchitecture();
+    }
+
+    @Override
     public InstructionData getData() {
         return data;
     }

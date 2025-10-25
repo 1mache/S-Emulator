@@ -67,6 +67,11 @@ public interface Instruction {
      */
     Label getLabel();
 
+    /**
+     * Returns the {@link Architecture} of this instruction
+     */
+    Architecture getArchitecture();
+
     InstructionData getData();
 
     /**
