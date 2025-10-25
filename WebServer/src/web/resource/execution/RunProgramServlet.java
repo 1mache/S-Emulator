@@ -2,7 +2,6 @@ package web.resource.execution;
 
 import dto.ProgramExecutionResult;
 import dto.server.request.RunRequest;
-import dto.server.response.ProgramExecutionResponse;
 import engine.api.SLanguageEngine;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -43,9 +42,7 @@ public class RunProgramServlet extends HttpServlet {
             );
         }
 
-        ProgramExecutionResponse executionResponse = new ProgramExecutionResponse(result, creditLimiter.isStopped());
-
         resp.setContentType("application/json");
-        ServletUtils.GsonInstance.toJson(executionResponse, resp.getWriter());
+        ServletUtils.GsonInstance.toJson(result, resp.getWriter());
     }
 }

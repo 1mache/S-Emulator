@@ -2,7 +2,7 @@ package dto.debug;
 
 import java.util.Map;
 
-public record DebugEndResult(Long output, Map<String, Long> variableMap, Long cycles) {
+public record DebugEndResult(Long output, Map<String, Long> variableMap, Long cycles, boolean isStoppedEarly) {
     public Long getOutput() {
         return output;
     }

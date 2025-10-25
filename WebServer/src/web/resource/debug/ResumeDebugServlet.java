@@ -30,16 +30,16 @@ public class ResumeDebugServlet extends HttpServlet {
                 var result = debugHandle.getResult();
                 resp.setContentType("application/json");
                 ServletUtils.GsonInstance.toJson(
-                        new DebugStateInfo(true, result.variableMap(), result.cycles(), -1),
+                        new DebugStateInfo(true, false ,result.variableMap(), result.cycles(), -1),
                         resp.getWriter()
                 );
             }
-            else // execution was paused on breakpoint
-            {
+            else{ // execution was paused on breakpoint
                 var result = debugHandle.getResult();
                 resp.setContentType("application/json");
                 ServletUtils.GsonInstance.toJson(
                         new DebugStateInfo(false,
+                                result.isStoppedEarly(),
                                 result.variableMap(),
                                 result.cycles(),
                                 debugHandle.whichLine().orElseThrow()

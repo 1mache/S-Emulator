@@ -9,6 +9,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import web.context.AppContext;
+import web.user.CreditExecutionLimiter;
+import web.user.User;
 import web.utils.ServletUtils;
 
 import java.io.IOException;
@@ -27,16 +29,20 @@ public class StartDebugServlet extends HttpServlet {
             return;
         }
 
+        User user = userManager.getUser(username);
+
         var engine = appContext.getEngine();
         StartDebugRequest debugRequest = ServletUtils.GsonInstance.fromJson(req.getReader(), StartDebugRequest.class);
+        CreditExecutionLimiter creditLimiter = new CreditExecutionLimiter(user);
         DebugHandle debugHandle;
         synchronized (getServletContext()) {
             debugHandle = engine.startDebugSession(
                     debugRequest.programName(),
                     debugRequest.expansionDegree(),
                     debugRequest.inputs(),
-                    userManager.getUser(username).getRunHistory(),
-                    debugRequest.breakpoints()
+                    user.getRunHistory(),
+                    debugRequest.breakpoints(),
+                    creditLimiter
             );
         }
         // store the debug handle for the user
@@ -57,7 +63,7 @@ public class StartDebugServlet extends HttpServlet {
             var result = debugHandle.getResult();
             resp.setContentType("application/json");
             ServletUtils.GsonInstance.toJson(
-                    new DebugStateInfo(true, result.variableMap(), result.cycles(), -1),
+                    new DebugStateInfo(true, false, result.variableMap(), result.cycles(), -1),
                     resp.getWriter()
             );
         }
@@ -67,6 +73,7 @@ public class StartDebugServlet extends HttpServlet {
             resp.setContentType("application/json");
             ServletUtils.GsonInstance.toJson(
                     new DebugStateInfo(false,
+                            result.isStoppedEarly(),
                             result.variableMap(),
                             result.cycles(),
                             debugHandle.whichLine().orElseThrow()

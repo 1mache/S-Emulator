@@ -128,7 +128,8 @@ public class SLanguageEngine {
                 runner.getAllVariableValues(),
                 inputs,
                 expansionDegree,
-                runner.getCycles()
+                runner.getCycles(),
+                executionLimiter != null && executionLimiter.isStopped()
         );
 
         history.addExecution(programName, executionResult);
@@ -180,7 +181,8 @@ public class SLanguageEngine {
                                 debugResult.variableMap(),
                                 inputs,
                                 expansionDegree,
-                                debugger.getCycles()
+                                debugger.getCycles(),
+                                executionLimiter != null && executionLimiter.isStopped()
                         )
                 )
         );

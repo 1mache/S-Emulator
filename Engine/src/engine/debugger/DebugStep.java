@@ -4,5 +4,6 @@ import engine.variable.Variable;
 
 public record DebugStep(
         Variable variableChanged,
-        Long newValue
+        Long newValue,
+        boolean isFailed
 ) {}

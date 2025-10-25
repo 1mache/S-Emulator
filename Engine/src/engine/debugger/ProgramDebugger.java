@@ -64,6 +64,9 @@ public class ProgramDebugger extends ProgramRunner {
         Variable variable = pausedOn.getVariable();
         Long oldValue = runContext.getVariableValue(variable);
 
+        if(cannotExecuteNextInstruction(pausedOn))
+            return new DebugStep(Variable.NO_VAR, -1L, true);
+
         Label jumpLabel = executeInstruction(pausedOn);
 
         Long newValue = runContext.getVariableValue(variable);
@@ -81,7 +84,7 @@ public class ProgramDebugger extends ProgramRunner {
         if(pausedOn == null) // executed last instruction
             transitionToEnd();
 
-        return new DebugStep(variable, newValue);
+        return new DebugStep(variable, newValue, false);
     }
 
     public boolean resume(){
@@ -97,6 +100,10 @@ public class ProgramDebugger extends ProgramRunner {
 
     public void removeBreakpoint(int lineNumber){
         breakpoints.remove(lineNumber);
+    }
+
+    public ExecutionLimiter getExecutionLimiter() {
+        return executionLimiter;
     }
 
     // -------- internal: -------

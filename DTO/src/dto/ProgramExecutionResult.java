@@ -9,7 +9,8 @@ public record ProgramExecutionResult(
         Map<String, Long> variableMap,
         List<Long> inputs,
         int expansionDegree,
-        long cycles
+        long cycles,
+        boolean isEndedEarly
 ) {
     public String getProgramName() {
         return programName;

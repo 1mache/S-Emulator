@@ -26,6 +26,7 @@ public class CreditExecutionLimiter implements ExecutionLimiter {
         user.removeCredits(result.cycles());
     }
 
+    @Override
     public boolean isStopped() {
         return stopped;
     }

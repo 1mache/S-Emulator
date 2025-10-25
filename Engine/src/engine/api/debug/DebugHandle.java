@@ -40,7 +40,8 @@ public class DebugHandle {
         return new DebugStepPeek(
                 variableChanged,
                 debugStep.newValue(),
-                whichLine().orElse(-1)
+                whichLine().orElse(-1),
+                debugStep.isFailed()
         );
     }
 
@@ -62,7 +63,8 @@ public class DebugHandle {
         return new DebugEndResult(
                 debugger.getRunOutput(),
                 debugger.getAllVariableValues(),
-                debugger.getCycles()
+                debugger.getCycles(),
+                debugger.getExecutionLimiter().isStopped()
         );
     }
 
