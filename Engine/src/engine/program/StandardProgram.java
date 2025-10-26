@@ -1,5 +1,6 @@
 package engine.program;
 
+import engine.instruction.Architecture;
 import engine.instruction.Instruction;
 import engine.instruction.utility.InstructionReference;
 import engine.label.FixedLabel;
@@ -98,6 +99,18 @@ public class StandardProgram implements Program {
             maxExpansionDegree = calculateMaxExpansionDegree();
 
         return maxExpansionDegree;
+    }
+
+    @Override
+    public Architecture getArchitecture() {
+        Architecture maxArchitecture = Architecture.I;
+
+        for(var instruction : instructions){
+            if(instruction.getArchitecture().getOrdinal() > maxArchitecture.getOrdinal())
+                maxArchitecture = instruction.getArchitecture();
+        }
+
+        return maxArchitecture;
     }
 
     private int calculateMaxExpansionDegree() {

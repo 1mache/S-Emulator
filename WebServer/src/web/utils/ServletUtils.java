@@ -50,7 +50,8 @@ public class ServletUtils {
                 engine.instructionCountOf(name),
                 engine.getMaxExpansionDegree(name),
                 engine.getRunCountOf(name),
-                engine.getAverageCostOf(name)
+                engine.getAverageCostOf(name),
+                engine.getArchitectureOf(name)
         );
     }
 }

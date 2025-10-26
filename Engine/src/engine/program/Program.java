@@ -1,5 +1,6 @@
 package engine.program;
 
+import engine.instruction.Architecture;
 import engine.instruction.Instruction;
 import engine.label.Label;
 import engine.variable.Variable;
@@ -54,4 +55,9 @@ public interface Program {
      * @return the max degree this program can be expanded to
      */
     int getMaxExpansionDegree();
+
+    /**
+     * @return the architecture of the Program. (max Architecture level)
+     */
+    Architecture getArchitecture();
 }

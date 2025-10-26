@@ -8,5 +8,6 @@ public record InstructionPeek(
         long cycles,
         // which instruction was this expanded from
         InstructionPeek expandedFrom, // can be null
-        int lineId
+        int lineId,
+        String architecture
 ){}

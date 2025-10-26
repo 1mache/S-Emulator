@@ -197,6 +197,14 @@ public class SLanguageEngine {
         return 0; // TODO: proper logic
     }
 
+    public String getArchitectureOf(String programName){
+        if (programNotLoaded(programName))
+            throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
+
+        Program program = getProgramByName(programName);
+        return program.getArchitecture().name();
+    }
+
     // returns all the functions names that the program uses including the main programs. the programs are first in list
     public List<ProgramIdentifier> getAvaliablePrograms() {
         return getFunctionIdentifiers(avaliablePrograms.values());

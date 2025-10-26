@@ -9,7 +9,8 @@ public record ProgramData(
         int instructionCount,
         int maxExpansionDegree,
         int runCount,
-        long avgCreditCost) {
+        long avgCreditCost,
+        String architecture) {
 
     // JavaBean-style getters for JavaFX PropertyValueFactory
     public String getName() { return name; }

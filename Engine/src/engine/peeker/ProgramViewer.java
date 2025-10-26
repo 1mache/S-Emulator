@@ -57,7 +57,8 @@ public class ProgramViewer {
                 getInputVariablePeeks(),
                 getWorkVariablePeeks(),
                 getLabelStrings(expandedProgram.getUsedLabels()),
-                instructionPeeks
+                instructionPeeks,
+                program.getArchitecture().name()
         );
     }
 
@@ -95,7 +96,8 @@ public class ProgramViewer {
                 instruction.isSynthetic(),
                 instruction.staticCycles(),
                 expandedFrom,
-                lineId
+                lineId,
+                instruction.getArchitecture().name()
         );
     }
 

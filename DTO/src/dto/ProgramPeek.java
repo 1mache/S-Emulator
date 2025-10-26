@@ -7,5 +7,6 @@ public record ProgramPeek(
         List<String> inputVariables,
         List<String> workVariables,
         List<String> labelsUsed,
-        List<InstructionPeek> instructions
+        List<InstructionPeek> instructions,
+        String architecture
 ){}
