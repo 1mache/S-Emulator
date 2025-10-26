@@ -96,6 +96,8 @@ public class executionController {
         resumeDebugButton.setDisable(true);
         stepOverDebugButton.setDisable(true);
         stopDebugButton.setDisable(true);
+        architectureSelection.getItems().addAll("I", "II", "III", "IV");
+        architectureSelection.setPromptText("Select architecture");
     }
 
     public void setMainExecutionController(mainExecutionController mainExecutionController) {
@@ -315,9 +317,11 @@ public class executionController {
 
                 // Update UI on the JavaFX Application Thread
                 Platform.runLater(() -> {
+                    mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
+
                     if (debugStateInfo.getNoCredits()) {
                         Alerts.noCreditsAlert();
-                        endDebug();
+                        endDebug(false);
                         return;
                     } else {
                         // Update variable-values map for variableTable
@@ -328,7 +332,7 @@ public class executionController {
 
                         if (debugStateInfo.getFinished()) {
                             // program finished without hitting a breakpoint
-                            endDebug();
+                            endDebug(true);
                         } else {
                             // stopped on a breakpoint
                             mainExecutionController.getInstructionsController().highlightLine(debugStateInfo.getStoppedOnLine());
@@ -341,7 +345,7 @@ public class executionController {
         });
     }
 
-    private void endDebug() {
+    private void endDebug(boolean toPrint) {
         debugModeActive = false;
         resumeDebugButton.setDisable(true);
         stepOverDebugButton.setDisable(true);
@@ -349,7 +353,9 @@ public class executionController {
         // last line or?
         // clear highlighted lines
         mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
-        Alerts.endOfDebug();
+        if (toPrint) {
+            Alerts.endOfDebug();
+        }
     }
 
     @FXML
@@ -374,17 +380,17 @@ public class executionController {
                     if (debugStepPeek.isFailed()) {
                         // program finished
                         Alerts.noCreditsAlert();
-                        endDebug();
+                        endDebug(false);
                         return;
                     } else {
                         mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
+                        // Highlight next line
+                        mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of(debugStepPeek.nextLine()));
 
                         // Update variable-value map for variableTable // only one variable changed
                         if (debugStepPeek.variable().isPresent()) {
                             String varName = debugStepPeek.variable().get();
                             Long newValue = debugStepPeek.newValue();
-                            // Highlight next line
-                            mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of(debugStepPeek.nextLine()));
 
                             variableValues.put(varName, newValue);
                             variableTable.refresh();
@@ -424,9 +430,10 @@ public class executionController {
 
                     if (debugStateInfo.getFinished()) {
                         // program finished without hitting a breakpoint
-                        endDebug();
+                        endDebug(true);
                     } else {
                         // stopped on a breakpoint
+                        mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
                         mainExecutionController.getInstructionsController().highlightLine(debugStateInfo.getStoppedOnLine());
                     }
                     // Update Cycles Counter
@@ -464,12 +471,11 @@ public class executionController {
 
                     // Update Cycles Counter
                     CyclesCounter.setText(valueOf(debugEndResult.getCycles()));
-                    endDebug();
+                    endDebug(true);
                 });
             }
         });
     }
-
 
 
 
@@ -567,4 +573,11 @@ public class executionController {
     public boolean debudgModeActive() {
         return debugModeActive;
     }
+
+    @FXML
+    void architectureSelectionListener(ActionEvent event) {
+        String selectedArchitecture = architectureSelection.getValue();
+        mainExecutionController.setSelectedArchitecture(selectedArchitecture);
+    }
+
 }
