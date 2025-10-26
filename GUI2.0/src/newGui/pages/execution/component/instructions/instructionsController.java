@@ -56,6 +56,7 @@ public class instructionsController {
 
 
     @FXML private TextField SummaryLine;
+    public List<Integer> architectures = new ArrayList<>();
 
     @FXML
     private void initialize() {
@@ -140,11 +141,9 @@ public class instructionsController {
         return new ArrayList<>(breakpointIndices);
     }
 
-
     public void setMainExecutionController(mainExecutionController mainExecutionController) {
         this.mainExecutionController = mainExecutionController;
     }
-
 
     private void showHistoryChain(InstructionPeek instructionPeek) {
         if (instructionPeek == null) {
@@ -178,8 +177,9 @@ public class instructionsController {
             return new SimpleStringProperty(text);
         });
 
-        colHistoryArchitecture.setCellValueFactory(data -> new SimpleStringProperty(""));
-        installRowHighlighter();
+        colArchitecture.setCellValueFactory(data ->
+                new SimpleStringProperty(data.getValue().architecture()));
+
 
     }
 
@@ -245,4 +245,14 @@ public class instructionsController {
         }
         instructionsTable.refresh(); // re-render rows to apply styles
     }
+
+    public void setSummaryLine(int b, int s, List<Integer> architectures) {
+        SummaryLine.setText(
+                String.format("Total: %d Synthetic: %d | Basic: %d | I:%d | II:%d | III:%d | IV:%d",
+                        (b + s), b, s,
+                        architectures.get(0), architectures.get(1), architectures.get(2), architectures.get(3))
+        );
+        this.architectures = new ArrayList<>(architectures);
+    }
+
 }

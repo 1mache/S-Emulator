@@ -1,5 +1,6 @@
 package newGui.pages.execution.component.primary;
 
+import dto.InstructionPeek;
 import dto.ProgramPeek;
 import dto.server.response.ProgramData;
 import javafx.application.Platform;
@@ -54,6 +55,46 @@ public class mainExecutionController {
         executionController.setProgramPeek(programPeek);
         instructionsController.setProgramPeek(programPeek.instructions());
         programName = programPeek.name();
+
+        List<Integer> architectures = getArchitecturesFromInstructions(programPeek.instructions());
+        int B = getBasicInstructionsCount(programPeek.instructions());
+        int S = programPeek.instructions().size() - B;
+
+        instructionsController.setSummaryLine(B, S, architectures);
+    }
+
+    private int getBasicInstructionsCount(List<InstructionPeek> instructions) {
+        int count = 0;
+        for (InstructionPeek instruction : instructions) {
+            if (!instruction.isSynthetic()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private List<Integer> getArchitecturesFromInstructions(List<InstructionPeek> instructions) {
+        // Initialize counters for each architecture
+        int countI = 0;
+        int countII = 0;
+        int countIII = 0;
+        int countIV = 0;
+
+        // Loop through all instructions and count occurrences
+        for (InstructionPeek instruction : instructions) {
+            String arch = instruction.architecture();
+            if (arch == null) continue; // skip if null
+
+            switch (arch.trim()) {
+                case "I" -> countI++;
+                case "II" -> countII++;
+                case "III" -> countIII++;
+                case "IV" -> countIV++;
+            }
+        }
+
+        // Return as list in order [I, II, III, IV]
+        return List.of(countI, countII, countIII, countIV);
     }
 
     public String getProgramName() {
@@ -139,5 +180,10 @@ public class mainExecutionController {
 
     public void setSelectedArchitecture(String selectedArchitecture) {
         architectureSelected = selectedArchitecture;
+    }
+
+
+    public List<Integer> getArchitecturesCount() {
+        return instructionsController.architectures;
     }
 }

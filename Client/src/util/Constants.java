@@ -6,7 +6,7 @@ import okhttp3.MediaType;
 public class Constants {
 
     // global constants
-    public final static String START_NAME = "<Anonymous>";
+    public final static String START_NAME = "Anonymous";
     public final static int REFRESH_RATE = 2;
 
     // fxml locations
@@ -51,7 +51,6 @@ public class Constants {
     public final static String RESUME_DEBUG = FULL_SERVER_PATH +"/debug/resume";
     public final static String STOP_DEBUG = FULL_SERVER_PATH +"/debug/stop";
     public final static String UPDATE_BREAKPOINTS = FULL_SERVER_PATH +"/debug/breakpoint";
-
 
 
 

@@ -93,4 +93,29 @@ public class Alerts {
         alert.setContentText("Not enough credits");
         alert.showAndWait();
     }
+
+    public static void debugModeActiveAlert() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText("Debug Mode Work - if you want to start regular please end debug.");
+        alert.showAndWait();
+    }
+
+    public static void architectureNotSelected() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText("If you want to run please select architecture.");
+        alert.showAndWait();
+    }
+
+    public static void architectureDependencyAlert(String selectedArch, int i) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(
+                "Can't run there are instructions in architecture " + i + " and you select architecture " + selectedArch +" .");
+        alert.showAndWait();
+    }
 }

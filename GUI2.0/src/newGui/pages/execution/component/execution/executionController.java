@@ -483,10 +483,43 @@ public class executionController {
     }
 
 
+    private int getArchitectureNumber(String architecture) {
+        switch (architecture) {
+            case "I":
+                return 0;
+            case "II":
+                return 1;
+            case "III":
+                return 2;
+            case "IV":
+                return 3;
+            default:
+                return -1; // or throw an exception
+        }
+    }
+
 
     // Run
     @FXML
     void startListener(ActionEvent event) {
+        if (debugModeActive) {
+            Alerts.debugModeActiveAlert();
+            return;
+        }
+        String selectedArch = architectureSelection.getValue();
+        if (selectedArch == null) {
+            Alerts.architectureNotSelected();
+            return;
+        }
+        int archNum = getArchitectureNumber(selectedArch);
+        for (int i = archNum + 1; i < 5; i++) {
+            if(mainExecutionController.getArchitecturesCount().get(i) != 0) {
+                Alerts.architectureDependencyAlert(selectedArch, i);
+                return;
+            }
+        }
+
+
         List<Long> inputs = sortKeysBySubstring(inputValues);
         int extensionDegree = mainExecutionController.getSelectedDgree();
         String programName = mainExecutionController.getProgramName();
