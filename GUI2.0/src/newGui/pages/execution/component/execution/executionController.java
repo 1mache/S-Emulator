@@ -315,21 +315,27 @@ public class executionController {
 
                 // Update UI on the JavaFX Application Thread
                 Platform.runLater(() -> {
-                    // Update variable-values map for variableTable
-                    Map<String, Long> outMap = debugStateInfo.getVariableMap();
-                    variableValues.clear();
-                    variableValues.putAll(outMap);
-                    variableTable.refresh();
-
-                    if (debugStateInfo.getFinished()) {
-                        // program finished without hitting a breakpoint
+                    if (debugStateInfo.getNoCredits()) {
+                        Alerts.noCreditsAlert();
                         endDebug();
+                        return;
                     } else {
-                        // stopped on a breakpoint
-                        mainExecutionController.getInstructionsController().highlightLine(debugStateInfo.getStoppedOnLine());
+                        // Update variable-values map for variableTable
+                        Map<String, Long> outMap = debugStateInfo.getVariableMap();
+                        variableValues.clear();
+                        variableValues.putAll(outMap);
+                        variableTable.refresh();
+
+                        if (debugStateInfo.getFinished()) {
+                            // program finished without hitting a breakpoint
+                            endDebug();
+                        } else {
+                            // stopped on a breakpoint
+                            mainExecutionController.getInstructionsController().highlightLine(debugStateInfo.getStoppedOnLine());
+                        }
+                        // Update Cycles Counter
+                        CyclesCounter.setText(valueOf(debugStateInfo.getCycles()));
                     }
-                    // Update Cycles Counter
-                    CyclesCounter.setText(valueOf(debugStateInfo.getCycles()));
                 });
             }
         });
@@ -365,17 +371,24 @@ public class executionController {
 
                 // Update UI on the JavaFX Application Thread
                 Platform.runLater(() -> {
-                    mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
+                    if (debugStepPeek.isFailed()) {
+                        // program finished
+                        Alerts.noCreditsAlert();
+                        endDebug();
+                        return;
+                    } else {
+                        mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
 
-                    // Update variable-value map for variableTable // only one variable changed
-                    if (debugStepPeek.variable().isPresent()) {
-                        String varName = debugStepPeek.variable().get();
-                        Long newValue = debugStepPeek.newValue();
-                        // Highlight next line
-                        mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of(debugStepPeek.nextLine()));
+                        // Update variable-value map for variableTable // only one variable changed
+                        if (debugStepPeek.variable().isPresent()) {
+                            String varName = debugStepPeek.variable().get();
+                            Long newValue = debugStepPeek.newValue();
+                            // Highlight next line
+                            mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of(debugStepPeek.nextLine()));
 
-                        variableValues.put(varName, newValue);
-                        variableTable.refresh();
+                            variableValues.put(varName, newValue);
+                            variableTable.refresh();
+                        }
                     }
                 });
             }
@@ -485,32 +498,36 @@ public class executionController {
 
                 // Update maps and tables on the JavaFX Application Thread
                 Platform.runLater(() -> {
-                    // Update the variable-values map for the variableTable
-                    Map<String, Long> outMap = res.getVariableMap();// or res.variableMap() if you use record accessors
-                    long result = res.getOutputValue();// or res.outputValue() if you use record accessors
-                    outMap.put("y", result); // add the output value with key "y"
-                    variableValues.clear();
-                    variableValues.putAll(outMap);
-                    variableTable.refresh();
+                    if( res.isEndedEarly()){
+                        Alerts.noCreditsAlert();
+                    } else {
+                        // Update the variable-values map for the variableTable
+                        Map<String, Long> outMap = res.getVariableMap();// or res.variableMap() if you use record accessors
+                        long result = res.getOutputValue();// or res.outputValue() if you use record accessors
+                        outMap.put("y", result); // add the output value with key "y"
+                        variableValues.clear();
+                        variableValues.putAll(outMap);
+                        variableTable.refresh();
 
-                    // Update the Cycles Counter
-                    CyclesCounter.setText(valueOf(res.getCycles()));
+                        // Update the Cycles Counter
+                        CyclesCounter.setText(valueOf(res.getCycles()));
 
 
-                    // Update history table
-                    // requet for history table
-                    Request userHistoryRequest = requests.UserHistoryRequest.build(mainExecutionController.getProgramName(), mainExecutionController.userName);
-                    HttpClientUtil.runAsync(userHistoryRequest, new Callback() {
-                        @Override
-                        public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                            requests.UserHistoryRequest.onFailure(e);
-                        }
+                        // Update history table
+                        // requet for history table
+                        Request userHistoryRequest = requests.UserHistoryRequest.build(mainExecutionController.getProgramName(), mainExecutionController.userName);
+                        HttpClientUtil.runAsync(userHistoryRequest, new Callback() {
+                            @Override
+                            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                                requests.UserHistoryRequest.onFailure(e);
+                            }
 
-                        @Override
-                        public void onResponse(@NotNull Call call, @NotNull Response response) {
-                           requests.UserHistoryRequest.onResponse(response, executionController.this);
-                        }
-                    });
+                            @Override
+                            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                                requests.UserHistoryRequest.onResponse(response, executionController.this);
+                            }
+                        });
+                    }
 
                 });
             }

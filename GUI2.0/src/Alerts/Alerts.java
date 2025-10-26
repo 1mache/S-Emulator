@@ -86,4 +86,11 @@ public class Alerts {
         return null;
     }
 
+    public static void noCreditsAlert() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Credits Error");
+        alert.setHeaderText(null);
+        alert.setContentText("Not enough credits");
+        alert.showAndWait();
+    }
 }
