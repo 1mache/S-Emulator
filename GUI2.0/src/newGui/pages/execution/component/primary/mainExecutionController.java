@@ -131,4 +131,8 @@ public class mainExecutionController {
     public instructionsController getInstructionsController() {
         return instructionsController;
     }
+
+    public boolean debugModeActive() {
+        return executionController.debudgModeActive();
+    }
 }

@@ -87,6 +87,8 @@ public class executionController {
     @FXML private ComboBox<String> architectureSelection;
     @FXML private TextField CyclesCounter;
 
+    private boolean debugModeActive = false;
+
 
     @FXML
     private void initialize() {
@@ -284,7 +286,7 @@ public class executionController {
     // Debugger
     @FXML
     void startDebugListener(ActionEvent event) {
-
+        debugModeActive = true;
         resumeDebugButton.setDisable(false);
         stepOverDebugButton.setDisable(false);
         stopDebugButton.setDisable(false);
@@ -334,6 +336,7 @@ public class executionController {
     }
 
     private void endDebug() {
+        debugModeActive = false;
         resumeDebugButton.setDisable(true);
         stepOverDebugButton.setDisable(true);
         stopDebugButton.setDisable(true);
@@ -542,5 +545,9 @@ public class executionController {
 
         // Add new rows
         historyTable.getItems().addAll(results);
+    }
+
+    public boolean debudgModeActive() {
+        return debugModeActive;
     }
 }

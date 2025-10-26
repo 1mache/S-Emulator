@@ -52,6 +52,7 @@ public class Constants {
     public final static String STEP_OVER_DEBUG = FULL_SERVER_PATH +"/debug/step-over";
     public final static String RESUME_DEBUG = FULL_SERVER_PATH +"/debug/resume";
     public final static String STOP_DEBUG = FULL_SERVER_PATH +"/debug/stop";
+    public final static String UPDATE_BREAKPOINTS = FULL_SERVER_PATH +"/debug/breakpoint";
 
 
 
