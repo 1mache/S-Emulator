@@ -88,6 +88,14 @@ public class executionController {
     @FXML private TextField CyclesCounter;
 
 
+    @FXML
+    private void initialize() {
+        // Initialization logic if needed
+        resumeDebugButton.setDisable(true);
+        stepOverDebugButton.setDisable(true);
+        stopDebugButton.setDisable(true);
+    }
+
     public void setMainExecutionController(mainExecutionController mainExecutionController) {
         this.mainExecutionController = mainExecutionController;
     }
@@ -277,6 +285,10 @@ public class executionController {
     @FXML
     void startDebugListener(ActionEvent event) {
 
+        resumeDebugButton.setDisable(false);
+        stepOverDebugButton.setDisable(false);
+        stopDebugButton.setDisable(false);
+
         Request runDebugRequest = requests.StartDebugRequest.build(
                 new dto.server.request.StartDebugRequest(
                         mainExecutionController.getProgramName(),
@@ -322,6 +334,9 @@ public class executionController {
     }
 
     private void endDebug() {
+        resumeDebugButton.setDisable(true);
+        stepOverDebugButton.setDisable(true);
+        stopDebugButton.setDisable(true);
         // last line or?
         // clear highlighted lines
         mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
@@ -353,6 +368,9 @@ public class executionController {
                     if (debugStepPeek.variable().isPresent()) {
                         String varName = debugStepPeek.variable().get();
                         Long newValue = debugStepPeek.newValue();
+                        // Highlight next line
+                        mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of(debugStepPeek.nextLine()));
+
                         variableValues.put(varName, newValue);
                         variableTable.refresh();
                     }
