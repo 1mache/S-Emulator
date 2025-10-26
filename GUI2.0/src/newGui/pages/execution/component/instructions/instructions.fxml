@@ -18,7 +18,7 @@
             <Insets />
          </VBox.margin>
       </Label>
-      <TableView fx:id="instructionsTable" onMouseClicked="#showHistoryChain" style="-fx-alignment: CENTER;" VBox.vgrow="ALWAYS">
+      <TableView fx:id="instructionsTable" style="-fx-alignment: CENTER;" VBox.vgrow="ALWAYS">
          <columns>
             <TableColumn fx:id="colNumber" prefWidth="71.33330810070038" style="-fx-alignment: CENTER; -fx-font-size: 12;" text="Number" />
             <TableColumn fx:id="colLabel" prefWidth="53.3333740234375" style="-fx-alignment: CENTER; -fx-font-size: 12;" text="Label" />

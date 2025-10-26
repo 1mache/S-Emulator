@@ -61,6 +61,12 @@ public class instructionsController {
     private void initialize() {
         refreshRowStylesWithBreakpoints();
         installBreakpointToggleByDoubleClick();
+
+        instructionsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                showHistoryChain(newSelection);
+            }
+        });
     }
 
     private void refreshRowStylesWithBreakpoints() {
@@ -139,9 +145,8 @@ public class instructionsController {
         this.mainExecutionController = mainExecutionController;
     }
 
-    @FXML
-    void showHistoryChain(MouseEvent event) {
-        InstructionPeek instructionPeek = instructionsTable.getSelectionModel().getSelectedItem();
+
+    private void showHistoryChain(InstructionPeek instructionPeek) {
         if (instructionPeek == null) {
             return;
         }
@@ -177,6 +182,7 @@ public class instructionsController {
         installRowHighlighter();
 
     }
+
 
     public void setProgramPeek(List<InstructionPeek> instructions) {
         instructionsTable.getItems().clear();
