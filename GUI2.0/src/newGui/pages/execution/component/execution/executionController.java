@@ -319,26 +319,27 @@ public class executionController {
                 Platform.runLater(() -> {
                     mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
 
+
+                    // Update variable-values map for variableTable
+                    Map<String, Long> outMap = debugStateInfo.getVariableMap();
+                    variableValues.clear();
+                    variableValues.putAll(outMap);
+                    variableTable.refresh();
+
+                    if (debugStateInfo.getFinished()) {
+                        // program finished without hitting a breakpoint
+                        endDebug(true);
+                    } else {
+                        // stopped on a breakpoint
+                        mainExecutionController.getInstructionsController().highlightLine(debugStateInfo.getStoppedOnLine());
+                    }
+                    // Update Cycles Counter
+                    CyclesCounter.setText(valueOf(debugStateInfo.getCycles()));
+
                     if (debugStateInfo.getNoCredits()) {
                         Alerts.noCreditsAlert();
                         endDebug(false);
                         return;
-                    } else {
-                        // Update variable-values map for variableTable
-                        Map<String, Long> outMap = debugStateInfo.getVariableMap();
-                        variableValues.clear();
-                        variableValues.putAll(outMap);
-                        variableTable.refresh();
-
-                        if (debugStateInfo.getFinished()) {
-                            // program finished without hitting a breakpoint
-                            endDebug(true);
-                        } else {
-                            // stopped on a breakpoint
-                            mainExecutionController.getInstructionsController().highlightLine(debugStateInfo.getStoppedOnLine());
-                        }
-                        // Update Cycles Counter
-                        CyclesCounter.setText(valueOf(debugStateInfo.getCycles()));
                     }
                 });
             }
@@ -377,24 +378,24 @@ public class executionController {
 
                 // Update UI on the JavaFX Application Thread
                 Platform.runLater(() -> {
+
+                    mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
+                    // Highlight next line
+                    mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of(debugStepPeek.nextLine()));
+
+                    // Update variable-value map for variableTable // only one variable changed
+                    if (debugStepPeek.variable().isPresent()) {
+                        String varName = debugStepPeek.variable().get();
+                        Long newValue = debugStepPeek.newValue();
+
+                        variableValues.put(varName, newValue);
+                        variableTable.refresh();
+                    }
                     if (debugStepPeek.isFailed()) {
                         // program finished
                         Alerts.noCreditsAlert();
                         endDebug(false);
                         return;
-                    } else {
-                        mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
-                        // Highlight next line
-                        mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of(debugStepPeek.nextLine()));
-
-                        // Update variable-value map for variableTable // only one variable changed
-                        if (debugStepPeek.variable().isPresent()) {
-                            String varName = debugStepPeek.variable().get();
-                            Long newValue = debugStepPeek.newValue();
-
-                            variableValues.put(varName, newValue);
-                            variableTable.refresh();
-                        }
                     }
                 });
             }
@@ -438,6 +439,10 @@ public class executionController {
                     }
                     // Update Cycles Counter
                     CyclesCounter.setText(valueOf(debugStateInfo.getCycles()));
+                    if( debugStateInfo.getNoCredits()) {
+                        Alerts.noCreditsAlert();
+                        endDebug(false);
+                    }
                 });
             }
         });
