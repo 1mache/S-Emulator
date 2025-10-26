@@ -38,7 +38,7 @@ public class topController {
     @FXML private Label statusLabel;
     @FXML private Label userName;
     @FXML private TextField availableCredits;
-    private LongProperty credits = new SimpleLongProperty(1000);
+    private LongProperty credits = new SimpleLongProperty(0);
 
     @FXML private TextField creditsAmount;
     @FXML private TextField currentlyLoadedFilePath;
@@ -184,28 +184,6 @@ public class topController {
                     setBusy(false);
                 });
                 UploadRequest.onResponse( response, currentlyLoadedFilePath, statusLabel, clearStatusLater);
-//                if (response.code() != 200) {
-//                    assert response.body() != null;
-//                    String responseBody = response.body().string();
-//                    Platform.runLater(() -> {
-//                        Alerts.loadField(responseBody);
-//                        setStatus("", true);
-//                        currentlyLoadedFilePath.setText("Currently Loaded File");
-//                    });
-//                }
-//                else {
-//                    String responseBody = response.body().string();
-//                    Platform.runLater(() -> {
-//                        if (responseBody != null && !responseBody.isEmpty()) {
-//                           Alerts.loadField(responseBody);
-//                        } else {
-//                            Alerts.loadSucceeded();
-//                        }
-//                        setStatus("Finish", true);
-//                        currentlyLoadedFilePath.setText("Currently Loaded File");
-//
-//                    });
-//                }
             }
         });
     }

@@ -4,6 +4,7 @@ package requests;
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import newGui.pages.primary.mainClientAppController;
+import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -17,16 +18,15 @@ public class LoginRequest {
 
     public static Request build(String userName) {
 
-        Map<String, Object> jsonMap = new LinkedHashMap<>();
-        jsonMap.put("username", userName);
-        jsonMap.put("startCreditAmount", Long.valueOf(1000));
-        String json = GSON_INSTANCE.toJson(jsonMap);
+        HttpUrl url = HttpUrl.parse(Constants.LOGIN)
+                .newBuilder()
+                .addQueryParameter("username",userName)
+                .build();
 
-        RequestBody body = RequestBody.create(json, Constants.MEDIA_TYPE_JSON);
 
         return new Request.Builder()
-                .url(Constants.LOGIN)
-                .post(body)
+                .url(url)
+                .post(RequestBody.create(new byte[0], null))
                 .build();
     }
 

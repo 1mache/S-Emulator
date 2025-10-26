@@ -87,6 +87,18 @@ public class executionController {
     @FXML private ComboBox<String> architectureSelection;
     @FXML private TextField CyclesCounter;
 
+    private boolean debugModeActive = false;
+
+
+    @FXML
+    private void initialize() {
+        // Initialization logic if needed
+        resumeDebugButton.setDisable(true);
+        stepOverDebugButton.setDisable(true);
+        stopDebugButton.setDisable(true);
+        architectureSelection.getItems().addAll("I", "II", "III", "IV");
+        architectureSelection.setPromptText("Select architecture");
+    }
 
     public void setMainExecutionController(mainExecutionController mainExecutionController) {
         this.mainExecutionController = mainExecutionController;
@@ -276,6 +288,10 @@ public class executionController {
     // Debugger
     @FXML
     void startDebugListener(ActionEvent event) {
+        debugModeActive = true;
+        resumeDebugButton.setDisable(false);
+        stepOverDebugButton.setDisable(false);
+        stopDebugButton.setDisable(false);
 
         Request runDebugRequest = requests.StartDebugRequest.build(
                 new dto.server.request.StartDebugRequest(
@@ -301,6 +317,9 @@ public class executionController {
 
                 // Update UI on the JavaFX Application Thread
                 Platform.runLater(() -> {
+                    mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
+
+
                     // Update variable-values map for variableTable
                     Map<String, Long> outMap = debugStateInfo.getVariableMap();
                     variableValues.clear();
@@ -309,23 +328,35 @@ public class executionController {
 
                     if (debugStateInfo.getFinished()) {
                         // program finished without hitting a breakpoint
-                        endDebug();
+                        endDebug(true);
                     } else {
                         // stopped on a breakpoint
                         mainExecutionController.getInstructionsController().highlightLine(debugStateInfo.getStoppedOnLine());
                     }
                     // Update Cycles Counter
                     CyclesCounter.setText(valueOf(debugStateInfo.getCycles()));
+
+                    if (debugStateInfo.getNoCredits()) {
+                        Alerts.noCreditsAlert();
+                        endDebug(false);
+                        return;
+                    }
                 });
             }
         });
     }
 
-    private void endDebug() {
+    private void endDebug(boolean toPrint) {
+        debugModeActive = false;
+        resumeDebugButton.setDisable(true);
+        stepOverDebugButton.setDisable(true);
+        stopDebugButton.setDisable(true);
         // last line or?
         // clear highlighted lines
         mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
-        Alerts.endOfDebug();
+        if (toPrint) {
+            Alerts.endOfDebug();
+        }
     }
 
     @FXML
@@ -347,14 +378,24 @@ public class executionController {
 
                 // Update UI on the JavaFX Application Thread
                 Platform.runLater(() -> {
+
                     mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
+                    // Highlight next line
+                    mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of(debugStepPeek.nextLine()));
 
                     // Update variable-value map for variableTable // only one variable changed
                     if (debugStepPeek.variable().isPresent()) {
                         String varName = debugStepPeek.variable().get();
                         Long newValue = debugStepPeek.newValue();
+
                         variableValues.put(varName, newValue);
                         variableTable.refresh();
+                    }
+                    if (debugStepPeek.isFailed()) {
+                        // program finished
+                        Alerts.noCreditsAlert();
+                        endDebug(false);
+                        return;
                     }
                 });
             }
@@ -390,13 +431,18 @@ public class executionController {
 
                     if (debugStateInfo.getFinished()) {
                         // program finished without hitting a breakpoint
-                        endDebug();
+                        endDebug(true);
                     } else {
                         // stopped on a breakpoint
+                        mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
                         mainExecutionController.getInstructionsController().highlightLine(debugStateInfo.getStoppedOnLine());
                     }
                     // Update Cycles Counter
                     CyclesCounter.setText(valueOf(debugStateInfo.getCycles()));
+                    if( debugStateInfo.getNoCredits()) {
+                        Alerts.noCreditsAlert();
+                        endDebug(false);
+                    }
                 });
             }
         });
@@ -430,12 +476,11 @@ public class executionController {
 
                     // Update Cycles Counter
                     CyclesCounter.setText(valueOf(debugEndResult.getCycles()));
-                    endDebug();
+                    endDebug(true);
                 });
             }
         });
     }
-
 
 
 
@@ -464,32 +509,36 @@ public class executionController {
 
                 // Update maps and tables on the JavaFX Application Thread
                 Platform.runLater(() -> {
-                    // Update the variable-values map for the variableTable
-                    Map<String, Long> outMap = res.getVariableMap();// or res.variableMap() if you use record accessors
-                    long result = res.getOutputValue();// or res.outputValue() if you use record accessors
-                    outMap.put("y", result); // add the output value with key "y"
-                    variableValues.clear();
-                    variableValues.putAll(outMap);
-                    variableTable.refresh();
+                    if( res.isEndedEarly()){
+                        Alerts.noCreditsAlert();
+                    } else {
+                        // Update the variable-values map for the variableTable
+                        Map<String, Long> outMap = res.getVariableMap();// or res.variableMap() if you use record accessors
+                        long result = res.getOutputValue();// or res.outputValue() if you use record accessors
+                        outMap.put("y", result); // add the output value with key "y"
+                        variableValues.clear();
+                        variableValues.putAll(outMap);
+                        variableTable.refresh();
 
-                    // Update the Cycles Counter
-                    CyclesCounter.setText(valueOf(res.getCycles()));
+                        // Update the Cycles Counter
+                        CyclesCounter.setText(valueOf(res.getCycles()));
 
 
-                    // Update history table
-                    // requet for history table
-                    Request userHistoryRequest = requests.UserHistoryRequest.build(mainExecutionController.getProgramName(), mainExecutionController.userName);
-                    HttpClientUtil.runAsync(userHistoryRequest, new Callback() {
-                        @Override
-                        public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                            requests.UserHistoryRequest.onFailure(e);
-                        }
+                        // Update history table
+                        // requet for history table
+                        Request userHistoryRequest = requests.UserHistoryRequest.build(mainExecutionController.getProgramName(), mainExecutionController.userName);
+                        HttpClientUtil.runAsync(userHistoryRequest, new Callback() {
+                            @Override
+                            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                                requests.UserHistoryRequest.onFailure(e);
+                            }
 
-                        @Override
-                        public void onResponse(@NotNull Call call, @NotNull Response response) {
-                           requests.UserHistoryRequest.onResponse(response, executionController.this);
-                        }
-                    });
+                            @Override
+                            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                                requests.UserHistoryRequest.onResponse(response, executionController.this);
+                            }
+                        });
+                    }
 
                 });
             }
@@ -525,4 +574,15 @@ public class executionController {
         // Add new rows
         historyTable.getItems().addAll(results);
     }
+
+    public boolean debudgModeActive() {
+        return debugModeActive;
+    }
+
+    @FXML
+    void architectureSelectionListener(ActionEvent event) {
+        String selectedArchitecture = architectureSelection.getValue();
+        mainExecutionController.setSelectedArchitecture(selectedArchitecture);
+    }
+
 }

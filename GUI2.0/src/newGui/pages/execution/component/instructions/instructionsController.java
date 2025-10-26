@@ -1,6 +1,7 @@
 package newGui.pages.execution.component.instructions;
 
 import dto.InstructionPeek;
+import dto.server.request.BreakpointRequest;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
@@ -9,7 +10,16 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import newGui.pages.execution.component.primary.mainExecutionController;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Request;
+import okhttp3.Response;
+import org.jetbrains.annotations.NotNull;
+import requests.HighlightInfoRequest;
+import requests.UpdateBreakpointRequest;
+import util.http.HttpClientUtil;
 
+import java.io.IOException;
 import java.util.*;
 
 public class instructionsController {
@@ -51,6 +61,12 @@ public class instructionsController {
     private void initialize() {
         refreshRowStylesWithBreakpoints();
         installBreakpointToggleByDoubleClick();
+
+        instructionsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                showHistoryChain(newSelection);
+            }
+        });
     }
 
     private void refreshRowStylesWithBreakpoints() {
@@ -88,15 +104,36 @@ public class instructionsController {
             if (e.getClickCount() == 2) {
                 int idx = instructionsTable.getSelectionModel().getSelectedIndex();
                 if (idx >= 0) {
-                    if (breakpointIndices.contains(idx)) {
+                    Boolean contains = breakpointIndices.contains(idx);
+                    if (contains) {
                         breakpointIndices.remove(idx);
                     } else {
                         breakpointIndices.add(idx);
                     }
                     instructionsTable.refresh();
+                    if (mainExecutionController.debugModeActive()){
+                        sendNewRequestOnBreakpointChange(idx,contains);
+                    }
                 }
             }
         });
+    }
+
+    private void sendNewRequestOnBreakpointChange(int idx, Boolean contains) {
+        Request changeBreakpointRequest = UpdateBreakpointRequest.build(new BreakpointRequest(idx, contains));
+        HttpClientUtil.runAsync(changeBreakpointRequest, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                UpdateBreakpointRequest.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                UpdateBreakpointRequest.onResponse(response);
+            }
+        });
+
+
     }
 
     public List<Integer> getBreakpointIndices() {
@@ -108,9 +145,8 @@ public class instructionsController {
         this.mainExecutionController = mainExecutionController;
     }
 
-    @FXML
-    void showHistoryChain(MouseEvent event) {
-        InstructionPeek instructionPeek = instructionsTable.getSelectionModel().getSelectedItem();
+
+    private void showHistoryChain(InstructionPeek instructionPeek) {
         if (instructionPeek == null) {
             return;
         }
@@ -146,6 +182,7 @@ public class instructionsController {
         installRowHighlighter();
 
     }
+
 
     public void setProgramPeek(List<InstructionPeek> instructions) {
         instructionsTable.getItems().clear();
