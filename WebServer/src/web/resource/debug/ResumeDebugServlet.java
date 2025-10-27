@@ -48,7 +48,7 @@ public class ResumeDebugServlet extends AuthorizingServlet {
                                 result.isStoppedEarly(),
                                 result.variableMap(),
                                 result.cycles(),
-                                debugHandle.whichLine().orElseThrow()
+                                debugHandle.whichLine().orElse(-1)
                         ),
                         resp.getWriter()
                 );
