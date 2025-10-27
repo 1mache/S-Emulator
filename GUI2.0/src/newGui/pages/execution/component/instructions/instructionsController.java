@@ -6,19 +6,15 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Circle;
 import newGui.pages.execution.component.primary.mainExecutionController;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
-import requests.HighlightInfoRequest;
 import requests.UpdateBreakpointRequest;
 import util.http.HttpClientUtil;
-
 import java.io.IOException;
 import java.util.*;
 
@@ -183,7 +179,6 @@ public class instructionsController {
 
     }
 
-
     public void setProgramPeek(List<InstructionPeek> instructions) {
         instructionsTable.getItems().clear();
         instructionsTable.getItems().addAll(instructions);
@@ -206,11 +201,16 @@ public class instructionsController {
             return new SimpleStringProperty(text);
         });
 
-        colArchitecture.setCellValueFactory(data -> new SimpleStringProperty(""));
-        installRowHighlighter();
+
+        colArchitecture.setCellValueFactory(data ->
+                new SimpleStringProperty(data.getValue().architecture()));
+
+
+
+//        colArchitecture.setCellValueFactory(data -> new SimpleStringProperty(""));
+//        installRowHighlighter();
 
     }
-
 
     private void installRowHighlighter() {
         if (instructionsTable.getRowFactory() != null) return;
@@ -229,7 +229,6 @@ public class instructionsController {
             }
         });
     }
-
 
     public void updateHighlightedInstructions(List<Integer> indices) {
         highlighted.clear();

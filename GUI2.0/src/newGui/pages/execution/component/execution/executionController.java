@@ -276,6 +276,7 @@ public class executionController {
         stage.centerOnScreen();
         stage.show();
     }
+
     // Helper: get input variable names sorted by index (x1, x2, x10, ...)
     private List<String> getSortedInputNames() {
         return inputValues.keySet()
@@ -513,7 +514,7 @@ public class executionController {
         }
         int archNum = getArchitectureNumber(selectedArch);
         for (int i = archNum + 1; i < 5; i++) {
-            if(mainExecutionController.getArchitecturesCount().get(i) != 0) {
+            if(mainExecutionController.getArchitecturesCount().get(i) != 0 || mainExecutionController.getArchitecturesCount().get(i) == null) {
                 Alerts.architectureDependencyAlert(selectedArch, i);
                 return;
             }
