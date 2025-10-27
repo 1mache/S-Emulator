@@ -4,24 +4,30 @@ import dto.server.response.DebugStateInfo;
 import engine.api.debug.DebugHandle;
 import engine.debugger.exception.DebugStateException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import web.context.AppContext;
+import web.exception.BadAuthorizationException;
 import web.exception.NotInDebugException;
+import web.resource.AuthorizingServlet;
+import web.user.User;
 import web.utils.ServletUtils;
 
 import java.io.IOException;
 
 @WebServlet(urlPatterns = "/debug/resume")
-public class ResumeDebugServlet extends HttpServlet {
+public class ResumeDebugServlet extends AuthorizingServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String username = ServletUtils.getUsernameFromRequest(req);
-        var appContext = ServletUtils.getAppContext(getServletContext());
-        if(username == null || !appContext.getUserManager().userExists(username)) {
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        User user;
+        try {
+            user = authorize(req, resp);
+        } catch (BadAuthorizationException e) {
             return;
         }
+
+        AppContext appContext = ServletUtils.getAppContext(getServletContext());
+        String username = user.getName();
 
         try {
             DebugHandle debugHandle = appContext.getDebugHandle(username);

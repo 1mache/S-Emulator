@@ -1,24 +1,26 @@
 package web.resource.execution;
 
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import web.context.AppContext;
+import web.exception.BadAuthorizationException;
+import web.resource.AuthorizingServlet;
 import web.utils.ServletUtils;
 
 import java.io.IOException;
 
 @WebServlet(urlPatterns = {"/execution/view-program"})
-public class ViewProgramServlet extends HttpServlet {
+public class ViewProgramServlet extends AuthorizingServlet {
     private static final String PROGRAM_NAME_PARAM = "programName";
     private static final String EXP_DEGREE_PARAM = "expansionDegree";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String username = ServletUtils.getUsernameFromRequest(req);
-        var appContext = ServletUtils.getAppContext(getServletContext());
-        if(username == null || !appContext.getUserManager().userExists(username)){
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        try {
+            // just an authorization check
+            authorize(req, resp);
+        } catch (BadAuthorizationException e) {
             return;
         }
 
@@ -39,6 +41,7 @@ public class ViewProgramServlet extends HttpServlet {
         }
 
         resp.setContentType("application/json");
+        AppContext appContext = ServletUtils.getAppContext(getServletContext());
         synchronized (getServletContext()) {
             ServletUtils.GsonInstance.toJson(
                     appContext.getEngine().getProgramPeek(programName, expansionDegree),

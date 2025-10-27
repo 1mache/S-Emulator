@@ -5,8 +5,6 @@ import dto.ProgramIdentifier;
 import dto.server.response.ProgramData;
 import engine.api.SLanguageEngine;
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import web.context.AppContext;
 
 public class ServletUtils {
@@ -28,14 +26,6 @@ public class ServletUtils {
         }
 
         return appContext;
-    }
-
-    public static String getUsernameFromRequest(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return null;
-        }
-        return (String) session.getAttribute(ServletUtils.USERNAME_ATR_NAME);
     }
 
     public static ProgramData buildProgramDataObject(ProgramIdentifier programIdentifier,

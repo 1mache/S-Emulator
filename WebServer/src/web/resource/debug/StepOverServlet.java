@@ -4,23 +4,28 @@ import dto.debug.DebugStepPeek;
 import engine.api.debug.DebugHandle;
 import engine.debugger.exception.DebugStateException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import web.context.AppContext;
+import web.exception.BadAuthorizationException;
 import web.exception.NotInDebugException;
+import web.resource.AuthorizingServlet;
+import web.user.User;
 import web.utils.ServletUtils;
 
 import java.io.IOException;
 
 @WebServlet(urlPatterns = "/debug/step-over")
-public class StepOverServlet extends HttpServlet {
+public class StepOverServlet extends AuthorizingServlet {
     public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String username = ServletUtils.getUsernameFromRequest(req);
-        var appContext = ServletUtils.getAppContext(getServletContext());
-        if(username == null || !appContext.getUserManager().userExists(username)) {
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        User user;
+        try {
+            user = authorize(req, resp);
+        } catch (BadAuthorizationException e) {
             return;
         }
+        String username = user.getName();
+        AppContext appContext = ServletUtils.getAppContext(getServletContext());
 
         try {
             DebugHandle debugHandle = appContext.getDebugHandle(username);

@@ -5,10 +5,11 @@ import dto.server.response.DebugStateInfo;
 import engine.api.debug.DebugHandle;
 import engine.debugger.exception.DebugStateException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import web.context.AppContext;
+import web.exception.BadAuthorizationException;
+import web.resource.AuthorizingServlet;
 import web.user.CreditExecutionLimiter;
 import web.user.User;
 import web.utils.ServletUtils;
@@ -16,20 +17,17 @@ import web.utils.ServletUtils;
 import java.io.IOException;
 
 @WebServlet(name = "StartDebugServlet", urlPatterns = {"/debug/start"})
-public class StartDebugServlet extends HttpServlet {
+public class StartDebugServlet extends AuthorizingServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        var appContext = (AppContext) req.getServletContext().getAttribute("appContext");
-        var userManager = appContext.getUserManager();
-
-        String username = ServletUtils.getUsernameFromRequest(req);
-
-        if(username == null || !appContext.getUserManager().userExists(username)) {
-            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        User user;
+        try {
+            user = authorize(req, resp);
+        } catch (BadAuthorizationException e) {
             return;
         }
-
-        User user = userManager.getUser(username);
+        String username = user.getName();
+        AppContext appContext = ServletUtils.getAppContext(getServletContext());
 
         var engine = appContext.getEngine();
         StartDebugRequest debugRequest = ServletUtils.GsonInstance.fromJson(req.getReader(), StartDebugRequest.class);
