@@ -173,7 +173,7 @@ public class instructionsController {
             return new SimpleStringProperty(text);
         });
 
-        colArchitecture.setCellValueFactory(data ->
+        colHistoryArchitecture.setCellValueFactory(data ->
                 new SimpleStringProperty(data.getValue().architecture()));
 
 

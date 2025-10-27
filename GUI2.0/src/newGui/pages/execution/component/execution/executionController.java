@@ -513,13 +513,15 @@ public class executionController {
             return;
         }
         int archNum = getArchitectureNumber(selectedArch);
-        for (int i = archNum + 1; i < 5; i++) {
-            if(mainExecutionController.getArchitecturesCount().get(i) != 0 || mainExecutionController.getArchitecturesCount().get(i) == null) {
-                Alerts.architectureDependencyAlert(selectedArch, i);
+
+        List<Integer> counts = mainExecutionController.getArchitecturesCount();
+        for (int i = archNum + 1; i < counts.size(); i++) {
+            Integer cnt = counts.get(i);
+            if (cnt != null && cnt != 0) {
+                Alerts.architectureDependencyAlert(selectedArch, i +1);
                 return;
             }
         }
-
 
         List<Long> inputs = sortKeysBySubstring(inputValues);
         int extensionDegree = mainExecutionController.getSelectedDgree();
