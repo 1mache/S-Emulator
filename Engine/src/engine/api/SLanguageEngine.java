@@ -200,6 +200,9 @@ public class SLanguageEngine {
             throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
 
         List<RunRecord> runs = programRuns.getOrDefault(programName, List.of());
+        if(runs.isEmpty())
+            return 0;
+
         long sum = 0L;
         for (RunRecord record : runs)
             sum += record.cycles;
@@ -325,8 +328,11 @@ public class SLanguageEngine {
 
     private void addRunRecord(RunRecord record) {
         List<RunRecord> runRecords = programRuns.get(record.programName);
-        if(runRecords == null)
-            programRuns.put(record.programName, List.of(record));
+        if(runRecords == null) {
+            runRecords = new ArrayList<>();
+            runRecords.add(record);
+            programRuns.put(record.programName, runRecords);
+        }
         else
             runRecords.add(record);
     }
