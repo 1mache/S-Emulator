@@ -3,6 +3,7 @@ package web.resource.execution;
 import dto.ProgramExecutionResult;
 import dto.server.request.RunRequest;
 import engine.api.SLanguageEngine;
+import engine.instruction.Architecture;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,6 +27,10 @@ public class RunProgramServlet extends AuthorizingServlet {
 
         SLanguageEngine engine = applicationContext.getEngine();
         RunRequest runRequest = ServletUtils.GsonInstance.fromJson(req.getReader(), RunRequest.class);
+
+        Architecture arch = engine.getArchitectureOf(runRequest.programName());
+        if(!ServletUtils.chargeArchitectureCost(resp, user, arch))
+            return;
 
         ProgramExecutionResult result;
         CreditExecutionLimiter creditLimiter = new CreditExecutionLimiter(user);

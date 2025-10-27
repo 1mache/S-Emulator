@@ -4,6 +4,7 @@ import dto.server.request.StartDebugRequest;
 import dto.server.response.DebugStateInfo;
 import engine.api.debug.DebugHandle;
 import engine.debugger.exception.DebugStateException;
+import engine.instruction.Architecture;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,6 +32,11 @@ public class StartDebugServlet extends AuthorizingServlet {
 
         var engine = appContext.getEngine();
         StartDebugRequest debugRequest = ServletUtils.GsonInstance.fromJson(req.getReader(), StartDebugRequest.class);
+
+        Architecture arch = engine.getArchitectureOf(debugRequest.programName());
+        if(!ServletUtils.chargeArchitectureCost(resp, user, arch))
+            return;
+
         CreditExecutionLimiter creditLimiter = new CreditExecutionLimiter(user);
         DebugHandle debugHandle;
         synchronized (getServletContext()) {

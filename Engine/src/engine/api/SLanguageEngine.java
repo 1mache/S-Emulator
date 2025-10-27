@@ -10,6 +10,7 @@ import engine.execution.ProgramRunner;
 import engine.execution.exception.SProgramNotLoadedException;
 import engine.expansion.ProgramExpander;
 import engine.function.Function;
+import engine.instruction.Architecture;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.label.NumericLabel;
@@ -197,12 +198,12 @@ public class SLanguageEngine {
         return 0; // TODO: proper logic
     }
 
-    public String getArchitectureOf(String programName){
+    public Architecture getArchitectureOf(String programName){
         if (programNotLoaded(programName))
             throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
 
         Program program = getProgramByName(programName);
-        return program.getArchitecture().name();
+        return program.getArchitecture();
     }
 
     // returns all the functions names that the program uses including the main programs. the programs are first in list
