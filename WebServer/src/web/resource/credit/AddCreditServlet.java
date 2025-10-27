@@ -17,7 +17,7 @@ public class AddCreditServlet extends AuthorizingServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String creditParam = req.getParameter(CREDIT_PARAM_NAME);
         if(creditParam == null){
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().println("Missing " + CREDIT_PARAM_NAME + " parameter");
             return;
         }
@@ -27,7 +27,7 @@ public class AddCreditServlet extends AuthorizingServlet {
         try {
             credits = Integer.parseInt(creditParam);
         } catch (NumberFormatException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().println("Not a number sent via " + CREDIT_PARAM_NAME + " parameter");
             return;
         }

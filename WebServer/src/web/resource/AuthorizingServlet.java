@@ -24,14 +24,14 @@ public abstract class AuthorizingServlet extends HttpServlet {
         try {
             if(username == null) username = getUsernameFromRequest(request); // if no username provided get ut from session
         } catch (UserNameException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().println(e.getMessage());
             throw new BadAuthorizationException(e.getMessage());
         }
 
         if(!userManager.userExists(username)){
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("User " + username + " unauthorized");
+            response.getWriter().println("User " + username + " unauthorized");
             throw new BadAuthorizationException("Unauthorized");
         }
         else
@@ -43,7 +43,7 @@ public abstract class AuthorizingServlet extends HttpServlet {
     public String getUsernameFromRequest(HttpServletRequest request) throws UserNameException {
         HttpSession session = request.getSession(false);
         if (session == null) {
-            return null;
+            throw new UserNameException("No session detected, please log in");
         }
         String username = (String) session.getAttribute(ServletUtils.USERNAME_ATR_NAME);
         if(username == null)

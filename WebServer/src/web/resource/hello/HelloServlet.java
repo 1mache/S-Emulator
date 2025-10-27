@@ -18,7 +18,7 @@ public class HelloServlet extends AuthorizingServlet {
             username = getUsernameFromRequest(request);
         } catch (UserNameException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(e.getMessage());
+            response.getWriter().println(e.getMessage());
             return;
         }
 
