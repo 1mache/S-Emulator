@@ -28,9 +28,13 @@ public class RunProgramServlet extends AuthorizingServlet {
         SLanguageEngine engine = applicationContext.getEngine();
         RunRequest runRequest = ServletUtils.GsonInstance.fromJson(req.getReader(), RunRequest.class);
 
+        resp.setContentType("application/json");
+
         Architecture arch = engine.getArchitectureOf(runRequest.programName());
-        if(!ServletUtils.chargeArchitectureCost(resp, user, arch))
+        if(!ServletUtils.chargeArchitectureCost(user, arch)){
+            ServletUtils.GsonInstance.toJson(constructFailedRunResponse(), resp.getWriter());
             return;
+        }
 
         ProgramExecutionResult result;
         CreditExecutionLimiter creditLimiter = new CreditExecutionLimiter(user);
@@ -39,13 +43,23 @@ public class RunProgramServlet extends AuthorizingServlet {
                     runRequest.programName(),
                     runRequest.expansionDegree(),
                     runRequest.inputs(),
-                    true,
                     user.getRunHistory(),
                     creditLimiter
             );
         }
 
-        resp.setContentType("application/json");
         ServletUtils.GsonInstance.toJson(result, resp.getWriter());
+    }
+
+    private ProgramExecutionResult constructFailedRunResponse() {
+        return new ProgramExecutionResult(
+                null,
+                null,
+                null,
+                null,
+                0,
+                0,
+                true // only important part
+        );
     }
 }

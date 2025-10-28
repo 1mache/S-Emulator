@@ -22,8 +22,4 @@ public record DebugStateInfo(boolean finished,
     public Integer getStoppedOnLine() {
         return stoppedOnLine;
     }
-
-    public boolean getNoCredits() {
-        return noCredits;
-    }
 }

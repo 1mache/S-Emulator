@@ -10,7 +10,7 @@ public record ProgramExecutionResult(
         List<Long> inputs,
         int expansionDegree,
         long cycles,
-        boolean isEndedEarly
+        boolean failed
 ) {
     public String getProgramName() {
         return programName;
