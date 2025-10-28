@@ -276,6 +276,7 @@ public class executionController {
         stage.centerOnScreen();
         stage.show();
     }
+
     // Helper: get input variable names sorted by index (x1, x2, x10, ...)
     private List<String> getSortedInputNames() {
         return inputValues.keySet()
@@ -483,10 +484,45 @@ public class executionController {
     }
 
 
+    private int getArchitectureNumber(String architecture) {
+        switch (architecture) {
+            case "I":
+                return 0;
+            case "II":
+                return 1;
+            case "III":
+                return 2;
+            case "IV":
+                return 3;
+            default:
+                return -1; // or throw an exception
+        }
+    }
+
 
     // Run
     @FXML
     void startListener(ActionEvent event) {
+        if (debugModeActive) {
+            Alerts.debugModeActiveAlert();
+            return;
+        }
+        String selectedArch = architectureSelection.getValue();
+        if (selectedArch == null) {
+            Alerts.architectureNotSelected();
+            return;
+        }
+        int archNum = getArchitectureNumber(selectedArch);
+
+        List<Integer> counts = mainExecutionController.getArchitecturesCount();
+        for (int i = archNum + 1; i < counts.size(); i++) {
+            Integer cnt = counts.get(i);
+            if (cnt != null && cnt != 0) {
+                Alerts.architectureDependencyAlert(selectedArch, i +1);
+                return;
+            }
+        }
+
         List<Long> inputs = sortKeysBySubstring(inputValues);
         int extensionDegree = mainExecutionController.getSelectedDgree();
         String programName = mainExecutionController.getProgramName();

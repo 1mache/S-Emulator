@@ -6,19 +6,15 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Circle;
 import newGui.pages.execution.component.primary.mainExecutionController;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
-import requests.HighlightInfoRequest;
 import requests.UpdateBreakpointRequest;
 import util.http.HttpClientUtil;
-
 import java.io.IOException;
 import java.util.*;
 
@@ -56,6 +52,7 @@ public class instructionsController {
 
 
     @FXML private TextField SummaryLine;
+    public List<Integer> architectures = new ArrayList<>();
 
     @FXML
     private void initialize() {
@@ -140,11 +137,9 @@ public class instructionsController {
         return new ArrayList<>(breakpointIndices);
     }
 
-
     public void setMainExecutionController(mainExecutionController mainExecutionController) {
         this.mainExecutionController = mainExecutionController;
     }
-
 
     private void showHistoryChain(InstructionPeek instructionPeek) {
         if (instructionPeek == null) {
@@ -178,11 +173,11 @@ public class instructionsController {
             return new SimpleStringProperty(text);
         });
 
-        colHistoryArchitecture.setCellValueFactory(data -> new SimpleStringProperty(""));
-        installRowHighlighter();
+        colHistoryArchitecture.setCellValueFactory(data ->
+                new SimpleStringProperty(data.getValue().architecture()));
+
 
     }
-
 
     public void setProgramPeek(List<InstructionPeek> instructions) {
         instructionsTable.getItems().clear();
@@ -206,11 +201,16 @@ public class instructionsController {
             return new SimpleStringProperty(text);
         });
 
-        colArchitecture.setCellValueFactory(data -> new SimpleStringProperty(""));
+
+        colArchitecture.setCellValueFactory(data ->
+                new SimpleStringProperty(data.getValue().architecture()));
+
+
+
+//        colArchitecture.setCellValueFactory(data -> new SimpleStringProperty(""));
         installRowHighlighter();
 
     }
-
 
     private void installRowHighlighter() {
         if (instructionsTable.getRowFactory() != null) return;
@@ -230,7 +230,6 @@ public class instructionsController {
         });
     }
 
-
     public void updateHighlightedInstructions(List<Integer> indices) {
         highlighted.clear();
         if (indices != null) {
@@ -245,4 +244,14 @@ public class instructionsController {
         }
         instructionsTable.refresh(); // re-render rows to apply styles
     }
+
+    public void setSummaryLine(int b, int s, List<Integer> architectures) {
+        SummaryLine.setText(
+                String.format("Total: %d Synthetic: %d | Basic: %d | I:%d | II:%d | III:%d | IV:%d",
+                        (b + s), b, s,
+                        architectures.get(0), architectures.get(1), architectures.get(2), architectures.get(3))
+        );
+        this.architectures = new ArrayList<>(architectures);
+    }
+
 }
