@@ -208,7 +208,7 @@ public class instructionsController {
 
 
 //        colArchitecture.setCellValueFactory(data -> new SimpleStringProperty(""));
-//        installRowHighlighter();
+        installRowHighlighter();
 
     }
 
