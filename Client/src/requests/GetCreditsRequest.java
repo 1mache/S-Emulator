@@ -16,7 +16,7 @@ import java.util.List;
 
 public class GetCreditsRequest {
 
-    public static Request build(String userName) {
+    public static Request build() {
 
         HttpUrl url = HttpUrl.parse(Constants.USER_INFO)
                 .newBuilder()
@@ -28,7 +28,7 @@ public class GetCreditsRequest {
                 .build();
     }
 
-    public static Long onResponse(Response response, dashboardController dashboardController) {
+    public static Long onResponse(Response response) {
         String responseBody;
         try {
             responseBody = response.body().string();

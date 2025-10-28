@@ -1,14 +1,11 @@
 package requests;
 
 import Alerts.Alerts;
-import dto.ProgramExecutionResult;
 import dto.server.response.DebugStateInfo;
 import javafx.application.Platform;
 import okhttp3.*;
 import util.Constants;
-
 import java.io.IOException;
-
 import static util.Constants.*;
 
 public class StartDebugRequest {

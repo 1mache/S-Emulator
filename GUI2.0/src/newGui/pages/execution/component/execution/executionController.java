@@ -1,7 +1,6 @@
 package newGui.pages.execution.component.execution;
 
 import Alerts.Alerts;
-import dto.InstructionPeek;
 import dto.ProgramExecutionResult;
 import dto.ProgramPeek;
 import dto.debug.DebugEndResult;
@@ -29,9 +28,7 @@ import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
-import requests.StepOverDebugRequest;
 import util.http.HttpClientUtil;
-
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -316,6 +313,8 @@ public class executionController {
                     return;
                 }
 
+                uptateCredits();
+
                 // Update UI on the JavaFX Application Thread
                 Platform.runLater(() -> {
                     mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
@@ -377,6 +376,8 @@ public class executionController {
                     return;
                 }
 
+                uptateCredits();
+
                 // Update UI on the JavaFX Application Thread
                 Platform.runLater(() -> {
 
@@ -422,6 +423,9 @@ public class executionController {
                     return;
                 }
 
+                uptateCredits();
+
+
                 // Update UI on the JavaFX Application Thread
                 Platform.runLater(() -> {
                     // Update variable-values map for variableTable
@@ -466,6 +470,9 @@ public class executionController {
                     return;
                 }
 
+                uptateCredits();
+
+
                 // Update UI on the JavaFX Application Thread
                 Platform.runLater(() -> {
                     // Update variable-values map for variableTable
@@ -483,6 +490,24 @@ public class executionController {
         });
     }
 
+    private void uptateCredits() {
+        Request creditsRequest = requests.GetCreditsRequest.build();
+
+        HttpClientUtil.runAsync(creditsRequest, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                requests.GetCreditsRequest.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                long credits = requests.GetCreditsRequest.onResponse(response);
+                Platform.runLater(() -> {
+                    mainExecutionController.setCredits(credits);
+                });
+            }
+        });
+    }
 
     private int getArchitectureNumber(String architecture) {
         switch (architecture) {
@@ -559,6 +584,7 @@ public class executionController {
                         // Update the Cycles Counter
                         CyclesCounter.setText(valueOf(res.getCycles()));
 
+                        uptateCredits();
 
                         // Update history table
                         // requet for history table
@@ -614,6 +640,7 @@ public class executionController {
     public boolean debudgModeActive() {
         return debugModeActive;
     }
+
 
     @FXML
     void architectureSelectionListener(ActionEvent event) {
