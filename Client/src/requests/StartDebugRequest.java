@@ -1,24 +1,18 @@
 package requests;
 
 import Alerts.Alerts;
-import dto.ProgramExecutionResult;
 import dto.server.response.DebugStateInfo;
 import javafx.application.Platform;
-import okhttp3.HttpUrl;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import okhttp3.*;
 import util.Constants;
-
 import java.io.IOException;
-
-import static util.Constants.GSON_INSTANCE;
+import static util.Constants.*;
 
 public class StartDebugRequest {
 
     public static Request build(dto.server.request.StartDebugRequest info ) {
         String json = GSON_INSTANCE.toJson(info);
-        RequestBody body = RequestBody.create(json, Constants.MEDIA_TYPE_JSON);
+        RequestBody body = RequestBody.create(json, MEDIA_TYPE_JSON);
 
         HttpUrl url = HttpUrl.parse(Constants.START_DEBUG)
                 .newBuilder()
@@ -31,7 +25,7 @@ public class StartDebugRequest {
     }
 
     public static DebugStateInfo onResponse(Response response) {
-        String responseBody;
+            String responseBody;
         try {
             responseBody = response.body().string();
         } catch (Exception e) {
@@ -48,7 +42,12 @@ public class StartDebugRequest {
             });
             return null;
         } else {
-            return Constants.GSON_INSTANCE.fromJson(responseBody, DebugStateInfo.class);
+            MediaType contentType = response.body().contentType();
+            String type = contentType != null ? contentType.toString() : "";
+            if (type.equals(MEDIA_TYPE_JSON)) {
+                return Constants.GSON_INSTANCE.fromJson(responseBody, DebugStateInfo.class);
+            }
+            return null;
         }
     }
 

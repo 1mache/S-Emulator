@@ -118,4 +118,12 @@ public class Alerts {
                 "Can't run there are instructions in architecture " + i + " and you select architecture " + selectedArch +" .");
         alert.showAndWait();
     }
+
+    public static void notEnoughCreditsAlert() {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText("There is not enough credits (avg cost).");
+        alert.showAndWait();
+    }
 }

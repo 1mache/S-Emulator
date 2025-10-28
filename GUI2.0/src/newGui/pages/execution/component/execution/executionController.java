@@ -1,12 +1,12 @@
 package newGui.pages.execution.component.execution;
 
 import Alerts.Alerts;
-import dto.InstructionPeek;
 import dto.ProgramExecutionResult;
 import dto.ProgramPeek;
 import dto.debug.DebugEndResult;
 import dto.debug.DebugStepPeek;
 import dto.server.request.RunRequest;
+import dto.server.response.ProgramData;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
@@ -29,9 +29,7 @@ import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
-import requests.StepOverDebugRequest;
 import util.http.HttpClientUtil;
-
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -316,6 +314,8 @@ public class executionController {
                     return;
                 }
 
+                uptateCredits();
+
                 // Update UI on the JavaFX Application Thread
                 Platform.runLater(() -> {
                     mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
@@ -377,6 +377,8 @@ public class executionController {
                     return;
                 }
 
+                uptateCredits();
+
                 // Update UI on the JavaFX Application Thread
                 Platform.runLater(() -> {
 
@@ -422,6 +424,9 @@ public class executionController {
                     return;
                 }
 
+                uptateCredits();
+
+
                 // Update UI on the JavaFX Application Thread
                 Platform.runLater(() -> {
                     // Update variable-values map for variableTable
@@ -466,6 +471,9 @@ public class executionController {
                     return;
                 }
 
+                uptateCredits();
+
+
                 // Update UI on the JavaFX Application Thread
                 Platform.runLater(() -> {
                     // Update variable-values map for variableTable
@@ -483,6 +491,24 @@ public class executionController {
         });
     }
 
+    private void uptateCredits() {
+        Request creditsRequest = requests.GetCreditsRequest.build();
+
+        HttpClientUtil.runAsync(creditsRequest, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                requests.GetCreditsRequest.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                long credits = requests.GetCreditsRequest.onResponse(response);
+                Platform.runLater(() -> {
+                    mainExecutionController.setCredits(credits);
+                });
+            }
+        });
+    }
 
     private int getArchitectureNumber(String architecture) {
         switch (architecture) {
@@ -523,12 +549,22 @@ public class executionController {
             }
         }
 
+        long cost = getAvgCost(mainExecutionController.getProgramName());
+        if (cost > mainExecutionController.getCredits()) {
+            Alerts.notEnoughCreditsAlert();
+            return;
+        }
+
+
+
+
+
+
         List<Long> inputs = sortKeysBySubstring(inputValues);
         int extensionDegree = mainExecutionController.getSelectedDgree();
         String programName = mainExecutionController.getProgramName();
 
         Request runRequest = requests.RunRequest.build(new RunRequest(programName, extensionDegree, inputs));
-        final ProgramExecutionResult[] result = new ProgramExecutionResult[1];
 
         HttpClientUtil.runAsync(runRequest, new Callback() {
             @Override
@@ -545,7 +581,7 @@ public class executionController {
 
                 // Update maps and tables on the JavaFX Application Thread
                 Platform.runLater(() -> {
-                    if( res.isEndedEarly()){
+                    if(res.isEndedEarly()){
                         Alerts.noCreditsAlert();
                     } else {
                         // Update the variable-values map for the variableTable
@@ -559,6 +595,7 @@ public class executionController {
                         // Update the Cycles Counter
                         CyclesCounter.setText(valueOf(res.getCycles()));
 
+                        uptateCredits();
 
                         // Update history table
                         // requet for history table
@@ -579,6 +616,23 @@ public class executionController {
                 });
             }
         });
+    }
+
+    private long getAvgCost(String programName) {
+        final long[] cost = {0};
+        Request programDataRequest = requests.ProgramInfoRequest.build(programName);
+        HttpClientUtil.runAsync(programDataRequest, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                ProgramData res = requests.ProgramInfoRequest.onResponse(response);
+                cost[0] = res.getAvgCreditCost();
+            }
+        });
+        return cost[0];
     }
 
     public void updateHistoryTable(List<ProgramExecutionResult> results) {
@@ -614,6 +668,7 @@ public class executionController {
     public boolean debudgModeActive() {
         return debugModeActive;
     }
+
 
     @FXML
     void architectureSelectionListener(ActionEvent event) {

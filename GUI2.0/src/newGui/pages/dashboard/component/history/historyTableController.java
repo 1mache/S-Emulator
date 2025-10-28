@@ -18,8 +18,8 @@ public class historyTableController {
 
     // History Table
     @FXML private TableView<ProgramExecutionResult> historyTable;
-    @FXML private TableColumn<ProgramExecutionResult, ?> architecture;
-    @FXML private TableColumn<ProgramExecutionResult, ?> FunctionOrProgram;
+    @FXML private TableColumn<ProgramExecutionResult, String> architecture;
+    @FXML private TableColumn<ProgramExecutionResult, String> FunctionOrProgram;
     @FXML private TableColumn<ProgramExecutionResult, Number> number;
     @FXML private TableColumn<ProgramExecutionResult, Long> cycels;
     @FXML private TableColumn<ProgramExecutionResult, Integer> level;
@@ -69,4 +69,37 @@ public class historyTableController {
         historyTable.refresh();
 
     }
+
+
+
+    public void updateHistoryTableArciAndMain(List<String> architectures, List<Boolean> isMain) {
+        // Ensure lists match the table size
+        int rowCount = historyTable.getItems().size();
+        if (architectures.size() != rowCount || isMain.size() != rowCount) {
+            System.err.println("Mismatch between table size and provided lists!");
+            return;
+        }
+
+        // Architecture column (string from architectures list)
+        architecture.setCellValueFactory(param -> {
+            int index = historyTable.getItems().indexOf(param.getValue());
+            if (index >= 0 && index < architectures.size()) {
+                return new ReadOnlyObjectWrapper<>(architectures.get(index));
+            }
+            return new ReadOnlyObjectWrapper<>("");
+        });
+
+        // FunctionOrProgram column — "true" or "false"
+        FunctionOrProgram.setCellValueFactory(param -> {
+            int index = historyTable.getItems().indexOf(param.getValue());
+            if (index >= 0 && index < isMain.size()) {
+                return new ReadOnlyObjectWrapper<>(String.valueOf(isMain.get(index)));
+            }
+            return new ReadOnlyObjectWrapper<>("");
+        });
+
+        // Refresh to apply updates
+        historyTable.refresh();
+    }
+
 }

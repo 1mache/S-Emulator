@@ -209,4 +209,8 @@ public class topController {
         Integer v = degreeSelection.getValue();
         return (v != null) ? v : 0;
     }
+
+    public void setCredits(long credits) {
+        availableCredits.setText(String.valueOf(credits));
+    }
 }

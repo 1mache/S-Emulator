@@ -2,39 +2,33 @@ package requests;
 
 import Alerts.Alerts;
 import dto.ProgramExecutionResult;
-import dto.server.response.ProgramData;
+import dto.server.response.UserData;
 import javafx.application.Platform;
 import newGui.pages.dashboard.component.primary.dashboardController;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 import util.Constants;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-import static util.Constants.GSON_INSTANCE;
+public class GetCreditsRequest {
 
-public class RunRequest {
-    public static Request build(dto.server.request.RunRequest info ) {
-        String json = GSON_INSTANCE.toJson(info);
-        RequestBody body = RequestBody.create(json, Constants.MEDIA_TYPE_JSON);
+    public static Request build() {
 
-        HttpUrl url = HttpUrl.parse(Constants.RUN)
+        HttpUrl url = HttpUrl.parse(Constants.USER_INFO)
                 .newBuilder()
                 .build();
 
         return new Request.Builder()
                 .url(url)
-                .post(body)
+                .get()
                 .build();
     }
 
-    public static ProgramExecutionResult onResponse(Response response) {
+    public static Long onResponse(Response response) {
         String responseBody;
         try {
             responseBody = response.body().string();
@@ -48,20 +42,14 @@ public class RunRequest {
         if (response.code() != 200) {
             Platform.runLater(() -> {
                 Alerts.serverBadAnswer(responseBody);
-
             });
-            return null;
         } else {
-            return GSON_INSTANCE.fromJson(responseBody, ProgramExecutionResult.class);
 
-//            if (response.body().contentType().toString().equals(Constants.MEDIA_TYPE_JSON)) {
-//                return GSON_INSTANCE.fromJson(responseBody, ProgramExecutionResult.class);
-//            }
-//            else if(response.body().contentType().toString().equals(Constants.MEDIA_TYPE_TEXT)) {
-//                return new ProgramExecutionResult(null,null,null,null
-//                ,0,0, true);
-//            }
+            UserData userInfo = Constants.GSON_INSTANCE.fromJson(responseBody, UserData .class);
+            return userInfo.getTotalCredits();
+
         }
+        return null;
     }
 
     public static void onFailure(IOException e) {
@@ -69,4 +57,7 @@ public class RunRequest {
             Alerts.serverProblamResponse(e.getMessage());
         });
     }
+
 }
+
+

@@ -182,8 +182,15 @@ public class mainExecutionController {
         architectureSelected = selectedArchitecture;
     }
 
-
     public List<Integer> getArchitecturesCount() {
         return instructionsController.architectures;
+    }
+
+    public void setCredits(long credits) {
+        topController.setCredits(credits);
+    }
+
+    public long getCredits() {
+        return topController.getCredits();
     }
 }
