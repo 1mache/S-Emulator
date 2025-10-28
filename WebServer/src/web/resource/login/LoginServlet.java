@@ -18,7 +18,7 @@ public class LoginServlet extends HttpServlet {
         var appContext = ServletUtils.getAppContext(getServletContext());
         var userManager = appContext.getUserManager();
         String username = request.getParameter(USERNAME_PARAM);
-        if(username == null){
+        if(username == null || username.isBlank()){
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().println("No username provided");
             return;

@@ -6,6 +6,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import web.exception.BadAuthorizationException;
+import web.resource.AuthorizingServlet;
+import web.user.User;
 import web.utils.ServletUtils;
 
 import java.io.IOException;
@@ -22,7 +25,7 @@ import java.util.List;
         maxFileSize = 1024 * 1024 * 50,      // 50 MB
         maxRequestSize = 1024 * 1024 * 100 // 100 MB
 )
-public class FileUploadServlet extends HttpServlet {
+public class FileUploadServlet extends AuthorizingServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -31,13 +34,10 @@ public class FileUploadServlet extends HttpServlet {
         Collection<Part> parts = request.getParts();
 
         var appContext = ServletUtils.getAppContext(getServletContext());
-        String username = ServletUtils.getUsernameFromRequest(request);
-
-        if(username == null || !appContext.getUserManager().userExists(username)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("User not logged in.");
-            return;
-        }
+        User user;
+        try {
+            user = authorize(request, response);
+        } catch (BadAuthorizationException e) {return;}
 
         // get all InputStreams from uploaded parts
         List<InputStream> inputStreams = new ArrayList<>();
@@ -53,7 +53,7 @@ public class FileUploadServlet extends HttpServlet {
         try {
             synchronized (getServletContext()) {
                 List<String> addedFunctions = engine.loadProgramIncremental(fileContent, null);
-                appContext.addProgramsFromUser(username, addedFunctions);
+                appContext.addProgramsFromUser(user.getName(), addedFunctions);
             }
         } catch (UnknownFunctionException | UnknownLabelException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

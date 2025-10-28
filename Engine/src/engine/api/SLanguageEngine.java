@@ -10,6 +10,7 @@ import engine.execution.ProgramRunner;
 import engine.execution.exception.SProgramNotLoadedException;
 import engine.expansion.ProgramExpander;
 import engine.function.Function;
+import engine.instruction.Architecture;
 import engine.label.FixedLabel;
 import engine.label.Label;
 import engine.label.NumericLabel;
@@ -30,7 +31,8 @@ import java.util.stream.Collectors;
 
 public class SLanguageEngine {
     private final Map<String,Program> avaliablePrograms = new HashMap<>();
-    private final Map<String, Integer> programRunCounts = new HashMap<>();
+    private record RunRecord(String programName, long cycles) {}
+    private final Map<String, List<RunRecord>> programRuns = new HashMap<>();
 
     private SLanguageEngine(){}
     // Singleton
@@ -133,7 +135,7 @@ public class SLanguageEngine {
         );
 
         history.addExecution(programName, executionResult);
-        incrementRunCount(programName);
+        addRunRecord(new RunRecord(programName, executionResult.cycles()));
 
         return executionResult;
     }
@@ -142,7 +144,7 @@ public class SLanguageEngine {
         if(programNotLoaded(programName))
             throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
 
-        return programRunCounts.getOrDefault(programName, 0);
+        return programRuns.getOrDefault(programName, List.of()).size();
     }
 
     // ========================== Debug ===========================
@@ -169,22 +171,26 @@ public class SLanguageEngine {
 
         initializeInputs(debugger, inputs, true);
 
-        incrementRunCount(programName);
-
         return new DebugHandle(
                 debugger,
-                debugResult -> history.addExecution(
-                        programName,
-                        new ProgramExecutionResult(
-                                programName,
-                                debugResult.output(),
-                                debugResult.variableMap(),
-                                inputs,
-                                expansionDegree,
-                                debugger.getCycles(),
-                                executionLimiter != null && executionLimiter.isStopped()
-                        )
-                )
+                debugResult -> {
+                    history.addExecution(
+                            programName,
+                            new ProgramExecutionResult(
+                                    programName,
+                                    debugResult.output(),
+                                    debugResult.variableMap(),
+                                    inputs,
+                                    expansionDegree,
+                                    debugger.getCycles(),
+                                    executionLimiter != null && executionLimiter.isStopped()
+                            )
+                    );
+                    synchronized (this){
+                        addRunRecord(new RunRecord(programName, debugResult.cycles()));
+                    }
+                }
+
         );
     }
     // =============================================================
@@ -193,16 +199,23 @@ public class SLanguageEngine {
         if (programNotLoaded(programName))
             throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
 
-        Program program = getProgramByName(programName);
-        return 0; // TODO: proper logic
+        List<RunRecord> runs = programRuns.getOrDefault(programName, List.of());
+        if(runs.isEmpty())
+            return 0;
+
+        long sum = 0L;
+        for (RunRecord record : runs)
+            sum += record.cycles;
+
+        return sum / runs.size();
     }
 
-    public String getArchitectureOf(String programName){
+    public Architecture getArchitectureOf(String programName){
         if (programNotLoaded(programName))
             throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
 
         Program program = getProgramByName(programName);
-        return program.getArchitecture().name();
+        return program.getArchitecture();
     }
 
     // returns all the functions names that the program uses including the main programs. the programs are first in list
@@ -313,11 +326,15 @@ public class SLanguageEngine {
             runner.initInputVariables(inputs);
     }
 
-    private void incrementRunCount(String programName) {
-        programRunCounts.put(
-                programName,
-                programRunCounts.getOrDefault(programName, 0) + 1
-        );
+    private void addRunRecord(RunRecord record) {
+        List<RunRecord> runRecords = programRuns.get(record.programName);
+        if(runRecords == null) {
+            runRecords = new ArrayList<>();
+            runRecords.add(record);
+            programRuns.put(record.programName, runRecords);
+        }
+        else
+            runRecords.add(record);
     }
 
     private Variable str2Variable(String str){

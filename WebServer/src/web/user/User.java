@@ -15,7 +15,7 @@ public class User {
         this.runHistory = new RunHistory();
     }
 
-    public String getUsername() {
+    public String getName() {
         return username;
     }
 

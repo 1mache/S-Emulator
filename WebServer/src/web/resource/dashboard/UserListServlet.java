@@ -17,7 +17,7 @@ public class UserListServlet extends HttpServlet {
         var userManager = appContext.getUserManager();
         var userData = userManager.getUsers().stream()
                 .map(user -> {
-                    String username = user.getUsername();
+                    String username = user.getName();
                     return new UserData(
                             username,
                             user.getTotalCredits(),
