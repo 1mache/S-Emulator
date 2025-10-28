@@ -1,5 +1,6 @@
 package web.resource.load;
 
+import engine.loader.exception.DuplicateProgramException;
 import engine.loader.exception.UnknownFunctionException;
 import engine.loader.exception.UnknownLabelException;
 import jakarta.servlet.ServletException;
@@ -37,7 +38,9 @@ public class FileUploadServlet extends AuthorizingServlet {
         User user;
         try {
             user = authorize(request, response);
-        } catch (BadAuthorizationException e) {return;}
+        } catch (BadAuthorizationException e) {
+            return;
+        }
 
         // get all InputStreams from uploaded parts
         List<InputStream> inputStreams = new ArrayList<>();
@@ -55,7 +58,7 @@ public class FileUploadServlet extends AuthorizingServlet {
                 List<String> addedFunctions = engine.loadProgramIncremental(fileContent, null);
                 appContext.addProgramsFromUser(user.getName(), addedFunctions);
             }
-        } catch (UnknownFunctionException | UnknownLabelException e) {
+        } catch (UnknownFunctionException | UnknownLabelException | DuplicateProgramException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write(e.getMessage());
         }

@@ -2,10 +2,7 @@ package engine.loader;
 
 import engine.jaxb.generated.SProgram;
 import engine.loader.event.LoadingListener;
-import engine.loader.exception.NotXMLException;
-import engine.loader.exception.SProgramXMLException;
-import engine.loader.exception.UnknownFunctionException;
-import engine.loader.exception.UnknownLabelException;
+import engine.loader.exception.*;
 import engine.label.FixedLabel;
 import engine.program.Program;
 import engine.instruction.utility.Instructions;
@@ -33,10 +30,13 @@ public class FromXMLProgramLoader {
             program = translator.getProgram(sProgram, listener);
         } catch (JAXBException e) { // should never happen
             throw new SProgramXMLException("Failed to marshal XML.", e);
+        } catch (DuplicateProgramException e) {
+            throw new RuntimeException(e); // should never get here because no additional functions are present
         }
     }
 
-    public void loadXML(InputStream inputStream, LoadingListener listener, Map<String, Program> availableExternalPrograms){
+    public void loadXML(InputStream inputStream, LoadingListener listener, Map<String, Program> availableExternalPrograms)
+            throws DuplicateProgramException {
         try {
             SProgram sProgram = JaxbLoader.loadProgramFromXML(inputStream);
             translator = new JaxbTranslator();
