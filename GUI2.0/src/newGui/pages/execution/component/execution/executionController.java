@@ -29,6 +29,7 @@ import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
+import util.Constants;
 import util.http.HttpClientUtil;
 import java.io.IOException;
 import java.util.*;
@@ -643,27 +644,31 @@ public class executionController {
 
     private long getAvgCost(String programName) {
         final long[] cost = new long[1];
+        final ProgramData[] moreData = new ProgramData[1];
         Request programDataRequest = requests.ProgramInfoRequest.build(programName);
         try {
-            Response ers = HttpClientUtil.runSync(programDataRequest);
-
+            Response response = HttpClientUtil.runSync(programDataRequest);
+            String responseBody;
+            try {
+                responseBody = response.body().string();
+                if (response.code() != 200) {
+                    Platform.runLater(() -> {
+                        Alerts.loadField(responseBody);
+                    });
+                } else {
+                    moreData[0] = Constants.GSON_INSTANCE.fromJson(responseBody, ProgramData.class);
+                }
+            } catch (IOException e) {
+                Platform.runLater(() -> {
+                    Alerts.badBody(e.getMessage());
+                });
+            }
         } catch (IOException e) {
         }
-
-
-
-
-//                , new Callback() {
-//            @Override
-//            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-//            }
-//
-//            @Override
-//            public void onResponse(@NotNull Call call, @NotNull Response response) {
-//                ProgramData res = requests.ProgramInfoRequest.onResponse(response);
-//                cost[0] = res.getAvgCreditCost();
-//            }
-//        });
+        if (moreData[0] == null) {
+            return 0;
+        }
+        cost[0] = moreData[0].getAvgCreditCost();
         return cost[0];
     }
 
