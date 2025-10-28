@@ -34,8 +34,10 @@ public class StartDebugServlet extends AuthorizingServlet {
         StartDebugRequest debugRequest = ServletUtils.GsonInstance.fromJson(req.getReader(), StartDebugRequest.class);
 
         Architecture arch = engine.getArchitectureOf(debugRequest.programName());
-        if(!ServletUtils.chargeArchitectureCost(resp, user, arch))
+        if(!ServletUtils.chargeArchitectureCost(user, arch)){
+            ServletUtils.GsonInstance.toJson(constructFailedStartResponse(), resp.getWriter());
             return;
+        }
 
         CreditExecutionLimiter creditLimiter = new CreditExecutionLimiter(user);
         DebugHandle debugHandle;
@@ -85,5 +87,11 @@ public class StartDebugServlet extends AuthorizingServlet {
                     resp.getWriter()
             );
         }
+    }
+
+    private DebugStateInfo constructFailedStartResponse() {
+        return new DebugStateInfo(
+                false, true, null, null, null
+        );
     }
 }

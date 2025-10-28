@@ -58,13 +58,10 @@ public class ServletUtils {
         );
     }
 
-    public static boolean chargeArchitectureCost(HttpServletResponse response, User user, Architecture arch) throws IOException {
+    public static boolean chargeArchitectureCost(User user, Architecture arch){
         int archCost = ServletUtils.architectureCosts.get(arch);
-        if(user.getTotalCredits() < archCost){
-            response.setContentType("text/html");
-            response.getWriter().write("Not enough credits to run Architecture " + arch.name());
+        if(user.getTotalCredits() < archCost)
             return false;
-        }
         user.removeCredits(archCost);
         return true;
     }
