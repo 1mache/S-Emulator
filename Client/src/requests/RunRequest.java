@@ -52,12 +52,15 @@ public class RunRequest {
             });
             return null;
         } else {
-            if ( response.body().contentType().toString().equals(Constants.MEDIA_TYPE_JSON)) {
-                return GSON_INSTANCE.fromJson(responseBody, ProgramExecutionResult.class);
-            }
-            else {
-                return null;
-            }
+            return GSON_INSTANCE.fromJson(responseBody, ProgramExecutionResult.class);
+
+//            if (response.body().contentType().toString().equals(Constants.MEDIA_TYPE_JSON)) {
+//                return GSON_INSTANCE.fromJson(responseBody, ProgramExecutionResult.class);
+//            }
+//            else if(response.body().contentType().toString().equals(Constants.MEDIA_TYPE_TEXT)) {
+//                return new ProgramExecutionResult(null,null,null,null
+//                ,0,0, true);
+//            }
         }
     }
 

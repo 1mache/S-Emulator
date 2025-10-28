@@ -14,8 +14,12 @@ import newGui.pages.dashboard.component.history.historyTableController;
 import newGui.pages.dashboard.component.top.topController;
 import newGui.pages.dashboard.component.usersInfo.usersTableInfoController;
 import newGui.pages.primary.mainClientAppController;
+import okhttp3.Request;
+import requests.ProgramInfoRequest;
 import util.Constants;
+import util.http.HttpClientUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class dashboardController {
@@ -129,6 +133,26 @@ public class dashboardController {
     }
 
     public void updateHistoryTable(List<ProgramExecutionResult> historyUsersDataList) {
+        List<String> arcitectures = new ArrayList<>();
+        List<Boolean> isMain = new ArrayList<>();
+        for (ProgramExecutionResult result : historyUsersDataList) {
+            String arch = result.getProgramName();
+            Request programDataRequest = ProgramInfoRequest.build(arch);
+            HttpClientUtil.runAsync(programDataRequest, new okhttp3.Callback() {
+                @Override
+                public void onFailure(okhttp3.Call call, java.io.IOException e) {
+                }
+
+                @Override
+                public void onResponse(okhttp3.Call call, okhttp3.Response response) throws java.io.IOException {
+                    ProgramData programData = ProgramInfoRequest.onResponse(response);
+                    arcitectures.add(programData.getArchitecture());
+                    isMain.add(programData.getIsMain());
+                }
+            });
+
+        }
         historyTableController.updateHistoryTable(historyUsersDataList);
+        historyTableController.updateHistoryTableArciAndMain(arcitectures, isMain);
     }
 }

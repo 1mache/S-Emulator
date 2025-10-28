@@ -86,7 +86,6 @@ public class usersTableInfoController {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 GeneralHistoryForUser.onFailure(e);
-
             }
 
             @Override

@@ -58,6 +58,7 @@ public class Constants {
 
     // infp type in the request body
     public static final MediaType MEDIA_TYPE_XML = MediaType.get("application/xml");
+    public static final MediaType MEDIA_TYPE_TEXT = MediaType.get("text/html");
     public static final MediaType MEDIA_TYPE_JSON = MediaType.get("application/json; charset=utf-8");
 
 

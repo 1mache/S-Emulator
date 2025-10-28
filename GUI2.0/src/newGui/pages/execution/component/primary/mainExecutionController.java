@@ -189,4 +189,8 @@ public class mainExecutionController {
     public void setCredits(long credits) {
         topController.setCredits(credits);
     }
+
+    public long getCredits() {
+        return topController.getCredits();
+    }
 }

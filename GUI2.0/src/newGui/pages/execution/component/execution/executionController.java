@@ -6,6 +6,7 @@ import dto.ProgramPeek;
 import dto.debug.DebugEndResult;
 import dto.debug.DebugStepPeek;
 import dto.server.request.RunRequest;
+import dto.server.response.ProgramData;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
@@ -548,12 +549,22 @@ public class executionController {
             }
         }
 
+        long cost = getAvgCost(mainExecutionController.getProgramName());
+        if (cost > mainExecutionController.getCredits()) {
+            Alerts.notEnoughCreditsAlert();
+            return;
+        }
+
+
+
+
+
+
         List<Long> inputs = sortKeysBySubstring(inputValues);
         int extensionDegree = mainExecutionController.getSelectedDgree();
         String programName = mainExecutionController.getProgramName();
 
         Request runRequest = requests.RunRequest.build(new RunRequest(programName, extensionDegree, inputs));
-        final ProgramExecutionResult[] result = new ProgramExecutionResult[1];
 
         HttpClientUtil.runAsync(runRequest, new Callback() {
             @Override
@@ -570,7 +581,7 @@ public class executionController {
 
                 // Update maps and tables on the JavaFX Application Thread
                 Platform.runLater(() -> {
-                    if( res.isEndedEarly()){
+                    if(res.isEndedEarly()){
                         Alerts.noCreditsAlert();
                     } else {
                         // Update the variable-values map for the variableTable
@@ -605,6 +616,23 @@ public class executionController {
                 });
             }
         });
+    }
+
+    private long getAvgCost(String programName) {
+        final long[] cost = {0};
+        Request programDataRequest = requests.ProgramInfoRequest.build(programName);
+        HttpClientUtil.runAsync(programDataRequest, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                ProgramData res = requests.ProgramInfoRequest.onResponse(response);
+                cost[0] = res.getAvgCreditCost();
+            }
+        });
+        return cost[0];
     }
 
     public void updateHistoryTable(List<ProgramExecutionResult> results) {

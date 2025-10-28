@@ -21,4 +21,5 @@ public record ProgramData(
     public long getAvgCreditCost() { return avgCreditCost; }
     public String getUserString() { return userString; }
     public boolean getIsMain() { return isMain; }
+    public String getArchitecture() { return architecture; }
 }
