@@ -52,6 +52,8 @@ public class Constants {
     public final static String STOP_DEBUG = FULL_SERVER_PATH +"/debug/stop";
     public final static String UPDATE_BREAKPOINTS = FULL_SERVER_PATH +"/debug/breakpoint";
 
+    //General user information
+    public final static String  USER_INFO = FULL_SERVER_PATH +"/info/user";
 
 
     // infp type in the request body
