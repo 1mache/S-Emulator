@@ -2,13 +2,11 @@ package dto.server.response;
 
 import java.util.Map;
 
-public record DebugStateInfo(
-        boolean finished,
-        boolean noCredits,
-        Map<String,Long> variableMap,
-        Long cycles,
-        Integer stoppedOnLine
-) {
+public record DebugStateInfo(boolean finished,
+                             boolean noCredits,
+                             Map<String,Long> variableMap,
+                             Long cycles,
+                             Integer stoppedOnLine) {
     public boolean getFinished() {
         return finished;
     }

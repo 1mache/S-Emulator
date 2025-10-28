@@ -30,6 +30,7 @@ public class mainExecutionController {
 
     String programName;
     public String userName;
+    private String architectureSelected;
 
     @FXML
     public void initialize() {
@@ -130,5 +131,13 @@ public class mainExecutionController {
 
     public instructionsController getInstructionsController() {
         return instructionsController;
+    }
+
+    public boolean debugModeActive() {
+        return executionController.debudgModeActive();
+    }
+
+    public void setSelectedArchitecture(String selectedArchitecture) {
+        architectureSelected = selectedArchitecture;
     }
 }

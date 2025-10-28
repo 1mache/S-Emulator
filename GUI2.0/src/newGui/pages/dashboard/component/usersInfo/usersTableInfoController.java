@@ -41,6 +41,20 @@ public class usersTableInfoController {
 
     @FXML void UnselectButtonListener(ActionEvent event) {
         dashboardController.clearUserInfo();
+        Request userInfoRequest = GeneralHistoryForUser.build(dashboardController.getCurrentUserName());
+        HttpClientUtil.runAsync(userInfoRequest, new Callback()  {
+
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                GeneralHistoryForUser.onFailure(e);
+
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                GeneralHistoryForUser.onResponse(response,dashboardController);
+            }
+        });
     }
 
     public void updateUsersList(List<UserData> usersDataList) {

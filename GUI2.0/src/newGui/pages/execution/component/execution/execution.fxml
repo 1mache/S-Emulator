@@ -100,7 +100,7 @@
             </VBox>
             <VBox alignment="TOP_CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="3.0" HBox.hgrow="ALWAYS">
                <children>
-                  <ComboBox fx:id="architectureSelection" prefWidth="150.0" promptText="Architecture Selection" />
+                  <ComboBox fx:id="architectureSelection" onAction="#architectureSelectionListener" prefWidth="150.0" promptText="Architecture Selection" />
                   <Label fx:id="InputsLabel" text="Execution Inputs">
                      <font>
                         <Font name="System Bold" size="14.0" />
