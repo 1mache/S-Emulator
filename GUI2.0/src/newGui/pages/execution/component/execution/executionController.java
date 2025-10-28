@@ -287,6 +287,27 @@ public class executionController {
     // Debugger
     @FXML
     void startDebugListener(ActionEvent event) {
+        String selectedArch = architectureSelection.getValue();
+        if (selectedArch == null) {
+            Alerts.architectureNotSelected();
+            return;
+        }
+        int archNum = getArchitectureNumber(selectedArch);
+        List<Integer> counts = mainExecutionController.getArchitecturesCount();
+        for (int i = archNum + 1; i < counts.size(); i++) {
+            Integer cnt = counts.get(i);
+            if (cnt != null && cnt != 0) {
+                Alerts.architectureDependencyAlert(selectedArch, i + 1);
+                return;
+            }
+        }
+
+
+        long cost = getAvgCost(mainExecutionController.getProgramName());
+        if (cost > mainExecutionController.getCredits()) {
+            Alerts.notEnoughCreditsAlert();
+            return;
+        }
         debugModeActive = true;
         resumeDebugButton.setDisable(false);
         stepOverDebugButton.setDisable(false);
@@ -310,7 +331,9 @@ public class executionController {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) {
                 dto.server.response.DebugStateInfo debugStateInfo = requests.StartDebugRequest.onResponse(response);
-                if (debugStateInfo == null) {
+                if (debugStateInfo.cycles() == null) {
+                    Alerts.noCreditsAlert();
+                    endDebug(false);
                     return;
                 }
 
@@ -619,19 +642,28 @@ public class executionController {
     }
 
     private long getAvgCost(String programName) {
-        final long[] cost = {0};
+        final long[] cost = new long[1];
         Request programDataRequest = requests.ProgramInfoRequest.build(programName);
-        HttpClientUtil.runAsync(programDataRequest, new Callback() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-            }
+        try {
+            Response ers = HttpClientUtil.runSync(programDataRequest);
 
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) {
-                ProgramData res = requests.ProgramInfoRequest.onResponse(response);
-                cost[0] = res.getAvgCreditCost();
-            }
-        });
+        } catch (IOException e) {
+        }
+
+
+
+
+//                , new Callback() {
+//            @Override
+//            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+//            }
+//
+//            @Override
+//            public void onResponse(@NotNull Call call, @NotNull Response response) {
+//                ProgramData res = requests.ProgramInfoRequest.onResponse(response);
+//                cost[0] = res.getAvgCreditCost();
+//            }
+//        });
         return cost[0];
     }
 

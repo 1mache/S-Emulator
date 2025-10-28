@@ -1,10 +1,8 @@
 package util.http;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
+import okhttp3.*;
 
+import java.io.IOException;
 import java.util.function.Consumer;
 
 public class HttpClientUtil {
@@ -65,9 +63,13 @@ public class HttpClientUtil {
     public static void runAsync(Request request, Callback callback) {
         Call call = HttpClientUtil.HTTP_CLIENT.newCall(request);
         call.enqueue(callback);
-
-
     }
+
+    public static Response runSync(Request request) throws IOException {
+        Call call = HttpClientUtil.HTTP_CLIENT.newCall(request);
+        return call.execute(); // Blocking
+    }
+
 
     // Shutdown the HTTP client, releasing its resources
     public static void shutdown() {
