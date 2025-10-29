@@ -33,7 +33,7 @@ public class StartDebugServlet extends AuthorizingServlet {
         var engine = appContext.getEngine();
         StartDebugRequest debugRequest = ServletUtils.GsonInstance.fromJson(req.getReader(), StartDebugRequest.class);
 
-        Architecture arch = engine.getArchitectureOf(debugRequest.programName());
+        Architecture arch = engine.getArchitectureOf(debugRequest.programName(), debugRequest.expansionDegree());
         if(!ServletUtils.chargeArchitectureCost(user, arch)){
             ServletUtils.GsonInstance.toJson(constructFailedStartResponse(), resp.getWriter());
             return;

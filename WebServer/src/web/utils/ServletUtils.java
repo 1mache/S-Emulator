@@ -41,7 +41,7 @@ public class ServletUtils {
         return appContext;
     }
 
-    public static ProgramData buildProgramDataObject(ProgramIdentifier programIdentifier,
+    public static ProgramData buildProgramDataObject(ProgramIdentifier programIdentifier, int expansionDegree,
                                                      AppContext context) {
         String name = programIdentifier.name();
         SLanguageEngine engine = context.getEngine();
@@ -54,7 +54,7 @@ public class ServletUtils {
                 engine.getMaxExpansionDegree(name),
                 engine.getRunCountOf(name),
                 engine.getAverageCostOf(name),
-                engine.getArchitectureOf(name).name()
+                engine.getArchitectureOf(name, expansionDegree).name()
         );
     }
 

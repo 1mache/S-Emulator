@@ -30,7 +30,7 @@ public class RunProgramServlet extends AuthorizingServlet {
 
         resp.setContentType("application/json");
 
-        Architecture arch = engine.getArchitectureOf(runRequest.programName());
+        Architecture arch = engine.getArchitectureOf(runRequest.programName(), runRequest.expansionDegree());
         if(!ServletUtils.chargeArchitectureCost(user, arch)){
             ServletUtils.GsonInstance.toJson(constructFailedRunResponse(), resp.getWriter());
             return;

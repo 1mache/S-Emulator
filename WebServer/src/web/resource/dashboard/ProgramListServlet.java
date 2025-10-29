@@ -28,7 +28,7 @@ public class ProgramListServlet extends AuthorizingServlet {
         synchronized (getServletContext()) {
             programsData = context.getEngine().getAvaliablePrograms().stream()
                     .map(functionIdentifier ->
-                            ServletUtils.buildProgramDataObject(functionIdentifier, context)
+                            ServletUtils.buildProgramDataObject(functionIdentifier, 0,context)
                     )
                     .toList();
         }

@@ -32,7 +32,7 @@ public class ProgramInfoServlet extends HttpServlet {
         resp.setContentType("application/json");
         synchronized (getServletContext()) {
             ServletUtils.GsonInstance.toJson(
-                    ServletUtils.buildProgramDataObject(appContext.getEngine().getProgramIdentifier(programName), appContext),
+                    ServletUtils.buildProgramDataObject(appContext.getEngine().getProgramIdentifier(programName), 0,appContext),
                     resp.getWriter()
             );
         }

@@ -211,11 +211,11 @@ public class SLanguageEngine {
         return sum / runs.size();
     }
 
-    public Architecture getArchitectureOf(String programName){
+    public Architecture getArchitectureOf(String programName, int expansionDegree){
         if (programNotLoaded(programName))
             throw new SProgramNotLoadedException("Program " +  programName + " has not been loaded");
 
-        Program program = getProgramByName(programName);
+        Program program = createExpandedProgram(programName, expansionDegree);
         return program.getArchitecture();
     }
 
