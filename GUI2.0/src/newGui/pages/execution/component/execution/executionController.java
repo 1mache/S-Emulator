@@ -103,9 +103,76 @@ public class executionController {
         this.mainExecutionController = mainExecutionController;
     }
 
+//    public void setProgramPeek(ProgramPeek programPeek) {
+//        // Extract data from the given ProgramPeek
+//        //List<InstructionPeek> instructions = programPeek.instructions();
+//        List<String> inputs = new ArrayList<>(programPeek.inputVariables());
+//        List<String> works = new ArrayList<>(programPeek.workVariables());
+//
+//        // ====== INPUT TABLE ======
+//        inputTable.getItems().clear(); // clear old data
+//
+//        // Each row represents a variable name (String)
+//        variableInput.setCellValueFactory(data -> new SimpleStringProperty(data.getValue()));
+//
+//        // Initialize map to hold values for each input variable
+//        inputValues.clear();
+//        for (String var : inputs) {
+//            inputValues.put(var, 0L); // default value 0
+//        }
+//
+//        // Make the table editable
+//        inputTable.setEditable(true);
+//        valueInput.setEditable(true);
+//
+//        // Display the current value (from map, default 0L)
+//        valueInput.setCellValueFactory(data ->
+//                new ReadOnlyObjectWrapper<>(inputValues.getOrDefault(data.getValue(), 0L)));
+//
+//        // Make the value column editable using a TextField
+//        valueInput.setCellFactory(TextFieldTableCell.forTableColumn(new LongStringConverter()));
+//
+//        // When user edits a cell → save the new value in the map
+//        valueInput.setOnEditCommit(event -> {
+//            String varName = event.getRowValue(); // variable name (String)
+//            Long newValue = event.getNewValue();  // user input parsed as Long
+//            inputValues.put(varName, newValue);   // update map
+//            inputTable.refresh();                 // refresh row display
+//        });
+//
+//        // Add all input variable names as rows
+//        inputTable.getItems().addAll(inputs);
+//
+//
+//        // ====== VARIABLE STATE TABLE ======
+//        List<String> allVariables = new ArrayList<>();
+//        allVariables.addAll(inputs);
+//        allVariables.addAll(works);
+//        allVariables.add("y"); // output variable
+//
+//        // init backing map for state table (default 0L)
+//        variableValues.clear();
+//        for (String v : allVariables) {
+//            variableValues.put(v, 0L);
+//        }
+//
+//
+//
+//        variableTable.getItems().clear();
+//        variableState.setCellValueFactory(data -> new SimpleStringProperty(data.getValue()));
+//        // show the value from variableValues (default 0L)
+//        valueState.setCellValueFactory(data ->
+//                new ReadOnlyObjectWrapper<>(variableValues.getOrDefault(data.getValue(), 0L)));
+//
+//        variableTable.getItems().addAll(allVariables);
+//    }
+
+
+
+
+
     public void setProgramPeek(ProgramPeek programPeek) {
         // Extract data from the given ProgramPeek
-        //List<InstructionPeek> instructions = programPeek.instructions();
         List<String> inputs = new ArrayList<>(programPeek.inputVariables());
         List<String> works = new ArrayList<>(programPeek.workVariables());
 
@@ -129,13 +196,40 @@ public class executionController {
         valueInput.setCellValueFactory(data ->
                 new ReadOnlyObjectWrapper<>(inputValues.getOrDefault(data.getValue(), 0L)));
 
-        // Make the value column editable using a TextField
-        valueInput.setCellFactory(TextFieldTableCell.forTableColumn(new LongStringConverter()));
+        // ✅ SAFE Long converter: prevents NumberFormatException
+        LongStringConverter safeLongConverter = new LongStringConverter() {
+            @Override
+            public Long fromString(String value) {
+                if (value == null) {
+                    Platform.runLater(() -> Alerts.invalidLong("Value is null. Using 0 instead."));
+                    return 0L;
+                }
+                String trimmed = value.trim();
+                if (trimmed.isEmpty()) {
+                    Platform.runLater(() -> Alerts.invalidLong("Empty input. Using 0 instead."));
+                    return 0L;
+                }
+                try {
+                    return Long.parseLong(trimmed);
+                } catch (NumberFormatException ex) {
+                    Platform.runLater(() -> Alerts.invalidLong("Invalid number: \"" + trimmed + "\". Using 0 instead."));
+                    return 0L; // if invalid → return 0 instead of throwing
+                }
+            }
+
+            @Override
+            public String toString(Long value) {
+                return String.valueOf(value == null ? 0L : value);
+            }
+        };
+
+        // Use the safe converter in the editable cell
+        valueInput.setCellFactory(TextFieldTableCell.forTableColumn(safeLongConverter));
 
         // When user edits a cell → save the new value in the map
         valueInput.setOnEditCommit(event -> {
             String varName = event.getRowValue(); // variable name (String)
-            Long newValue = event.getNewValue();  // user input parsed as Long
+            Long newValue = event.getNewValue();  // user input parsed as Long or 0 if invalid
             inputValues.put(varName, newValue);   // update map
             inputTable.refresh();                 // refresh row display
         });
@@ -156,16 +250,22 @@ public class executionController {
             variableValues.put(v, 0L);
         }
 
-
-
         variableTable.getItems().clear();
         variableState.setCellValueFactory(data -> new SimpleStringProperty(data.getValue()));
+
         // show the value from variableValues (default 0L)
         valueState.setCellValueFactory(data ->
                 new ReadOnlyObjectWrapper<>(variableValues.getOrDefault(data.getValue(), 0L)));
 
         variableTable.getItems().addAll(allVariables);
     }
+
+
+
+
+
+
+
 
     public static List<Long> sortKeysBySubstring(Map<String, Long> map) {
         // Sort the keys by their substring starting from index 1
@@ -608,6 +708,11 @@ public class executionController {
 
 
         List<Long> inputs = sortKeysBySubstring(inputValues);
+        for (Long val : inputs) {
+            if (val == null) {
+                return; // invalid input
+            }
+        }
         int extensionDegree = mainExecutionController.getSelectedDgree();
         String programName = mainExecutionController.getProgramName();
 
