@@ -42,12 +42,7 @@ public class StartDebugRequest {
             });
             return null;
         } else {
-            MediaType contentType = response.body().contentType();
-            String type = contentType != null ? contentType.toString() : "";
-            if (type.equals(MEDIA_TYPE_JSON)) {
-                return Constants.GSON_INSTANCE.fromJson(responseBody, DebugStateInfo.class);
-            }
-            return null;
+            return Constants.GSON_INSTANCE.fromJson(responseBody, DebugStateInfo.class);
         }
     }
 

@@ -36,4 +36,5 @@ public record ProgramExecutionResult(
         return cycles;
     }
 
+    public boolean isEndedEarly() {return failed;}
 }

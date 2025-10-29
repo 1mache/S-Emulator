@@ -29,6 +29,7 @@ import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
+import util.Constants;
 import util.http.HttpClientUtil;
 import java.io.IOException;
 import java.util.*;
@@ -287,6 +288,27 @@ public class executionController {
     // Debugger
     @FXML
     void startDebugListener(ActionEvent event) {
+        String selectedArch = architectureSelection.getValue();
+        if (selectedArch == null) {
+            Alerts.architectureNotSelected();
+            return;
+        }
+        int archNum = getArchitectureNumber(selectedArch);
+        List<Integer> counts = mainExecutionController.getArchitecturesCount();
+        for (int i = archNum + 1; i < counts.size(); i++) {
+            Integer cnt = counts.get(i);
+            if (cnt != null && cnt != 0) {
+                Alerts.architectureDependencyAlert(selectedArch, i + 1);
+                return;
+            }
+        }
+
+
+        long cost = getAvgCost(mainExecutionController.getProgramName());
+        if (cost > mainExecutionController.getCredits()) {
+            Alerts.notEnoughCreditsAlert();
+            return;
+        }
         debugModeActive = true;
         resumeDebugButton.setDisable(false);
         stepOverDebugButton.setDisable(false);
@@ -310,7 +332,11 @@ public class executionController {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) {
                 dto.server.response.DebugStateInfo debugStateInfo = requests.StartDebugRequest.onResponse(response);
-                if (debugStateInfo == null) {
+                if (debugStateInfo.cycles() == null) {
+                    Platform.runLater(() -> {
+                                Alerts.noCreditsAlert();
+                            });
+                    endDebug(false);
                     return;
                 }
 
@@ -335,7 +361,8 @@ public class executionController {
                         mainExecutionController.getInstructionsController().highlightLine(debugStateInfo.getStoppedOnLine());
                     }
                     // Update Cycles Counter
-                    CyclesCounter.setText(valueOf(debugStateInfo.getCycles()));
+                    String valueOf = String.valueOf(debugStateInfo.getCycles());
+                    CyclesCounter.setText(valueOf);
 
                     if (debugStateInfo.getNoCredits()) {
                         Alerts.noCreditsAlert();
@@ -352,9 +379,23 @@ public class executionController {
         resumeDebugButton.setDisable(true);
         stepOverDebugButton.setDisable(true);
         stopDebugButton.setDisable(true);
-        // last line or?
         // clear highlighted lines
         mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
+
+        // Update history table
+        // requet for history table
+        Request userHistoryRequest = requests.UserHistoryRequest.build(mainExecutionController.getProgramName(), mainExecutionController.userName);
+        HttpClientUtil.runAsync(userHistoryRequest, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                requests.UserHistoryRequest.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                requests.UserHistoryRequest.onResponse(response, executionController.this);
+            }
+        });
         if (toPrint) {
             Alerts.endOfDebug();
         }
@@ -393,6 +434,8 @@ public class executionController {
 
                         variableValues.put(varName, newValue);
                         variableTable.refresh();
+
+
                     }
                     if (debugStepPeek.isFailed()) {
                         // program finished
@@ -425,8 +468,6 @@ public class executionController {
                 }
 
                 uptateCredits();
-
-
                 // Update UI on the JavaFX Application Thread
                 Platform.runLater(() -> {
                     // Update variable-values map for variableTable
@@ -444,8 +485,9 @@ public class executionController {
                         mainExecutionController.getInstructionsController().highlightLine(debugStateInfo.getStoppedOnLine());
                     }
                     // Update Cycles Counter
-                    CyclesCounter.setText(valueOf(debugStateInfo.getCycles()));
-                    if( debugStateInfo.getNoCredits()) {
+                    String valueOf = String.valueOf(debugStateInfo.getCycles());
+                    CyclesCounter.setText(valueOf);
+                    if(debugStateInfo.getNoCredits()) {
                         Alerts.noCreditsAlert();
                         endDebug(false);
                     }
@@ -535,7 +577,9 @@ public class executionController {
         }
         String selectedArch = architectureSelection.getValue();
         if (selectedArch == null) {
-            Alerts.architectureNotSelected();
+            Platform.runLater(() -> {
+                Alerts.architectureNotSelected();
+            });
             return;
         }
         int archNum = getArchitectureNumber(selectedArch);
@@ -544,7 +588,10 @@ public class executionController {
         for (int i = archNum + 1; i < counts.size(); i++) {
             Integer cnt = counts.get(i);
             if (cnt != null && cnt != 0) {
-                Alerts.architectureDependencyAlert(selectedArch, i +1);
+                int finalI = i;
+                Platform.runLater(() -> {
+                    Alerts.architectureDependencyAlert(selectedArch, finalI + 1);
+                });
                 return;
             }
         }
@@ -619,19 +666,32 @@ public class executionController {
     }
 
     private long getAvgCost(String programName) {
-        final long[] cost = {0};
+        final long[] cost = new long[1];
+        final ProgramData[] moreData = new ProgramData[1];
         Request programDataRequest = requests.ProgramInfoRequest.build(programName);
-        HttpClientUtil.runAsync(programDataRequest, new Callback() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+        try {
+            Response response = HttpClientUtil.runSync(programDataRequest);
+            String responseBody;
+            try {
+                responseBody = response.body().string();
+                if (response.code() != 200) {
+                    Platform.runLater(() -> {
+                        Alerts.loadField(responseBody);
+                    });
+                } else {
+                    moreData[0] = Constants.GSON_INSTANCE.fromJson(responseBody, ProgramData.class);
+                }
+            } catch (IOException e) {
+                Platform.runLater(() -> {
+                    Alerts.badBody(e.getMessage());
+                });
             }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) {
-                ProgramData res = requests.ProgramInfoRequest.onResponse(response);
-                cost[0] = res.getAvgCreditCost();
-            }
-        });
+        } catch (IOException e) {
+        }
+        if (moreData[0] == null) {
+            return 0;
+        }
+        cost[0] = moreData[0].getAvgCreditCost();
         return cost[0];
     }
 
