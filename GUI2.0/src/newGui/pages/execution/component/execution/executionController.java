@@ -333,7 +333,9 @@ public class executionController {
             public void onResponse(@NotNull Call call, @NotNull Response response) {
                 dto.server.response.DebugStateInfo debugStateInfo = requests.StartDebugRequest.onResponse(response);
                 if (debugStateInfo.cycles() == null) {
-                    Alerts.noCreditsAlert();
+                    Platform.runLater(() -> {
+                                Alerts.noCreditsAlert();
+                            });
                     endDebug(false);
                     return;
                 }
@@ -359,7 +361,8 @@ public class executionController {
                         mainExecutionController.getInstructionsController().highlightLine(debugStateInfo.getStoppedOnLine());
                     }
                     // Update Cycles Counter
-                    CyclesCounter.setText(valueOf(debugStateInfo.getCycles()));
+                    String valueOf = String.valueOf(debugStateInfo.getCycles());
+                    CyclesCounter.setText(valueOf);
 
                     if (debugStateInfo.getNoCredits()) {
                         Alerts.noCreditsAlert();
@@ -376,9 +379,23 @@ public class executionController {
         resumeDebugButton.setDisable(true);
         stepOverDebugButton.setDisable(true);
         stopDebugButton.setDisable(true);
-        // last line or?
         // clear highlighted lines
         mainExecutionController.getInstructionsController().updateHighlightedInstructions(List.of());
+
+        // Update history table
+        // requet for history table
+        Request userHistoryRequest = requests.UserHistoryRequest.build(mainExecutionController.getProgramName(), mainExecutionController.userName);
+        HttpClientUtil.runAsync(userHistoryRequest, new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                requests.UserHistoryRequest.onFailure(e);
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                requests.UserHistoryRequest.onResponse(response, executionController.this);
+            }
+        });
         if (toPrint) {
             Alerts.endOfDebug();
         }
@@ -417,6 +434,8 @@ public class executionController {
 
                         variableValues.put(varName, newValue);
                         variableTable.refresh();
+
+
                     }
                     if (debugStepPeek.isFailed()) {
                         // program finished
@@ -449,8 +468,6 @@ public class executionController {
                 }
 
                 uptateCredits();
-
-
                 // Update UI on the JavaFX Application Thread
                 Platform.runLater(() -> {
                     // Update variable-values map for variableTable
@@ -468,8 +485,9 @@ public class executionController {
                         mainExecutionController.getInstructionsController().highlightLine(debugStateInfo.getStoppedOnLine());
                     }
                     // Update Cycles Counter
-                    CyclesCounter.setText(valueOf(debugStateInfo.getCycles()));
-                    if( debugStateInfo.getNoCredits()) {
+                    String valueOf = String.valueOf(debugStateInfo.getCycles());
+                    CyclesCounter.setText(valueOf);
+                    if(debugStateInfo.getNoCredits()) {
                         Alerts.noCreditsAlert();
                         endDebug(false);
                     }
@@ -559,7 +577,9 @@ public class executionController {
         }
         String selectedArch = architectureSelection.getValue();
         if (selectedArch == null) {
-            Alerts.architectureNotSelected();
+            Platform.runLater(() -> {
+                Alerts.architectureNotSelected();
+            });
             return;
         }
         int archNum = getArchitectureNumber(selectedArch);
@@ -568,7 +588,10 @@ public class executionController {
         for (int i = archNum + 1; i < counts.size(); i++) {
             Integer cnt = counts.get(i);
             if (cnt != null && cnt != 0) {
-                Alerts.architectureDependencyAlert(selectedArch, i +1);
+                int finalI = i;
+                Platform.runLater(() -> {
+                    Alerts.architectureDependencyAlert(selectedArch, finalI + 1);
+                });
                 return;
             }
         }
