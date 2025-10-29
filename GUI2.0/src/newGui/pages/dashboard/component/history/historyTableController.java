@@ -73,32 +73,53 @@ public class historyTableController {
 
 
     public void updateHistoryTableArciAndMain(List<String> architectures, List<Boolean> isMain) {
-        // Ensure lists match the table size
         int rowCount = historyTable.getItems().size();
         if (architectures.size() != rowCount || isMain.size() != rowCount) {
             System.err.println("Mismatch between table size and provided lists!");
             return;
         }
 
-        // Architecture column (string from architectures list)
-        architecture.setCellValueFactory(param -> {
-            int index = historyTable.getItems().indexOf(param.getValue());
-            if (index >= 0 && index < architectures.size()) {
-                return new ReadOnlyObjectWrapper<>(architectures.get(index));
+        // לא רוצים שמיון של העמודות האלו יבלגן התאמה לפי אינדקס
+        architecture.setSortable(false);
+        FunctionOrProgram.setSortable(false);
+
+        // עמודת ארכיטקטורה – מציגים לפי האינדקס של השורה בתצוגה
+        architecture.setCellFactory(col -> new TableCell<ProgramExecutionResult, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setText(null);
+                    return;
+                }
+                int idx = getIndex();
+                if (idx >= 0 && idx < architectures.size()) {
+                    setText(architectures.get(idx));
+                } else {
+                    setText("");
+                }
             }
-            return new ReadOnlyObjectWrapper<>("");
         });
 
-        // FunctionOrProgram column — "true" or "false"
-        FunctionOrProgram.setCellValueFactory(param -> {
-            int index = historyTable.getItems().indexOf(param.getValue());
-            if (index >= 0 && index < isMain.size()) {
-                return new ReadOnlyObjectWrapper<>(String.valueOf(isMain.get(index)));
+        // עמודת פונקציה/תכנית – מציגים "true"/"false" לפי isMain
+        FunctionOrProgram.setCellFactory(col -> new TableCell<ProgramExecutionResult, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setText(null);
+                    return;
+                }
+                int idx = getIndex();
+                if (idx >= 0 && idx < isMain.size()) {
+                    setText(String.valueOf(isMain.get(idx))); // "true" or "false"
+                } else {
+                    setText("");
+                }
             }
-            return new ReadOnlyObjectWrapper<>("");
         });
 
-        // Refresh to apply updates
+        // רענון התצוגה
         historyTable.refresh();
     }
 

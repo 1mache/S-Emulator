@@ -29,6 +29,7 @@ import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
+import util.Constants;
 import util.http.HttpClientUtil;
 import java.io.IOException;
 import java.util.*;
@@ -287,6 +288,27 @@ public class executionController {
     // Debugger
     @FXML
     void startDebugListener(ActionEvent event) {
+        String selectedArch = architectureSelection.getValue();
+        if (selectedArch == null) {
+            Alerts.architectureNotSelected();
+            return;
+        }
+        int archNum = getArchitectureNumber(selectedArch);
+        List<Integer> counts = mainExecutionController.getArchitecturesCount();
+        for (int i = archNum + 1; i < counts.size(); i++) {
+            Integer cnt = counts.get(i);
+            if (cnt != null && cnt != 0) {
+                Alerts.architectureDependencyAlert(selectedArch, i + 1);
+                return;
+            }
+        }
+
+
+        long cost = getAvgCost(mainExecutionController.getProgramName());
+        if (cost > mainExecutionController.getCredits()) {
+            Alerts.notEnoughCreditsAlert();
+            return;
+        }
         debugModeActive = true;
         resumeDebugButton.setDisable(false);
         stepOverDebugButton.setDisable(false);
@@ -310,7 +332,9 @@ public class executionController {
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) {
                 dto.server.response.DebugStateInfo debugStateInfo = requests.StartDebugRequest.onResponse(response);
-                if (debugStateInfo == null) {
+                if (debugStateInfo.cycles() == null) {
+                    Alerts.noCreditsAlert();
+                    endDebug(false);
                     return;
                 }
 
@@ -619,19 +643,32 @@ public class executionController {
     }
 
     private long getAvgCost(String programName) {
-        final long[] cost = {0};
+        final long[] cost = new long[1];
+        final ProgramData[] moreData = new ProgramData[1];
         Request programDataRequest = requests.ProgramInfoRequest.build(programName);
-        HttpClientUtil.runAsync(programDataRequest, new Callback() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+        try {
+            Response response = HttpClientUtil.runSync(programDataRequest);
+            String responseBody;
+            try {
+                responseBody = response.body().string();
+                if (response.code() != 200) {
+                    Platform.runLater(() -> {
+                        Alerts.loadField(responseBody);
+                    });
+                } else {
+                    moreData[0] = Constants.GSON_INSTANCE.fromJson(responseBody, ProgramData.class);
+                }
+            } catch (IOException e) {
+                Platform.runLater(() -> {
+                    Alerts.badBody(e.getMessage());
+                });
             }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) {
-                ProgramData res = requests.ProgramInfoRequest.onResponse(response);
-                cost[0] = res.getAvgCreditCost();
-            }
-        });
+        } catch (IOException e) {
+        }
+        if (moreData[0] == null) {
+            return 0;
+        }
+        cost[0] = moreData[0].getAvgCreditCost();
         return cost[0];
     }
 
