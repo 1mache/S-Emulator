@@ -16,6 +16,7 @@ import engine.label.Label;
 import engine.label.NumericLabel;
 import engine.loader.FromXMLProgramLoader;
 import engine.loader.event.LoadingListener;
+import engine.loader.exception.DuplicateProgramException;
 import engine.loader.exception.NotXMLException;
 import engine.loader.exception.UnknownFunctionException;
 import engine.loader.exception.UnknownLabelException;
@@ -52,7 +53,7 @@ public class SLanguageEngine {
 
     // returns the names of the loaded programs and functions, main program is first in list
     public List<String> loadProgramIncremental(InputStream inputStream, LoadingListener listener)
-            throws UnknownLabelException, UnknownFunctionException {
+            throws UnknownLabelException, UnknownFunctionException, DuplicateProgramException {
         FromXMLProgramLoader loader = new FromXMLProgramLoader();
         loader.loadXML(inputStream, listener, avaliablePrograms);
         return loadProgram(loader, false);

@@ -5,6 +5,7 @@ import engine.function.parameter.FunctionParam;
 import engine.function.parameter.FunctionParamList;
 import engine.instruction.argument.InstructionArgument;
 import engine.instruction.argument.InstructionArgumentType;
+import engine.loader.exception.DuplicateProgramException;
 import engine.numeric.constant.NumericConstant;
 import engine.instruction.*;
 import engine.jaxb.generated.*;
@@ -61,12 +62,15 @@ public class JaxbTranslator {
     // keeps references for functions by name until we processed them
     private final Set<FunctionCall> toBeResolved = new HashSet<>();
 
-    public Program getProgram(SProgram sProgram, LoadingListener listener, Map<String, Program> availableExternalPrograms) {
+    public Program getProgram(SProgram sProgram, LoadingListener listener, Map<String, Program> availableExternalPrograms)
+            throws DuplicateProgramException {
+        duplicateProgramCheck(sProgram, availableExternalPrograms);
         List<SInstruction> sInstructions = sProgram.getSInstructions().getSInstruction();
 
         var sFunctions = sProgram.getSFunctions();
         if(sFunctions != null){
             for (SFunction sFunction: sFunctions.getSFunction()){
+                duplicateFunctionCheck(sFunction, availableExternalPrograms);
                 Function function = translateFunction(sFunction);
                 name2Function.put(function.getName(),function);
             }
@@ -101,7 +105,7 @@ public class JaxbTranslator {
         return new StandardProgram(sProgram.getName(), instructions);
     }
 
-    public Program getProgram(SProgram sProgram, LoadingListener listener) {
+    public Program getProgram(SProgram sProgram, LoadingListener listener) throws DuplicateProgramException {
         return getProgram(sProgram, listener, Map.of());
     }
 
@@ -111,6 +115,19 @@ public class JaxbTranslator {
 
     public Set<FunctionCall> getFunctionCalls() {
         return toBeResolved;
+    }
+
+
+    // ==================== internal =======================
+
+    private void duplicateFunctionCheck(SFunction sFunction, Map<String, Program> availableExternalPrograms) throws DuplicateProgramException {
+        if(availableExternalPrograms.containsKey(sFunction.getName()))
+            throw new DuplicateProgramException("The function " + sFunction.getName() + " was already loaded");
+    }
+
+    private void duplicateProgramCheck(SProgram sProgram, Map<String, Program> availableExternalPrograms) throws DuplicateProgramException {
+        if(availableExternalPrograms.containsKey(sProgram.getName()))
+            throw new DuplicateProgramException("The function " + sProgram.getName() + " was already previously loaded");
     }
 
     private List<Instruction> translateInstructions(List<SInstruction> sInstructions,
