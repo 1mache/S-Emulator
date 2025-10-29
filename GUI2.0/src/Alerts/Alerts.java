@@ -126,4 +126,13 @@ public class Alerts {
         alert.setContentText("There is not enough credits (avg cost).");
         alert.showAndWait();
     }
+
+    public static void invalidLong(String msg) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Invalid Input");
+        alert.setHeaderText("Input must be a whole number (long)");
+        alert.setContentText(msg);
+        alert.showAndWait();
+    }
+
 }
