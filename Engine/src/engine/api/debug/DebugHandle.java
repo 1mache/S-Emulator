@@ -19,7 +19,14 @@ public class DebugHandle {
         this.onRunEnded = onRunEnded;
     }
 
-    public boolean startDebug() {return debugger.run();}
+    public boolean startDebug() {
+        if(debugger.run()){
+            onRunEnded.accept(getResult());
+            return true;
+        }
+
+        return false;
+    }
 
     public void stopDebug(){
         onRunEnded.accept(getResult());
