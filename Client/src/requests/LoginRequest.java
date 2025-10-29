@@ -10,9 +10,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import util.Constants;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import static util.Constants.GSON_INSTANCE;
 
 public class LoginRequest {
 
@@ -22,7 +19,6 @@ public class LoginRequest {
                 .newBuilder()
                 .addQueryParameter("username",userName)
                 .build();
-
 
         return new Request.Builder()
                 .url(url)

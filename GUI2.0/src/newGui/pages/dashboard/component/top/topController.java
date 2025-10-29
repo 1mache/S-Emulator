@@ -109,7 +109,7 @@ public class topController {
         creditsAmount.clear();
 
         // new request to server to charge credits
-        Request request = LoadCreditRequest.build(credits.get());
+        Request request = LoadCreditRequest.build(amount);
         HttpClientUtil.runAsync(request, new Callback()  {
 
             @Override
